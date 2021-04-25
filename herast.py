@@ -8,7 +8,7 @@ from tree.processing import TreeProcessor
 from graph.view import CFuncGraphViewer
 from views.patterns_edit import PatternsManager
 
-
+# [NOTE]: Actual for 7.6
 class HR_EVENT:
     HXE_FLOWCHART               = 0
     HXE_STKPNTS                 = 1
@@ -42,7 +42,7 @@ class HR_EVENT:
     LXE_LVAR_MAPPING_CHANGED    = 114
     HXE_CMT_CHANGED             = 115
 
-
+# [NOTE]: Actual for 7.6
 class CMAT_LEVEL:
     ZERO    = 0
     BUILT   = 1
@@ -72,19 +72,22 @@ class UnloadCallbackAction(idaapi.action_handler_t):
 def herast_callback(*args):
     event = args[0]
 
-    if event == HR_EVENT.HXE_MATURITY:
+    if event == idaapi.hxe_maturity:
         cfunc, level = args[1], args[2]
-        if level == CMAT_LEVEL.FINAL:
-            tp = TreeProcessor(cfunc)
-            tp.traverse_function_tree()
+        if level == idaapi.CMAT_FINAL:
+            try:
+                tp = TreeProcessor(cfunc)
+                tp.traverse_function_tree()
 
-            # test purposes, show graph
-            # gv = CFuncGraphViewer("Huypizda")
-            # gv.Show()
+                # test purposes, show graph
+                # gv = CFuncGraphViewer("Huypizda")
+                # gv.Show()
 
-            # test purposes, show qt gui
-            # pm = PatternsManager()
-            # pm.Show()
+                # test purposes, show qt gui
+                # pm = PatternsManager()
+                # pm.Show()
+            except Exception as e:
+                raise e
 
     return 0
 
