@@ -1,17 +1,14 @@
 import idaapi
-import logging, sys
-import autologging
-
-logging.basicConfig(level=autologging.TRACE, stream=sys.stdout,format="[%(levelname)s] %(name)s:%(funcName)s:%(message)s")
 
 
 
 
 DEBUG_PRINT_ENABLED = True
-def debug_print(*args):
+def debug_print(*args, message='DEBUG'):
     if DEBUG_PRINT_ENABLED:
-        print("[DEBUG]", *args)
+        print("[%s]" % message, *args)
 
+# [NOTE]: Actual for 7.6
 op2str = {
     0: 'cot_empty', 1: 'cot_comma', 2: 'cot_asg', 
     3: 'cot_asgbor', 4: 'cot_asgxor', 5: 'cot_asgband', 
@@ -42,6 +39,7 @@ op2str = {
     78: 'cit_break', 80: 'cit_return', 81: 'cit_goto', 82: 'cit_asm'
 }
 
+# [NOTE]: Actual for 7.6
 str2op = {
 	'cot_empty': 0, 'cot_comma': 1, 'cot_asg': 2, 'cot_asgbor': 3, 'cot_asgxor': 4, 'cot_asgband': 5,
 	'cot_asgadd': 6, 'cot_asgsub': 7, 'cot_asgmul': 8, 'cot_asgsshr': 9, 'cot_asgushr': 10,
@@ -59,26 +57,37 @@ str2op = {
 	'cit_while': 75, 'cit_do': 76, 'cit_switch': 77, 'cit_break': 78, 'cit_return': 80, 'cit_goto': 81, 'cit_asm': 82
 }
 
+def trace_method(method):
+    import functools
 
-@autologging.traced("__assert", exclude=True)
+    @functools.wraps(method)
+    def method_wrapper(*args, **kwargs):
+        insn = args[1]
+        debug_print('%s   CALL: %s(%#x)' % (method.__name__, insn, insn.ea), message='TRACE')
+        result = method(*args, **kwargs)
+        debug_print('%s RETURN: %s' % (method.__name__, result), message='TRACE')
+
+        return result
+    return method_wrapper
+
+
 class TreeProcessor:
 
     def __init__(self, cfunc):
         self.function_tree = cfunc
         self.context = None
 
-        self.op2func = {
-            # str2op['cot_insn']: self._process_cinsn, # guess this will never happen at this level of analysis, so there is no need in handler of cinsn
-            str2op['cit_expr']: self._process_cexpr,
-
-            str2op['cit_return']: self._process_creturn,
-            str2op['cit_block']: self._process_cblock,
-            str2op['cit_if']: self._process_cif,
-            str2op['cit_while']: self._process_cwhile,
-            str2op['cit_do']: self._process_cdo,
-            str2op['cit_for']: self._process_cfor,
-            str2op['cit_goto']: self._process_cgoto,
-            str2op['cit_asm']: self._process_casm
+        self.insnop2func = {
+            idaapi.cit_expr: self._process_cexpr,
+            idaapi.cit_return: self._process_creturn,
+            idaapi.cit_block: self._process_cblock,
+            idaapi.cit_if: self._process_cif,
+            idaapi.cit_switch: self._process_cswitch,
+            idaapi.cit_while: self._process_cwhile,
+            idaapi.cit_do: self._process_cdo,
+            idaapi.cit_for: self._process_cfor,
+            # idaapi.cit_goto: self._process_cgoto,
+            idaapi.cit_asm: self._process_casm
         }
         
     
@@ -93,20 +102,34 @@ class TreeProcessor:
 
         # print(function_body.cblock)
 
-        self._process_cblock(function_body.cblock)
+        tree_stack = list()
+
+        block = self._process_cblock(function_body)
+        # for expr in block:
+
+
     
 
-    def _process_cblock(self, cblock):
+    @trace_method
+    def _process_cblock(self, cinsn):
         # [NOTE] cblock is just an array of cinsn_t (qlist<cinsn_t>)
-        for ins in cblock:
-            # self._process_cinsn(ins)
-            self.op2func[ins.op](ins)
+        cblock = cinsn.cblock
 
+        debug_print(len(cblock))
+
+        try:
+            for ins in cblock:
+                self.insnop2func[ins.op](ins)
+        except KeyError:
+            raise KeyError("Handler for %s is not setted" % op2str[ins.op])
+
+    @trace_method
     def _process_cexpr(self, cinsn):
         cexpr = cinsn.cexpr
 
         debug_print("Expression: %s" % cexpr)
 
+    @trace_method
     def _process_cinsn(self, cinsn):
         union = ["cblock", "cexpr", "cif", "cfor", "cwhile", "cdo", "cswitch", "creturn", "cgoto", "casm"]
         for possible_type in union:
@@ -116,6 +139,7 @@ class TreeProcessor:
                 return attr
 
 
+    @trace_method
     def _process_creturn(self, cinsn):
         # [NOTE] as i understand, creturn just a cexpr_t nested inside of creturn_t
         creturn = cinsn.creturn
@@ -124,6 +148,7 @@ class TreeProcessor:
         return creturn.expr
 
 
+    @trace_method
     def _process_cif(self, cinsn):
         # [NOTE] cif has ithen<cinsn_t>, ielse<cinsn_t> and expr<cexpr_t>
         cif = cinsn.cif
@@ -133,27 +158,48 @@ class TreeProcessor:
         debug_print('if then branch: %s' % cif.ithen)
         debug_print('if else branch: %s' % cif.ielse)
 
+        return cif, cif.ithen, cif.ielse
+
     
+    @trace_method
     def _process_cfor(self, cinsn):
+        # [NOTE]: cfor has init<cexpr_t>, expr<cexpr_t>, step<cexpr_t>, body<cinsn_t>(inherited from cloop_t)
         cfor = cinsn.cfor
-        pass
 
+        return cfor.init, cfor.expr, cfor.step, cfor.body
+
+    @trace_method
     def _process_cwhile(self, cinsn):
+        # [NOTE]: cwhile has body<cexpr_t>(inherited from cloop_t), expr<cexpr_t>
         cwhile = cinsn.cwhile
-        pass
+        
+        return cwhile.expr, cwhile.body
 
+    @trace_method
     def _process_cdo(self, cinsn):
+        # [NOTE]: cdo has body<cexpr_t>(inherited from cloop_t), expr<cexpr_t>
         cdo = cinsn.cdo
-        pass
 
+        return cdo.body, cdo.expr
+
+    @trace_method
     def _process_cswitch(self, cinsn):
+        # [NOTE]: cswitch has expr<cexpr_t> and cases<qvector<ccase_t>>
+        # [NOTE]: ccase_t is just a cinsn_t which also has values<uint64vec_t>
         cswitch = cinsn.cswitch
-        pass
+        
+        return cswitch.expr, [(c.cblock, list(c.values)) for c in cswitch.cases]
 
+    @trace_method
     def _process_cgoto(self, cinsn):
+        # [NOTE]: cgoto is just label_num, citem pointed by this label can be founded by cfunc_t.find_label(label_num)
         cgoto = cinsn.cgoto
-        pass
 
+        return cgoto.label_num
+
+    @trace_method
     def _process_casm(self, cinsn):
+        # [NOTE]: idfk, there is no normal way to interact with inline-assembly in HR
         casm = cinsn.casm
-        pass
+
+        return None
