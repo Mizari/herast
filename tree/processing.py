@@ -79,6 +79,8 @@ class TreeProcessor:
 
         self.inop2func = {
             idaapi.cit_expr: self._process_cexpr,
+            idaapi.cit_empty: lambda _: None,
+            idaapi.cit_break: lambda _: None,
             idaapi.cit_return: self._process_creturn,
             idaapi.cit_block: self._process_cblock,
             idaapi.cit_if: self._process_cif,
@@ -104,22 +106,25 @@ class TreeProcessor:
 
         tree_stack = list()
 
-        block = self._process_cblock(function_body)
-        # for expr in block:
+        block = iter(self._process_cblock(function_body))
+        traversal_in_progress = True
 
-
+        while traversal_in_progress:
+            insn = next(block)
+            
     
-
     @trace_method
     def _process_cblock(self, cinsn):
         # [NOTE] cblock is just an array of cinsn_t (qlist<cinsn_t>)
         cblock = cinsn.cblock
 
         debug_print(len(cblock))
+        block = list()
 
         try:
             for ins in cblock:
-                self.inop2func[ins.op](ins)
+                block.append(self.inop2func[ins.op](ins))
+            return block
         except KeyError:
             raise KeyError("Handler for %s is not setted" % op2str[ins.op])
 
@@ -127,17 +132,7 @@ class TreeProcessor:
     def _process_cexpr(self, cinsn):
         cexpr = cinsn.cexpr
 
-        debug_print("Expression: %s" % cexpr)
-
-    @trace_method
-    def _process_cinsn(self, cinsn):
-        union = ["cblock", "cexpr", "cif", "cfor", "cwhile", "cdo", "cswitch", "creturn", "cgoto", "casm"]
-        for possible_type in union:
-            attr = getattr(cinsn, possible_type)
-            if attr is not None:
-                debug_print(attr, op2str[cinsn.op])
-                return attr
-
+        debug_print("Expression: %s" % op2str[cexpr.op])
 
     @trace_method
     def _process_creturn(self, cinsn):
@@ -146,7 +141,6 @@ class TreeProcessor:
 
         debug_print("return: %s", creturn.expr)
         return creturn.expr
-
 
     @trace_method
     def _process_cif(self, cinsn):
@@ -158,13 +152,20 @@ class TreeProcessor:
         debug_print('if then branch: %s' % cif.ithen)
         debug_print('if else branch: %s' % cif.ielse)
 
+        if cif.ithen is not None:
+            self.inop2func[cif.ithen.op](cif.ithen)
+        
+        if cif.ielse is not None:
+            self.inop2func[cif.ielse.op](cif.ielse)
+
         return cif, cif.ithen, cif.ielse
 
-    
     @trace_method
     def _process_cfor(self, cinsn):
         # [NOTE]: cfor has init<cexpr_t>, expr<cexpr_t>, step<cexpr_t>, body<cinsn_t>(inherited from cloop_t)
         cfor = cinsn.cfor
+
+        self.inop2func[cfor.body.op](cfor.body)
 
         return cfor.init, cfor.expr, cfor.step, cfor.body
 

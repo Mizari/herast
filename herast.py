@@ -85,7 +85,7 @@ def herast_callback(*args):
 
                 traversal_end = time.time()
 
-                print("Traversal done within %f seconds" % (traversal_end - traversal_start))
+                print("[TIME] Traversal done within %f seconds" % (traversal_end - traversal_start))
 
                 # test purposes, show graph
                 # gv = CFuncGraphViewer("Huypizda")
