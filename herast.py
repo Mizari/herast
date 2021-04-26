@@ -7,6 +7,7 @@ idaapi.require('views.patterns_edit')
 from tree.processing import TreeProcessor
 from graph.view import CFuncGraphViewer
 from views.patterns_edit import PatternsManager
+import time
 
 # [NOTE]: Actual for 7.6
 class HR_EVENT:
@@ -77,7 +78,14 @@ def herast_callback(*args):
         if level == idaapi.CMAT_FINAL:
             try:
                 tp = TreeProcessor(cfunc)
+                
+                traversal_start = time.time()
+
                 tp.traverse_function_tree()
+
+                traversal_end = time.time()
+
+                print("Traversal done within %f seconds" % (traversal_start - traversal_end))
 
                 # test purposes, show graph
                 # gv = CFuncGraphViewer("Huypizda")

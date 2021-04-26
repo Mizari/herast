@@ -77,7 +77,7 @@ class TreeProcessor:
         self.function_tree = cfunc
         self.context = None
 
-        self.insnop2func = {
+        self.inop2func = {
             idaapi.cit_expr: self._process_cexpr,
             idaapi.cit_return: self._process_creturn,
             idaapi.cit_block: self._process_cblock,
@@ -86,7 +86,7 @@ class TreeProcessor:
             idaapi.cit_while: self._process_cwhile,
             idaapi.cit_do: self._process_cdo,
             idaapi.cit_for: self._process_cfor,
-            # idaapi.cit_goto: self._process_cgoto,
+            idaapi.cit_goto: self._process_cgoto,
             idaapi.cit_asm: self._process_casm
         }
         
@@ -119,7 +119,7 @@ class TreeProcessor:
 
         try:
             for ins in cblock:
-                self.insnop2func[ins.op](ins)
+                self.inop2func[ins.op](ins)
         except KeyError:
             raise KeyError("Handler for %s is not setted" % op2str[ins.op])
 
