@@ -1,12 +1,18 @@
+from __future__ import print_function
 import idaapi
 
 
-
-
-DEBUG_PRINT_ENABLED = True
-def debug_print(*args, message='DEBUG'):
+DEBUG_PRINT_ENABLED = False
+def debug_print(*args, **kwargs):
+    message = None
+    try:
+        message = kwargs['message']
+    except KeyError:
+        message = 'DEBUG'
+    
     if DEBUG_PRINT_ENABLED:
-        print("[%s]" % message, *args)
+        _args = args
+        print("[%s]" % message, *_args)
 
 # [NOTE]: Actual for 7.6
 op2str = {
@@ -73,9 +79,9 @@ def trace_method(method):
 
 class TreeProcessor:
 
-    def __init__(self, cfunc):
+    def __init__(self, cfunc, matcher):
         self.function_tree = cfunc
-        self.context = None
+        self.matcher = matcher
 
         self.inop2func = {
             idaapi.cit_expr: self._process_cexpr,
@@ -88,69 +94,74 @@ class TreeProcessor:
             idaapi.cit_while: self._process_cwhile,
             idaapi.cit_do: self._process_cdo,
             idaapi.cit_for: self._process_cfor,
-            idaapi.cit_goto: self._process_cgoto,
-            idaapi.cit_asm: self._process_casm
+            idaapi.cit_goto: lambda _: None,
+            idaapi.cit_asm: lambda _: None
         }
+
+        for i in range(idaapi.cit_empty):
+            self.inop2func[i] = self._process_cexpr
         
     
     def __assert(self, cond, msg=""):
         assert cond, "%s: %s" % (self.__class__.__name__, msg)
 
-    def traverse_function_tree(self):
+    def process_function(self):
         function_body = self.function_tree.body
 
         self.__assert(isinstance(function_body, idaapi.cinsn_t), "Function body is not cinsn_t")
         self.__assert(isinstance(function_body.cblock, idaapi.cblock_t), "Function body must be a cblock_t")
 
-        # print(function_body.cblock)
+        self._process_cblock(function_body)
 
-        tree_stack = list()
 
-        block = iter(self._process_cblock(function_body))
-        traversal_in_progress = True
-
-        while traversal_in_progress:
-            insn = next(block)
-            
-    
     @trace_method
     def _process_cblock(self, cinsn):
         # [NOTE] cblock is just an array of cinsn_t (qlist<cinsn_t>)
         cblock = cinsn.cblock
+        self.matcher.check_patterns(cinsn)
 
         debug_print(len(cblock))
-        block = list()
 
         try:
             for ins in cblock:
-                block.append(self.inop2func[ins.op](ins))
-            return block
+                self.inop2func[ins.op](ins)
+
         except KeyError:
             raise KeyError("Handler for %s is not setted" % op2str[ins.op])
 
     @trace_method
     def _process_cexpr(self, cinsn):
+        # This is kinda tricky, cuz sometimes we calling process_cexpr w/ cinsn_t and sometimes w/ cexpr_t
+        # but as cexpr_t also has cexpr member it works
         cexpr = cinsn.cexpr
+        self.matcher.check_patterns(cinsn)
+
 
         debug_print("Expression: %s" % op2str[cexpr.op])
+
 
     @trace_method
     def _process_creturn(self, cinsn):
         # [NOTE] as i understand, creturn just a cexpr_t nested inside of creturn_t
         creturn = cinsn.creturn
+        self.matcher.check_patterns(cinsn)
 
-        debug_print("return: %s", creturn.expr)
-        return creturn.expr
+
+        self._process_cexpr(creturn.expr)
+
 
     @trace_method
     def _process_cif(self, cinsn):
         # [NOTE] cif has ithen<cinsn_t>, ielse<cinsn_t> and expr<cexpr_t>
         cif = cinsn.cif
+        self.matcher.check_patterns(cinsn)
 
         debug_print(cif)
         debug_print('if condition: %s' % cif)
         debug_print('if then branch: %s' % cif.ithen)
         debug_print('if else branch: %s' % cif.ielse)
+
+        self._process_cexpr(cif.expr)
 
         if cif.ithen is not None:
             self.inop2func[cif.ithen.op](cif.ithen)
@@ -158,49 +169,73 @@ class TreeProcessor:
         if cif.ielse is not None:
             self.inop2func[cif.ielse.op](cif.ielse)
 
-        return cif, cif.ithen, cif.ielse
 
     @trace_method
     def _process_cfor(self, cinsn):
         # [NOTE]: cfor has init<cexpr_t>, expr<cexpr_t>, step<cexpr_t>, body<cinsn_t>(inherited from cloop_t)
         cfor = cinsn.cfor
+        self.matcher.check_patterns(cinsn)
+        
 
-        self.inop2func[cfor.body.op](cfor.body)
+        if cfor.init is not None:
+            self._process_cexpr(cfor.init)
 
-        return cfor.init, cfor.expr, cfor.step, cfor.body
+        if cfor.expr is not None:
+            self._process_cexpr(cfor.expr)
+
+        if cfor.step is not None:
+            self._process_cexpr(cfor.step)
+
+        if cfor.body is not None:
+            self.inop2func[cfor.body.op](cfor.body)
+
 
     @trace_method
     def _process_cwhile(self, cinsn):
-        # [NOTE]: cwhile has body<cexpr_t>(inherited from cloop_t), expr<cexpr_t>
+        # [NOTE]: cwhile has body<cinsn_t>(inherited from cloop_t), expr<cexpr_t>
         cwhile = cinsn.cwhile
+        self.matcher.check_patterns(cinsn)
         
-        return cwhile.expr, cwhile.body
+        self._process_cexpr(cwhile.expr)
+
+        if cwhile.body is not None:
+            self.inop2func[cwhile.body.op](cwhile.body)
+
 
     @trace_method
     def _process_cdo(self, cinsn):
-        # [NOTE]: cdo has body<cexpr_t>(inherited from cloop_t), expr<cexpr_t>
+        # [NOTE]: cdo has body<cinsn_t>(inherited from cloop_t), expr<cexpr_t>
         cdo = cinsn.cdo
+        self.matcher.check_patterns(cinsn)
 
-        return cdo.body, cdo.expr
+        self._process_cexpr(cdo.expr)
+
+        if cdo.body is not None:
+            self.inop2func[cdo.body.op](cdo.body)
+
 
     @trace_method
     def _process_cswitch(self, cinsn):
         # [NOTE]: cswitch has expr<cexpr_t> and cases<qvector<ccase_t>>
         # [NOTE]: ccase_t is just a cinsn_t which also has values<uint64vec_t>
         cswitch = cinsn.cswitch
+        self.matcher.check_patterns(cinsn)
         
-        return cswitch.expr, [(c.cblock, list(c.values)) for c in cswitch.cases]
+        self._process_cexpr(cswitch.expr)
+        
+        for c in cswitch.cases:
+            self.inop2func[c.op](c)
+
 
     @trace_method
     def _process_cgoto(self, cinsn):
         # [NOTE]: cgoto is just label_num, citem pointed by this label can be founded by cfunc_t.find_label(label_num)
         cgoto = cinsn.cgoto
+        self.matcher.check_patterns(cinsn)
 
-        return cgoto.label_num
 
     @trace_method
     def _process_casm(self, cinsn):
         # [NOTE]: idfk, there is no normal way to interact with inline-assembly in HR
         casm = cinsn.casm
-
-        return None
+        self.matcher.check_patterns(cinsn)
