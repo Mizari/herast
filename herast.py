@@ -1,12 +1,21 @@
 import idaapi
 
 idaapi.require('tree.processing')
+idaapi.require('tree.matcher')
+idaapi.require('tree.patterns.abstracts')
+idaapi.require('tree.patterns.instructions')
+idaapi.require('tree.patterns.expressions')
 idaapi.require('graph.view')
 idaapi.require('views.patterns_edit')
 
 from tree.processing import TreeProcessor
-from graph.view import CFuncGraphViewer
-from views.patterns_edit import PatternsManager
+from tree.matcher import Matcher
+
+from tree.patterns.abstracts import AnyPat, SeqPat
+from tree.patterns.instructions import *
+
+# from graph.view import CFuncGraphViewer
+# from views.patterns_edit import PatternsManager
 import time
 
 # [NOTE]: Actual for 7.6
@@ -55,6 +64,7 @@ class CMAT_LEVEL:
     CASTED  = 7
     FINAL   = 8
 
+
 class UnloadCallbackAction(idaapi.action_handler_t):
     def __init__(self):
         super(UnloadCallbackAction, self).__init__()
@@ -69,6 +79,7 @@ class UnloadCallbackAction(idaapi.action_handler_t):
     def update(self, ctx):
         return idaapi.AST_ENABLE_ALWAYS
 
+test_pattern = IfInsPat(else_branch=AnyPat(may_be_none=False))
 
 def herast_callback(*args):
     event = args[0]
@@ -77,11 +88,14 @@ def herast_callback(*args):
         cfunc, level = args[1], args[2]
         if level == idaapi.CMAT_FINAL:
             try:
-                tp = TreeProcessor(cfunc)
+                print("CALLED!")
+                m = Matcher(cfunc)
+                m.insert_pattern(test_pattern)
+                tp = TreeProcessor(cfunc, m)
                 
                 traversal_start = time.time()
 
-                tp.traverse_function_tree()
+                tp.process_function()
 
                 traversal_end = time.time()
 
