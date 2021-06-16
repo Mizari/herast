@@ -31,6 +31,10 @@ class BlockPat(AbstractPattern):
 
         return self.sequence.check(instruction)
 
+    @property
+    def children(self):
+        return (self.sequence, )       
+
 
 # idaapi.cit_expr
 class ExInsPat(AbstractPattern):
