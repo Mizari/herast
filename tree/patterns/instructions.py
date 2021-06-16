@@ -19,7 +19,9 @@ from .abstracts import AnyPat, AbstractPattern, SeqPat
 # idaapi.cit_block
 class BlockPat(AbstractPattern):
     def __init__(self, seq=None):
-        self.__assert(isinstance(seq, SeqPat) or seq is None, "Block pattern must be provided with Sequence pattern")
+        self.__assert(isinstance(seq, SeqPat) or isinstance(seq, AnyPat) or seq is None, \
+            "Block pattern must be provided with Sequence pattern")
+
         self.op = idaapi.cit_block
         self.sequence = seq or AnyPat()
 
@@ -28,6 +30,7 @@ class BlockPat(AbstractPattern):
             return False
 
         return self.sequence.check(instruction)
+
 
 # idaapi.cit_expr
 class ExInsPat(AbstractPattern):
@@ -40,6 +43,11 @@ class ExInsPat(AbstractPattern):
             return False
         
         return self.expr.check(instruction.cexpr)
+
+    @property
+    def children(self):
+        return (self.expr, )
+
 
 # idaapi.cit_cif
 class IfInsPat(AbstractPattern):
@@ -58,6 +66,11 @@ class IfInsPat(AbstractPattern):
         return self.condition.check(cif.expr) and \
             self.then_branch.check(cif.ithen) and \
             self.else_branch.check(cif.ielse)
+
+    @property
+    def children(self):
+        return (self.expr, self.body)
+
 
 # idaapi.cit_for
 class ForInsPat(AbstractPattern):
@@ -80,6 +93,10 @@ class ForInsPat(AbstractPattern):
             self.step.check(cfor.step) and \
             self.body.check(cfor.body)
 
+    @property
+    def children(self):
+        return (self.init, self.expr, self.step, self.body)
+
 
 # idaapi.cit_return
 class RetInsPat(AbstractPattern):
@@ -94,6 +111,11 @@ class RetInsPat(AbstractPattern):
         creturn = instruction.creturn
 
         return self.expr.check(creturn.expr)
+
+    @property
+    def children(self):
+        return (self.expr, )
+
 
 # idaapi.cit_while
 class WhileInsPat(AbstractPattern):
@@ -111,6 +133,11 @@ class WhileInsPat(AbstractPattern):
         return self.expr.check(cwhile.expr) and \
             self.body.check(cwhile.body)
 
+    @property
+    def children(self):
+        return (self.expr, self.body)
+
+
 # idaapi.cit_cdo
 class DoInsPat(AbstractPattern):
     def __init__(self, expr=None, body=None):
@@ -127,3 +154,6 @@ class DoInsPat(AbstractPattern):
         return self.body.check(cdo.body) and \
             self.expr.check(cdo.expr) 
 
+    @property
+    def children(self):
+        return (self.expr, self.body)
