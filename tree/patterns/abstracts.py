@@ -1,6 +1,8 @@
 import idaapi
 
 class AbstractPattern:
+    op = None
+
     def __init__(self):
         pass
     
@@ -9,6 +11,15 @@ class AbstractPattern:
 
     def check(self, *args, **kwargs):
         raise NotImplementedError("This is an abstract class")
+
+    @staticmethod
+    def initial_check(func):
+        def __perform_initial_check(self, item, *args, **kwargs):
+            if item is None or item.op != self.op:
+                return False
+            else:
+                return func(self, item, args, kwargs)
+        return __perform_initial_check
 
     @property
     def children(self):
