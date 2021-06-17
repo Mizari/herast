@@ -69,7 +69,7 @@ class OrPat(AbstractPattern):
 
     # [NOTE]: thought about lazy checking feature, but decided that it kinda useless atm
     def __init__(self, pats):
-        assert len(pats) > 0, "Passing one or less patterns to OrPat is useless"
+        assert len(pats) > 1, "Passing one or less patterns to OrPat is useless"
         self.pats = tuple(pats)
     
     def check(self, item):
