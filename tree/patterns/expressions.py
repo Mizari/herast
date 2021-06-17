@@ -2,8 +2,17 @@ import idaapi
 from .abstracts import AnyPat, AbstractPattern, SeqPat
 
 
+
+class CallExprPat(AbstractPattern):
+    op = idaapi.cot_call
+
+    def __init__(self, calling_function, arguments):
+
+
+
 class AbstractUnaryOpPattern(AbstractPattern):
     op = None
+
     def __init__(self, operand):
         self.operand = operand
 
@@ -16,6 +25,7 @@ class AbstractUnaryOpPattern(AbstractPattern):
 
 class AbstractBinaryOpPattern(AbstractPattern):
     op = None
+
     def __init__(self, first_operand, second_operand, symmetric=True):
         self.first_operand = first_operand
         self.second_operand = second_operand

@@ -16,13 +16,13 @@ from .abstracts import AnyPat, AbstractPattern, SeqPat
 
 
 
-# idaapi.cit_block
 class BlockPat(AbstractPattern):
+    op = idaapi.cit_block
+    
     def __init__(self, seq=None):
         self.__assert(isinstance(seq, SeqPat) or isinstance(seq, AnyPat) or seq is None, \
             "Block pattern must be provided with Sequence pattern")
 
-        self.op = idaapi.cit_block
         self.sequence = seq or AnyPat()
 
     def check(self, instruction):
@@ -36,10 +36,10 @@ class BlockPat(AbstractPattern):
         return (self.sequence, )       
 
 
-# idaapi.cit_expr
 class ExInsPat(AbstractPattern):
+    op = idaapi.cit_expr
+
     def __init__(self, expr=None):
-        self.op = idaapi.cit_expr
         self.expr = expr or AnyPat()
 
     def check(self, instruction):
@@ -53,10 +53,10 @@ class ExInsPat(AbstractPattern):
         return (self.expr, )
 
 
-# idaapi.cit_cif
 class IfInsPat(AbstractPattern):
+    op = idaapi.cit_if
+
     def __init__(self, condition=None, then_branch=None, else_branch=None):
-        self.op = idaapi.cit_if
         self.condition   = condition   or AnyPat()
         self.then_branch = then_branch or AnyPat()
         self.else_branch = else_branch or AnyPat()
@@ -76,10 +76,10 @@ class IfInsPat(AbstractPattern):
         return (self.expr, self.body)
 
 
-# idaapi.cit_for
 class ForInsPat(AbstractPattern):
+    op = idaapi.cit_for
+
     def __init__(self, init=None, expr=None, step=None, body=None):
-        self.op = idaapi.cit_for
         self.init = init or AnyPat()
         self.expr = expr or AnyPat()
         self.step = step or AnyPat()
@@ -102,10 +102,10 @@ class ForInsPat(AbstractPattern):
         return (self.init, self.expr, self.step, self.body)
 
 
-# idaapi.cit_return
 class RetInsPat(AbstractPattern):
+    op = idaapi.cit_return
+
     def __init__(self, expr=None):
-        self.op = idaapi.cit_return
         self.expr = expr or AnyPat()
 
     def check(self, instruction):
@@ -121,10 +121,10 @@ class RetInsPat(AbstractPattern):
         return (self.expr, )
 
 
-# idaapi.cit_while
 class WhileInsPat(AbstractPattern):
+    op = idaapi.cit_while
+
     def __init__(self, expr=None, body=None):
-        self.op = idaapi.cit_while
         self.expr = expr or AnyPat()
         self.body = body or AnyPat()
 
@@ -142,10 +142,10 @@ class WhileInsPat(AbstractPattern):
         return (self.expr, self.body)
 
 
-# idaapi.cit_cdo
 class DoInsPat(AbstractPattern):
+    op = idaapi.cit_cdo
+
     def __init__(self, expr=None, body=None):
-        self.op = idaapi.cit_cdo
         self.expr = expr or AnyPat()
         self.body = body or AnyPat()
 
