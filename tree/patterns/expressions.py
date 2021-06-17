@@ -7,6 +7,7 @@ class CallExprPat(AbstractPattern):
     op = idaapi.cot_call
 
     def __init__(self, calling_function, arguments):
+        pass
 
 
 
