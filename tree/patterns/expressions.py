@@ -6,10 +6,17 @@ from .abstracts import AnyPat, AbstractPattern, SeqPat
 class CallExprPat(AbstractPattern):
     op = idaapi.cot_call
 
-    def __init__(self, calling_function, arguments):
-        pass
+    def __init__(self, calling_function, arguments, skip_missing_args=True):
+        self.calling_function = calling_function
+        self.arguments = arguments
 
+    @AbstractPattern.initial_check
+    def check(self, expression) -> bool:
+        return True
 
+    @property
+    def children(self):
+        return (self.calling_function, *self.arguments)
 
 class AbstractUnaryOpPattern(AbstractPattern):
     op = None
@@ -17,7 +24,7 @@ class AbstractUnaryOpPattern(AbstractPattern):
     def __init__(self, operand):
         self.operand = operand
 
-    def check(self, expression):
+    def check(self, expression) -> bool:
         if expression is None or expression.op != self.op:
             return False
         
@@ -32,7 +39,7 @@ class AbstractBinaryOpPattern(AbstractPattern):
         self.second_operand = second_operand
         self.symmetric = symmetric
 
-    def check(self, expression):
+    def check(self, expression) -> bool:
         if expression is None or expression.op != self.op:
             return False
 
