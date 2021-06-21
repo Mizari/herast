@@ -1,7 +1,7 @@
 import idaapi
 from .abstracts import AnyPat, AbstractPattern, SeqPat
 
-# TODO: consider about merging somehow cit_cdo and cit_cwhile patterns
+# [TODO]: consider about merging somehow cit_cdo and cit_cwhile patterns
 
 
 # block:    
@@ -25,10 +25,8 @@ class BlockPat(AbstractPattern):
 
         self.sequence = seq or AnyPat()
 
-    def check(self, instruction):
-        if instruction is None or self.op != instruction.op:
-            return False
-
+    @AbstractPattern.initial_check
+    def check(self, instruction) -> bool:
         return self.sequence.check(instruction)
 
     @property
@@ -42,10 +40,8 @@ class ExInsPat(AbstractPattern):
     def __init__(self, expr=None):
         self.expr = expr or AnyPat()
 
-    def check(self, instruction):
-        if instruction is None or instruction.op != self.op:
-            return False
-        
+    @AbstractPattern.initial_check
+    def check(self, instruction) -> bool:
         return self.expr.check(instruction.cexpr)
 
     @property
@@ -61,10 +57,8 @@ class IfInsPat(AbstractPattern):
         self.then_branch = then_branch or AnyPat()
         self.else_branch = else_branch or AnyPat()
 
-    def check(self, instruction):
-        if instruction is None or instruction.op != self.op:
-            return False
-
+    @AbstractPattern.initial_check
+    def check(self, instruction) -> bool:
         cif = instruction.cif
 
         return self.condition.check(cif.expr) and \
@@ -86,10 +80,8 @@ class ForInsPat(AbstractPattern):
         self.body = body or AnyPat()
 
 
-    def check(self, instruction):
-        if instruction is None or instruction.op != self.op:
-            return False
-
+    @AbstractPattern.initial_check
+    def check(self, instruction) -> bool:
         cfor = instruction.cfor
 
         return self.init.check(cfor.init) and \
@@ -108,10 +100,8 @@ class RetInsPat(AbstractPattern):
     def __init__(self, expr=None):
         self.expr = expr or AnyPat()
 
-    def check(self, instruction):
-        if instruction is None or self.op != instruction.op:
-            return False
-
+    @AbstractPattern.initial_check
+    def check(self, instruction) -> bool:
         creturn = instruction.creturn
 
         return self.expr.check(creturn.expr)
@@ -128,10 +118,8 @@ class WhileInsPat(AbstractPattern):
         self.expr = expr or AnyPat()
         self.body = body or AnyPat()
 
-    def check(self, instruction):
-        if instruction is None or self.op != instruction.op:
-            return False
-
+    @AbstractPattern.initial_check
+    def check(self, instruction) -> bool:
         cwhile = instruction.cwhile
 
         return self.expr.check(cwhile.expr) and \
@@ -143,16 +131,14 @@ class WhileInsPat(AbstractPattern):
 
 
 class DoInsPat(AbstractPattern):
-    op = idaapi.cit_cdo
+    op = idaapi.cit_do
 
     def __init__(self, expr=None, body=None):
         self.expr = expr or AnyPat()
         self.body = body or AnyPat()
 
-    def check(self, instruction):
-        if instruction is None or self.op != instruction.op:
-            return False
-
+    @AbstractPattern.initial_check
+    def check(self, instruction) -> bool:
         cdo = instruction.cdo
 
         return self.body.check(cdo.body) and \
