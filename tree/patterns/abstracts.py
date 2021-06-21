@@ -18,7 +18,7 @@ class AbstractPattern:
             if item is None or item.op != self.op:
                 return False
             else:
-                return func(self, item, args, kwargs)
+                return func(self, item, *args, **kwargs)
         return __perform_initial_check
 
     @property
