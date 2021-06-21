@@ -1,0 +1,1 @@
+# [TODO]: resolving global objects to get their names or at least their addresses
