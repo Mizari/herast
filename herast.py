@@ -11,8 +11,11 @@ idaapi.require('views.patterns_edit')
 from tree.processing import TreeProcessor
 from tree.matcher import Matcher
 
-from tree.patterns.abstracts import AnyPat, SeqPat
+from tree.patterns.abstracts import AnyPat, SeqPat, OrPat
 from tree.patterns.instructions import *
+from tree.patterns.expressions import *
+
+from tree.test_patterns.call_explore import test_pattern, test_handler
 
 # from graph.view import CFuncGraphViewer
 # from views.patterns_edit import PatternsManager
@@ -79,8 +82,6 @@ class UnloadCallbackAction(idaapi.action_handler_t):
     def update(self, ctx):
         return idaapi.AST_ENABLE_ALWAYS
 
-test_pattern = IfInsPat(else_branch=AnyPat(may_be_none=False))
-
 def herast_callback(*args):
     event = args[0]
 
@@ -90,7 +91,7 @@ def herast_callback(*args):
             try:
                 print("CALLED!")
                 m = Matcher(cfunc)
-                m.insert_pattern(test_pattern)
+                m.insert_pattern(test_pattern, test_handler)
                 tp = TreeProcessor(cfunc, m)
                 
                 traversal_start = time.time()
