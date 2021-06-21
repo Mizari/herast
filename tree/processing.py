@@ -45,6 +45,22 @@ op2str = {
     78: 'cit_break', 80: 'cit_return', 81: 'cit_goto', 82: 'cit_asm'
 }
 
+binary_expressions_ops = [
+    idaapi.cot_comma, idaapi.cot_asg, idaapi.cot_asgbor, idaapi.cot_asgxor, idaapi.cot_asgband,
+    idaapi.cot_asgadd, idaapi.cot_asgsub, idaapi.cot_asgmul, idaapi.cot_asgsshr, idaapi.cot_asgushr,
+    idaapi.cot_asgshl, idaapi.cot_asgsdiv, idaapi.cot_asgudiv, idaapi.cot_asgsmod, idaapi.cot_asgumod,
+    idaapi.cot_lor, idaapi.cot_land, idaapi.cot_bor, idaapi.cot_xor, idaapi.cot_band, idaapi.cot_eq,
+    idaapi.cot_ne, idaapi.cot_sge, idaapi.cot_uge, idaapi.cot_sle, idaapi.cot_ule, idaapi.cot_sgt,
+    idaapi.cot_ugt, idaapi.cot_slt, idaapi.cot_ult, idaapi.cot_sshr, idaapi.cot_ushr, idaapi.cot_shl,
+    idaapi.cot_add, idaapi.cot_sub, idaapi.cot_mul, idaapi.cot_sdiv, idaapi.cot_udiv, idaapi.cot_smod,
+    idaapi.cot_umod, idaapi.cot_fadd, idaapi.cot_fsub, idaapi.cot_fmul, idaapi.cot_fdiv
+]
+
+unary_expressions_ops = [
+    idaapi.cot_fneg, idaapi.cot_neg, idaapi.cot_cast, idaapi.cot_lnot, idaapi.cot_bnot, idaapi.cot_ptr,
+     idaapi.cot_ref, idaapi.cot_postinc, idaapi.cot_postdec, idaapi.cot_preinc, idaapi.cot_predec
+]
+
 # [NOTE]: Actual for 7.6
 str2op = {
 	'cot_empty': 0, 'cot_comma': 1, 'cot_asg': 2, 'cot_asgbor': 3, 'cot_asgxor': 4, 'cot_asgband': 5,
@@ -83,7 +99,8 @@ class TreeProcessor:
         self.function_tree = cfunc
         self.matcher = matcher
 
-        self.inop2func = {
+        # Instructions
+        self.op2func = {
             idaapi.cit_expr: self._process_cexpr,
             idaapi.cit_empty: lambda _: None,
             idaapi.cit_break: lambda _: None,
@@ -98,14 +115,29 @@ class TreeProcessor:
             idaapi.cit_asm: lambda _: None
         }
 
-        for i in range(idaapi.cit_empty):
-            self.inop2func[i] = self._process_cexpr
+        # For debugging purposes
+        for i in range(100):
+            if self.op2func.get(i) is None:
+                self.op2func[i] = lambda _: None
+
+        # Basic unary expressions
+        for i in unary_expressions_ops:
+            self.op2func[i] = self._process_unary_expr
+
+        # Basic binary expressions
+        for i in binary_expressions_ops:
+            self.op2func[i] = self._process_binary_expr
+
+        # Other expressions
+        self.op2func.update({
+            idaapi.cot_call: self._process_call_expr
+        })
         
     
     def __assert(self, cond, msg=""):
         assert cond, "%s: %s" % (self.__class__.__name__, msg)
 
-    def process_function(self):
+    def process_function(self) -> None:
         function_body = self.function_tree.body
 
         self.__assert(isinstance(function_body, idaapi.cinsn_t), "Function body is not cinsn_t")
@@ -115,33 +147,35 @@ class TreeProcessor:
 
 
     @trace_method
-    def _process_cblock(self, cinsn):
+    def _process_cblock(self, cinsn) -> None:
         # [NOTE] cblock is just an array of cinsn_t (qlist<cinsn_t>)
         cblock = cinsn.cblock
         self.matcher.check_patterns(cinsn)
 
-        debug_print(len(cblock))
+        # debug_print(len(cblock))
 
         try:
             for ins in cblock:
-                self.inop2func[ins.op](ins)
+                self.op2func[ins.op](ins)
 
         except KeyError:
             raise KeyError("Handler for %s is not setted" % op2str[ins.op])
 
     @trace_method
-    def _process_cexpr(self, cinsn):
+    def _process_cexpr(self, cinsn) -> None:
         # This is kinda tricky, cuz sometimes we calling process_cexpr w/ cinsn_t and sometimes w/ cexpr_t
-        # but as cexpr_t also has cexpr member it works
+        # but as cexpr_t also has cexpr member, so it works
         cexpr = cinsn.cexpr
         self.matcher.check_patterns(cinsn)
 
 
-        debug_print("Expression: %s" % op2str[cexpr.op])
+        # debug_print("Expression: %s" % op2str[cexpr.op])
+
+        self.op2func[cexpr.op](cexpr)
 
 
     @trace_method
-    def _process_creturn(self, cinsn):
+    def _process_creturn(self, cinsn) -> None:
         # [NOTE] as i understand, creturn just a cexpr_t nested inside of creturn_t
         creturn = cinsn.creturn
         self.matcher.check_patterns(cinsn)
@@ -151,27 +185,27 @@ class TreeProcessor:
 
 
     @trace_method
-    def _process_cif(self, cinsn):
+    def _process_cif(self, cinsn) -> None:
         # [NOTE] cif has ithen<cinsn_t>, ielse<cinsn_t> and expr<cexpr_t>
         cif = cinsn.cif
         self.matcher.check_patterns(cinsn)
 
-        debug_print(cif)
-        debug_print('if condition: %s' % cif)
-        debug_print('if then branch: %s' % cif.ithen)
-        debug_print('if else branch: %s' % cif.ielse)
+        # debug_print(cif)
+        # debug_print('if condition: %s' % cif)
+        # debug_print('if then branch: %s' % cif.ithen)
+        # debug_print('if else branch: %s' % cif.ielse)
 
         self._process_cexpr(cif.expr)
 
         if cif.ithen is not None:
-            self.inop2func[cif.ithen.op](cif.ithen)
+            self.op2func[cif.ithen.op](cif.ithen)
         
         if cif.ielse is not None:
-            self.inop2func[cif.ielse.op](cif.ielse)
+            self.op2func[cif.ielse.op](cif.ielse)
 
 
     @trace_method
-    def _process_cfor(self, cinsn):
+    def _process_cfor(self, cinsn) -> None:
         # [NOTE]: cfor has init<cexpr_t>, expr<cexpr_t>, step<cexpr_t>, body<cinsn_t>(inherited from cloop_t)
         cfor = cinsn.cfor
         self.matcher.check_patterns(cinsn)
@@ -187,11 +221,11 @@ class TreeProcessor:
             self._process_cexpr(cfor.step)
 
         if cfor.body is not None:
-            self.inop2func[cfor.body.op](cfor.body)
+            self.op2func[cfor.body.op](cfor.body)
 
 
     @trace_method
-    def _process_cwhile(self, cinsn):
+    def _process_cwhile(self, cinsn) -> None:
         # [NOTE]: cwhile has body<cinsn_t>(inherited from cloop_t), expr<cexpr_t>
         cwhile = cinsn.cwhile
         self.matcher.check_patterns(cinsn)
@@ -199,11 +233,11 @@ class TreeProcessor:
         self._process_cexpr(cwhile.expr)
 
         if cwhile.body is not None:
-            self.inop2func[cwhile.body.op](cwhile.body)
+            self.op2func[cwhile.body.op](cwhile.body)
 
 
     @trace_method
-    def _process_cdo(self, cinsn):
+    def _process_cdo(self, cinsn) -> None:
         # [NOTE]: cdo has body<cinsn_t>(inherited from cloop_t), expr<cexpr_t>
         cdo = cinsn.cdo
         self.matcher.check_patterns(cinsn)
@@ -211,11 +245,11 @@ class TreeProcessor:
         self._process_cexpr(cdo.expr)
 
         if cdo.body is not None:
-            self.inop2func[cdo.body.op](cdo.body)
+            self.op2func[cdo.body.op](cdo.body)
 
 
     @trace_method
-    def _process_cswitch(self, cinsn):
+    def _process_cswitch(self, cinsn) -> None:
         # [NOTE]: cswitch has expr<cexpr_t> and cases<qvector<ccase_t>>
         # [NOTE]: ccase_t is just a cinsn_t which also has values<uint64vec_t>
         cswitch = cinsn.cswitch
@@ -224,18 +258,31 @@ class TreeProcessor:
         self._process_cexpr(cswitch.expr)
         
         for c in cswitch.cases:
-            self.inop2func[c.op](c)
+            self.op2func[c.op](c)
 
 
     @trace_method
-    def _process_cgoto(self, cinsn):
+    def _process_cgoto(self, cinsn) -> None:
         # [NOTE]: cgoto is just label_num, citem pointed by this label can be founded by cfunc_t.find_label(label_num)
         cgoto = cinsn.cgoto
         self.matcher.check_patterns(cinsn)
 
 
     @trace_method
-    def _process_casm(self, cinsn):
+    def _process_casm(self, cinsn) -> None:
         # [NOTE]: idfk, there is no normal way to interact with inline-assembly in HR
         casm = cinsn.casm
         self.matcher.check_patterns(cinsn)
+
+    @trace_method
+    def _process_unary_expr(self, expr) -> None:
+        first_operand, second_operand = expr.x, expr.y
+        self.matcher.check_patterns(expr)
+
+    @trace_method
+    def _process_binary_expr(self, expr) -> None:
+        first_operand = expr.x
+        self.matcher.check_patterns(expr)
+
+    def _process_call_expr(self, expr) -> None:
+        self.matcher.check_patterns(expr)
