@@ -38,6 +38,7 @@ class TreeProcessor:
     def __init__(self, cfunc, matcher):
         self.function_tree = cfunc
         self.matcher = matcher
+        self.need_expression_traversal = matcher.has_deep_expressions()
 
         self.op2func = {i:self.__stub for i in range(100)}
 
@@ -102,10 +103,8 @@ class TreeProcessor:
         cexpr = cinsn.cexpr
         self.matcher.check_patterns(cinsn)
 
-
-        # debug_print("Expression: %s" % op2str[cexpr.op])
-
-        self.op2func[cexpr.op](cexpr)
+        if self.need_expression_traversal:
+            self.op2func[cexpr.op](cexpr)
 
 
     @trace_method

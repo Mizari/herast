@@ -13,8 +13,16 @@ class Matcher:
         for p, h in self.patterns:
             if p.check(item) is True:
                 if h is not None:
-                    h(item)
+                    try:
+                        h(item)
+                    except Exception as e:
+                        print('[!] Got an exception: %s' % e)
                 # print("[FOUND]: %#x %d" % (item.ea, item.op))
 
     def insert_pattern(self, pat, handler=None):
         self.patterns.append((pat, handler))
+
+
+    # [TODO]: make traversal of patterns to check if there is at least one deep expression pattern
+    def has_deep_expressions(self):
+        return True
