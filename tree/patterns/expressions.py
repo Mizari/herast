@@ -1,6 +1,10 @@
 import idaapi
-from .abstracts import AnyPat, AbstractPattern, SeqPat
 
+idaapi.require('tree.patterns.abstracts')
+idaapi.require('tree.consts')
+
+from tree.patterns.abstracts import AnyPat, AbstractPattern, SeqPat
+from tree.consts import binary_expressions_ops, unary_expressions_ops, op2str
 
 
 class CallExprPat(AbstractPattern):
@@ -24,10 +28,8 @@ class AbstractUnaryOpPattern(AbstractPattern):
     def __init__(self, operand):
         self.operand = operand
 
+    @AbstractPattern.initial_check
     def check(self, expression) -> bool:
-        if expression is None or expression.op != self.op:
-            return False
-        
         return self.operand.check(expression.x)
 
 
@@ -39,10 +41,8 @@ class AbstractBinaryOpPattern(AbstractPattern):
         self.second_operand = second_operand
         self.symmetric = symmetric
 
+    @AbstractPattern.initial_check
     def check(self, expression) -> bool:
-        if expression is None or expression.op != self.op:
-            return False
-
         first_op_second = self.first_operand.check(expression.x) and self.second_operand.check(expression.y)
         if self.symmetric:
             second_op_first = self.first_operand.check(expression.y) and self.second_operand.check(expression.x)
@@ -54,5 +54,12 @@ class AbstractBinaryOpPattern(AbstractPattern):
 import sys
 module = sys.modules[__name__]
 
-unary_operations = []
-binary_operations = []
+# [TODO]: name-overwriting check
+for op in unary_expressions_ops:
+    name = '%sExprPat' % op2str[op].replace('cot_', '').capitalize()
+    vars(module)[name] = type(name, (AbstractUnaryOpPattern,), {'op': op})
+
+for op in binary_expressions_ops:
+    name = '%sExprPat' % op2str[op].replace('cot_', '').capitalize()
+    vars(module)[name] = type(name, (AbstractBinaryOpPattern,), {'op': op})
+
