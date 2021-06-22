@@ -15,7 +15,8 @@ from tree.patterns.abstracts import AnyPat, SeqPat, OrPat
 from tree.patterns.instructions import *
 from tree.patterns.expressions import *
 
-from tree.test_patterns.call_explore import test_pattern, test_handler
+idaapi.require('test_patterns.call_explore')
+from test_patterns.call_explore import test_pattern, test_handler
 
 # from graph.view import CFuncGraphViewer
 # from views.patterns_edit import PatternsManager
