@@ -22,53 +22,6 @@ from test_patterns.call_explore import test_pattern, test_handler
 # from views.patterns_edit import PatternsManager
 import time
 
-# [NOTE]: Actual for 7.6
-class HR_EVENT:
-    HXE_FLOWCHART               = 0
-    HXE_STKPNTS                 = 1
-    HXE_PROLOG                  = 2
-    HXE_MICROCODE               = 3
-    HXE_PREOPTIMIZED            = 4
-    HXE_LOCOPT                  = 5
-    HXE_PREALLOC                = 6
-    HXE_GLBOPT                  = 7
-    HXE_STRUCTURAL              = 8
-    HXE_MATURITY                = 9
-    HXE_INTERR                  = 10
-    HXE_COMBINE                 = 11
-    HXE_PRINT_FUNC              = 12
-    HXE_FUNC_PRINTED            = 13
-    HXE_RESOLVE_STKADDRS        = 14
-    HXE_OPEN_PSEUDOCODE         = 100
-    HXE_SWITCH_PSEUDOCODE       = 101
-    HXE_REFRESH_PSEUDOCODE      = 102
-    HXE_CLOSE_PSEUDOCODE        = 103
-    HXE_KEYBOARD                = 104
-    HXE_RIGHT_CLICK             = 105
-    HXE_DOUBLE_CLICK            = 106
-    HXE_CURPOS                  = 107
-    HXE_CREATE_HINT             = 108
-    HXE_TEXT_READY              = 109
-    HXE_POPULATING_POPUP        = 110
-    LXE_LVAR_NAME_CHANGED       = 111
-    LXE_LVAR_TYPE_CHANGED       = 112
-    LXE_LVAR_CMT_CHANGED        = 113
-    LXE_LVAR_MAPPING_CHANGED    = 114
-    HXE_CMT_CHANGED             = 115
-
-# [NOTE]: Actual for 7.6
-class CMAT_LEVEL:
-    ZERO    = 0
-    BUILT   = 1
-    TRANS1  = 2
-    NICE    = 3
-    TRANS2  = 4
-    CPA     = 5
-    TRANS3  = 6
-    CASTED  = 7
-    FINAL   = 8
-
-
 class UnloadCallbackAction(idaapi.action_handler_t):
     def __init__(self):
         super(UnloadCallbackAction, self).__init__()
