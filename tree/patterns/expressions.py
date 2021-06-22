@@ -32,6 +32,10 @@ class AbstractUnaryOpPattern(AbstractPattern):
     def check(self, expression) -> bool:
         return self.operand.check(expression.x)
 
+    @property
+    def children(self):
+        return (self.operand, )
+
 
 class AbstractBinaryOpPattern(AbstractPattern):
     op = None
@@ -50,11 +54,16 @@ class AbstractBinaryOpPattern(AbstractPattern):
         else:
             return first_op_second
 
+    @property
+    def children(self):
+        return (self.first_operand, self.second_operand)
+
 
 import sys
 module = sys.modules[__name__]
 
 # [TODO]: name-overwriting check
+# [TODO]: add `children` property
 for op in unary_expressions_ops:
     name = '%sExprPat' % op2str[op].replace('cot_', '').capitalize()
     vars(module)[name] = type(name, (AbstractUnaryOpPattern,), {'op': op})
