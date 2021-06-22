@@ -63,7 +63,6 @@ import sys
 module = sys.modules[__name__]
 
 # [TODO]: name-overwriting check
-# [TODO]: add `children` property
 for op in unary_expressions_ops:
     name = '%sExprPat' % op2str[op].replace('cot_', '').capitalize()
     vars(module)[name] = type(name, (AbstractUnaryOpPattern,), {'op': op})
