@@ -10,17 +10,33 @@ from tree.consts import binary_expressions_ops, unary_expressions_ops, op2str
 class CallExprPat(AbstractPattern):
     op = idaapi.cot_call
 
-    def __init__(self, calling_function, arguments, skip_missing_args=True):
+    def __init__(self, calling_function, *arguments, skip_missing_args=True):
         self.calling_function = calling_function
         self.arguments = arguments
 
     @AbstractPattern.initial_check
     def check(self, expression) -> bool:
-        return True
+        return self.calling_function.check(expression.x)
 
     @property
     def children(self):
         return (self.calling_function, *self.arguments)
+
+class HelperExprPat(AbstractPattern):
+    op = idaapi.cot_helper
+
+    def __init__(self, helper_name=None):
+        self.helper_name = helper_name
+    
+    @AbstractPattern.initial_check
+    def check(self, expression) -> bool:
+        return self.helper_name == expression.helper if self.helper_name is not None else True
+
+    @property
+    def children(self):
+        return ()
+
+
 
 class AbstractUnaryOpPattern(AbstractPattern):
     op = None
