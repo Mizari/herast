@@ -123,8 +123,7 @@ class TreeProcessor:
 
         self._process_cexpr(cif.expr)
 
-        if cif.ithen is not None:
-            self.op2func[cif.ithen.op](cif.ithen)
+        self.op2func[cif.ithen.op](cif.ithen)
         
         if cif.ielse is not None:
             self.op2func[cif.ielse.op](cif.ielse)
