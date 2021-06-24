@@ -87,8 +87,6 @@ class TreeProcessor:
         cblock = cinsn.cblock
         self.matcher.check_patterns(cinsn)
 
-        # debug_print(len(cblock))
-
         try:
             for ins in cblock:
                 self.op2func[ins.op](ins)
@@ -122,11 +120,6 @@ class TreeProcessor:
         # [NOTE] cif has ithen<cinsn_t>, ielse<cinsn_t> and expr<cexpr_t>
         cif = cinsn.cif
         self.matcher.check_patterns(cinsn)
-
-        # debug_print(cif)
-        # debug_print('if condition: %s' % cif)
-        # debug_print('if then branch: %s' % cif.ithen)
-        # debug_print('if else branch: %s' % cif.ielse)
 
         self._process_cexpr(cif.expr)
 
@@ -207,15 +200,22 @@ class TreeProcessor:
         casm = cinsn.casm
         self.matcher.check_patterns(cinsn)
 
+
     @trace_method
     def _process_unary_expr(self, expr) -> None:
-        first_operand, second_operand = expr.x, expr.y
         self.matcher.check_patterns(expr)
+        
+        self.op2func[expr.x.op](expr.x)
+
 
     @trace_method
     def _process_binary_expr(self, expr) -> None:
-        first_operand = expr.x
         self.matcher.check_patterns(expr)
 
+        self.op2func[expr.x.op](expr.x)
+        self.op2func[expr.y.op](expr.y)
+
+
+    @trace_method
     def _process_call_expr(self, expr) -> None:
         self.matcher.check_patterns(expr)
