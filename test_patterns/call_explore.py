@@ -5,7 +5,7 @@ idaapi.require('tree.patterns.expressions')
 idaapi.require('tree.utils')
 
 from tree.patterns.abstracts import *
-from tree.patterns.expressions import CallExprPat
+from tree.patterns.expressions import CallExprPat, HelperExprPat
 
 from tree.utils import *
 
@@ -13,9 +13,9 @@ test_pattern = CallExprPat(AnyPat(), AnyPat())
 
 def test_handler(item):
     try:
-        calling_func = get_obj_from_call_node(item)
-        func_name = resolve_obj_symbol(calling_func) or 'NOT_RESOLVED'
+        # print(item.x.helper)
+        calling_func_addr, calling_func_name = resolve_calling_function_from_node(item)
         
-        print("[FOUND]: %#x -> %s" % (item.ea, func_name))
+        print("[FOUND]: %#x -> %s" % (item.ea, calling_func_name))
     except NotImplementedError:
         pass
