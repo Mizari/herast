@@ -1,5 +1,9 @@
 import idaapi
 
+idaapi.require('tree.context')
+
+from tree.context import Context
+
 # [TODO]: mb somehow it should have architecture when patterns can provide some more feedback to matcher, not only True/False
 # it can be useful to not traverse every expresion for every pattern-chain, and do it only with a particular-ones
  
@@ -10,17 +14,19 @@ class Matcher:
         self.deep_patterns = list()
 
     def check_patterns(self, item):
-        for p, h in self.patterns:
+        for p, h, c in self.patterns:
             if p.check(item) is True:
                 if h is not None:
                     try:
-                        h(item)
+                        h(item, c)
                     except Exception as e:
                         print('[!] Got an exception: %s' % e)
                 # print("[FOUND]: %#x %d" % (item.ea, item.op))
 
     def insert_pattern(self, pat, handler=None):
-        self.patterns.append((pat, handler))
+        ctx = Context()
+        ctx.update({'current_function': self.function})
+        self.patterns.append((pat, handler, ctx))
 
 
     # [TODO]: make traversal of patterns to check if there is at least one deep expression pattern
