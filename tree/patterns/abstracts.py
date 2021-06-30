@@ -1,4 +1,3 @@
-from tree.patterns.expressions import AbstractUnaryOpPattern
 import idaapi
 
 # [TODO]: for some reason i've thought that not-recursive check of children may be useful, but forget how can i use it
@@ -13,7 +12,7 @@ class AbstractPattern:
     def __init__(self):
         pass
     
-    def __assert(self, cond, msg=""):
+    def _assert(self, cond, msg=""):
         assert cond, "%s: %s" % (self.__class__.__name__, msg)
 
     def check(self, *args, **kwargs):
@@ -87,7 +86,7 @@ class OrPat(AbstractPattern):
 
     # [NOTE]: thought about lazy checking feature, but decided that it kinda useless atm
     def __init__(self, pats):
-        self.__assert(len(pats) > 1, "Passing one or less patterns to OrPat is useless")
+        self._assert(len(pats) > 1, "Passing one or less patterns to OrPat is useless")
         self.pats = tuple(pats)
     
     def check(self, item):

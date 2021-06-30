@@ -67,14 +67,14 @@ class TreeProcessor:
             idaapi.cot_call: self._process_call_expr
         })
     
-    def __assert(self, cond, msg=""):
+    def _assert(self, cond, msg=""):
         assert cond, "%s: %s" % (self.__class__.__name__, msg)
 
     def process_function(self) -> None:
         function_body = self.function_tree.body
 
-        self.__assert(isinstance(function_body, idaapi.cinsn_t), "Function body is not cinsn_t")
-        self.__assert(isinstance(function_body.cblock, idaapi.cblock_t), "Function body must be a cblock_t")
+        self._assert(isinstance(function_body, idaapi.cinsn_t), "Function body is not cinsn_t")
+        self._assert(isinstance(function_body.cblock, idaapi.cblock_t), "Function body must be a cblock_t")
 
         self._process_cblock(function_body)
 

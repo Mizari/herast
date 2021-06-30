@@ -2,9 +2,11 @@ import idaapi
 
 idaapi.require('tree.patterns.abstracts')
 idaapi.require('tree.consts')
+idaapi.require('tree.utils')
 
 from tree.patterns.abstracts import AnyPat, AbstractPattern, SeqPat
 from tree.consts import binary_expressions_ops, unary_expressions_ops, op2str
+from tree.utils import resolve_name_address
 
 
 class CallExprPat(AbstractPattern):
@@ -22,6 +24,7 @@ class CallExprPat(AbstractPattern):
     def children(self):
         return (self.calling_function, *self.arguments)
 
+
 class HelperExprPat(AbstractPattern):
     op = idaapi.cot_helper
 
@@ -36,7 +39,22 @@ class HelperExprPat(AbstractPattern):
     def children(self):
         return ()
 
+class ObjPat(AbstractPattern):
+    op = idaapi.cot_obj
 
+    def __init__(self, name=None, ea=None):
+        self.ea = ea
+        if ea is None and name is not None:
+            self.ea = resolve_name_address(name)
+            self._assert(self.ea != idaapi.BADADDR, "Unable to resolve '%s' address" % (name))
+
+    @AbstractPattern.initial_check
+    def check(self, expression) -> bool:
+        if self.ea is None:
+            return True
+        
+        return self.ea == expression.obj_ea 
+                
 
 class AbstractUnaryOpPattern(AbstractPattern):
     op = None
@@ -86,4 +104,3 @@ for op in unary_expressions_ops:
 for op in binary_expressions_ops:
     name = '%sExprPat' % op2str[op].replace('cot_', '').capitalize()
     vars(module)[name] = type(name, (AbstractBinaryOpPattern,), {'op': op})
-

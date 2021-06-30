@@ -20,7 +20,7 @@ class BlockPat(AbstractPattern):
     op = idaapi.cit_block
     
     def __init__(self, seq=None):
-        self.__assert(isinstance(seq, SeqPat) or isinstance(seq, AnyPat) or seq is None, \
+        self._assert(isinstance(seq, SeqPat) or isinstance(seq, AnyPat) or seq is None, \
             "Block pattern must be provided with Sequence pattern")
 
         self.sequence = seq or AnyPat()
