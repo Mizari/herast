@@ -31,8 +31,7 @@ class AbstractPattern:
     def children(self):
         raise NotImplementedError("An abstract class doesn't have any children")
 
-# any:      Done
-# seq:      
+
 
 # any pattern
 class AnyPat(AbstractPattern):
@@ -47,8 +46,6 @@ class AnyPat(AbstractPattern):
     @property
     def children(self):
         return ()
-
-
 
 # sequence of instructions
 class SeqPat(AbstractPattern):
@@ -84,7 +81,6 @@ class SeqPat(AbstractPattern):
 class OrPat(AbstractPattern):
     op = -1
 
-    # [NOTE]: thought about lazy checking feature, but decided that it kinda useless atm
     def __init__(self, pats):
         self._assert(len(pats) > 1, "Passing one or less patterns to OrPat is useless")
         self.pats = tuple(pats)
