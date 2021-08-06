@@ -64,17 +64,42 @@ def remove_instruction_from_ast(unwanted_ins, parent):
     else:
         raise TypeError("Parent must be cfuncptr_t or cblock_t")
 
-    # try:
-    #     new_block = idaapi.cblock_t()
-    #     for i in block.cblock:
-    #         if i == unwanted_ins:
-    #             continue
+    try:
+        new_block = idaapi.cblock_t()
+        for i in block.cblock:
+            if i == unwanted_ins:
+                continue
             
-    #         new_block.push_back(i)
+            new_block.push_back(i)
         
-        
-    #     # del new_block
-    # except Exception as e:
-    #     print(e)
-    #     print(e)
-    #     print(e)
+        new_insn = make_block_insn(new_block, block.ea)
+
+        # block.cleanup()
+        idaapi.qswap(block, new_insn)
+    except Exception as e:
+        print(e)
+
+
+def make_cblock(instructions):
+    block = idaapi.cblock_t()
+    for i in instructions:
+        block.push_back(i)
+    
+    return block
+
+def make_block_insn(instructions, address):
+    block = None
+    if type(instructions) is idaapi.cblock_t:
+        block = instructions
+    elif type(instructions) is list or type(instructions) is tuple:
+        block = make_cblock(instructions)
+    else:
+        raise TypeError("Trying to make cblock instruicton neither of cblock_t or list|tuple")
+    
+    insn = idaapi.cinsn_t()
+    insn.ea = address
+    insn.op = idaapi.cit_block
+    insn.cblock = block
+    insn.thisown = False
+
+    return insn    
