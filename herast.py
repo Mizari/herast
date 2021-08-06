@@ -11,10 +11,6 @@ idaapi.require('views.patterns_edit')
 from tree.processing import TreeProcessor
 from tree.matcher import Matcher
 
-from tree.patterns.abstracts import AnyPat, SeqPat, OrPat
-from tree.patterns.instructions import *
-from tree.patterns.expressions import *
-
 idaapi.require('test_patterns.call_explore')
 from test_patterns.call_explore import test_pattern, test_handler
 

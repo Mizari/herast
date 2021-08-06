@@ -11,17 +11,16 @@ from tree.patterns.instructions import ExInsPat
 
 from tree.utils import *
 
-test_pattern = ExInsPat(CallExprPat(ObjPat("_MiCheckAging@8"), AnyPat()))
+test_pattern = CallExprPat(AnyPat(), AnyPat())
 
 def test_handler(item, ctx):
     try:
         # print(item.x.helper)
-        # calling_func_addr, calling_func_name = resolve_calling_function_from_node(item)
+        calling_func_addr, calling_func_name = resolve_calling_function_from_node(item)
         
-        # print("[FOUND]: %#x -> %s" % (item.ea, calling_func_name))
-        remove_instruction_from_ast(item, ctx.data['current_function'])
+        print("[FOUND]: %#x -> %s" % (item.ea, calling_func_name))
+        # remove_instruction_from_ast(item, ctx.data['current_function'])
 
-        print('[FOUND]: %#x' % item.ea)
-        item.cleanup()
+        # print('[FOUND]: %#x' % item.ea)
     except NotImplementedError:
         pass
