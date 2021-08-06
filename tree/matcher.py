@@ -11,7 +11,6 @@ class Matcher:
     def __init__(self, processed_function):
         self.function = processed_function
         self.patterns = list()
-        self.deep_patterns = list()
 
     def check_patterns(self, item):
         for p, h, c in self.patterns:
@@ -29,6 +28,9 @@ class Matcher:
         self.patterns.append((pat, handler, ctx))
 
 
-    # [TODO]: make traversal of patterns to check if there is at least one deep expression pattern
     def has_deep_expressions(self):
-        return True
+        for p, _, _ in self.patterns:
+            if p.op >= 0 and p.op < idaapi.cit_empty:
+                return True
+
+        return False
