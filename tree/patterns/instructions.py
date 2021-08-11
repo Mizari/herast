@@ -27,6 +27,9 @@ class BlockPat(AbstractPattern):
 
     @AbstractPattern.initial_check
     def check(self, instruction) -> bool:
+        if not isinstance(self.sequence, AnyPat) and len(instruction.cblock) != self.sequence.length:
+            return False
+        
         return self.sequence.check(instruction)
 
     @property
