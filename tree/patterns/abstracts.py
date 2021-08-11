@@ -14,6 +14,9 @@ class AbstractPattern:
     
     def _assert(self, cond, msg=""):
         assert cond, "%s: %s" % (self.__class__.__name__, msg)
+    
+    def _raise(self, msg):
+        raise "%s: %s" % (self.__class__.__name__, msg)
 
     def check(self, *args, **kwargs):
         raise NotImplementedError("This is an abstract class")
@@ -51,22 +54,30 @@ class AnyPat(AbstractPattern):
 class SeqPat(AbstractPattern):
     op = -1
 
-    def __init__(self, pats, function=None):
+    def __init__(self, pats, parent=None, function=None):
         if type(pats) is not tuple and type(pats) is not list:
             pats = (pats, )
 
         self.seq = pats
         self.length = len(pats)
+        self.parent = parent
         self.function = function
 
     def set_function(self, function):
         self.function = function
 
+    def set_parent(self, parent):
+        self.parent = parent
+
     def check(self, instructions):
-        parent = self.function.find_parent_of(instructions[0])
+        if self.parent is None:
+            if self.function is not None:
+                self.parent = self.function.find_parent_of(instructions[0])
+            else:
+                self._raise("self.parent or self.function must be provided")
 
         # There is can be no sequence unless its parent is a cblock instruction
-        if parent.op != idaapi.cit_cblock:
+        if self.parent.op != idaapi.cit_cblock:
             return False
     
         for i in range(self.length):
@@ -95,3 +106,19 @@ class OrPat(AbstractPattern):
     @property
     def children(self):
         return self.pats
+
+class SkipCasts(AbstractPattern):
+    op = -1
+    def __init__(self, pat):
+        self.pat = pat
+
+    def check(self, item):
+        while item.x.op == idaapi.cot_cast:
+            item = item.x
+        
+        return self.check.pat(item)
+
+    @property
+    def children(self):
+        return self.pat
+        
