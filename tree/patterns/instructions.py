@@ -15,7 +15,7 @@ from .abstracts import AnyPat, AbstractPattern, SeqPat
 # asm:      nope
 
 
-
+# [TODO]: consider of using SeqPat implicitly and providing to ctor just *args or iterable (list, tuple) of patterns
 class BlockPat(AbstractPattern):
     op = idaapi.cit_block
     
@@ -26,11 +26,13 @@ class BlockPat(AbstractPattern):
         self.sequence = seq or AnyPat()
 
     @AbstractPattern.initial_check
-    def check(self, instruction) -> bool:
+    def check(self, instruction, ctx) -> bool:
         if not isinstance(self.sequence, AnyPat) and len(instruction.cblock) != self.sequence.length:
             return False
         
-        return self.sequence.check(instruction)
+        block = instruction.cblock
+
+        return self.sequence.check(block[0], ctx)
 
     @property
     def children(self):
@@ -44,8 +46,8 @@ class ExInsPat(AbstractPattern):
         self.expr = expr or AnyPat()
 
     @AbstractPattern.initial_check
-    def check(self, instruction) -> bool:
-        return self.expr.check(instruction.cexpr)
+    def check(self, instruction, ctx) -> bool:
+        return self.expr.check(instruction.cexpr, ctx)
 
     @property
     def children(self):
@@ -61,12 +63,12 @@ class IfInsPat(AbstractPattern):
         self.else_branch = else_branch or AnyPat()
 
     @AbstractPattern.initial_check
-    def check(self, instruction) -> bool:
+    def check(self, instruction, ctx) -> bool:
         cif = instruction.cif
 
-        return self.condition.check(cif.expr) and \
-            self.then_branch.check(cif.ithen) and \
-            self.else_branch.check(cif.ielse)
+        return self.condition.check(cif.expr, ctx) and \
+            self.then_branch.check(cif.ithen, ctx) and \
+            self.else_branch.check(cif.ielse, ctx)
 
     @property
     def children(self):
@@ -84,13 +86,13 @@ class ForInsPat(AbstractPattern):
 
 
     @AbstractPattern.initial_check
-    def check(self, instruction) -> bool:
+    def check(self, instruction, ctx) -> bool:
         cfor = instruction.cfor
 
-        return self.init.check(cfor.init) and \
-            self.expr.check(cfor.expr) and \
-            self.step.check(cfor.step) and \
-            self.body.check(cfor.body)
+        return self.init.check(cfor.init, ctx) and \
+            self.expr.check(cfor.expr, ctx) and \
+            self.step.check(cfor.step, ctx) and \
+            self.body.check(cfor.body, ctx)
 
     @property
     def children(self):
@@ -104,10 +106,10 @@ class RetInsPat(AbstractPattern):
         self.expr = expr or AnyPat()
 
     @AbstractPattern.initial_check
-    def check(self, instruction) -> bool:
+    def check(self, instruction, ctx) -> bool:
         creturn = instruction.creturn
 
-        return self.expr.check(creturn.expr)
+        return self.expr.check(creturn.expr, ctx)
 
     @property
     def children(self):
@@ -122,11 +124,11 @@ class WhileInsPat(AbstractPattern):
         self.body = body or AnyPat()
 
     @AbstractPattern.initial_check
-    def check(self, instruction) -> bool:
+    def check(self, instruction, ctx) -> bool:
         cwhile = instruction.cwhile
 
-        return self.expr.check(cwhile.expr) and \
-            self.body.check(cwhile.body)
+        return self.expr.check(cwhile.expr, ctx) and \
+            self.body.check(cwhile.body, ctx)
 
     @property
     def children(self):
@@ -141,11 +143,11 @@ class DoInsPat(AbstractPattern):
         self.body = body or AnyPat()
 
     @AbstractPattern.initial_check
-    def check(self, instruction) -> bool:
+    def check(self, instruction, ctx) -> bool:
         cdo = instruction.cdo
 
-        return self.body.check(cdo.body) and \
-            self.expr.check(cdo.expr) 
+        return self.body.check(cdo.body, ctx) and \
+            self.expr.check(cdo.expr, ctx) 
 
     @property
     def children(self):
