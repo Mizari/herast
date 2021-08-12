@@ -19,8 +19,8 @@ class CallExprPat(AbstractPattern):
         self.skip_missing_args = skip_missing_args
 
     @AbstractPattern.initial_check
-    def check(self, expression) -> bool:
-        return self.calling_function.check(expression.x)
+    def check(self, expression, ctx) -> bool:
+        return self.calling_function.check(expression.x, ctx)
 
     @property
     def children(self):
@@ -34,7 +34,7 @@ class HelperExprPat(AbstractPattern):
         self.helper_name = helper_name
     
     @AbstractPattern.initial_check
-    def check(self, expression) -> bool:
+    def check(self, expression, ctx) -> bool:
         return self.helper_name == expression.helper if self.helper_name is not None else True
 
     @property
@@ -51,7 +51,7 @@ class ObjPat(AbstractPattern):
             self._assert(self.ea != idaapi.BADADDR, "Unable to resolve '%s' address" % (name))
 
     @AbstractPattern.initial_check
-    def check(self, expression) -> bool:
+    def check(self, expression, ctx) -> bool:
         if self.ea is None:
             return True
         
@@ -65,8 +65,8 @@ class AbstractUnaryOpPattern(AbstractPattern):
         self.operand = operand
 
     @AbstractPattern.initial_check
-    def check(self, expression) -> bool:
-        return self.operand.check(expression.x)
+    def check(self, expression, ctx) -> bool:
+        return self.operand.check(expression.x, ctx)
 
     @property
     def children(self):
@@ -76,16 +76,16 @@ class AbstractUnaryOpPattern(AbstractPattern):
 class AbstractBinaryOpPattern(AbstractPattern):
     op = None
 
-    def __init__(self, first_operand, second_operand, symmetric=True):
+    def __init__(self, first_operand, second_operand, symmetric=False):
         self.first_operand = first_operand
         self.second_operand = second_operand
         self.symmetric = symmetric
 
     @AbstractPattern.initial_check
-    def check(self, expression) -> bool:
-        first_op_second = self.first_operand.check(expression.x) and self.second_operand.check(expression.y)
+    def check(self, expression, ctx) -> bool:
+        first_op_second = self.first_operand.check(expression.x, ctx) and self.second_operand.check(expression.y, ctx)
         if self.symmetric:
-            second_op_first = self.first_operand.check(expression.y) and self.second_operand.check(expression.x)
+            second_op_first = self.first_operand.check(expression.y, ctx) and self.second_operand.check(expression.x, ctx)
             return first_op_second or second_op_first
         else:
             return first_op_second
