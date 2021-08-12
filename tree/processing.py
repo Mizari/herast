@@ -39,6 +39,7 @@ class TreeProcessor:
         self.function_tree = cfunc
         self.matcher = matcher
         self.need_expression_traversal = matcher.has_deep_expressions()
+        debug_print('has_deep_expressions = %s' % self.need_expression_traversal)
 
         self.op2func = {i:self.__stub for i in range(100)}
 
