@@ -18,7 +18,7 @@ class AbstractPattern:
     def _raise(self, msg):
         raise "%s: %s" % (self.__class__.__name__, msg)
 
-    def check(self, *args, **kwargs):
+    def check(self, item, ctx, *args, **kwargs):
         raise NotImplementedError("This is an abstract class")
 
     @staticmethod
@@ -43,7 +43,7 @@ class AnyPat(AbstractPattern):
     def __init__(self, may_be_none=True):
         self.may_be_none = may_be_none
 
-    def check(self, item):
+    def check(self, item, ctx):
         return item is not None or self.may_be_none
 
     @property
@@ -54,34 +54,26 @@ class AnyPat(AbstractPattern):
 class SeqPat(AbstractPattern):
     op = -1
 
-    def __init__(self, pats, parent=None, function=None):
+    def __init__(self, pats):
         if type(pats) is not tuple and type(pats) is not list:
             pats = (pats, )
 
         self.seq = pats
         self.length = len(pats)
-        self.parent = parent
-        self.function = function
 
-    def set_function(self, function):
-        self.function = function
-
-    def set_parent(self, parent):
-        self.parent = parent
-
-    def check(self, instructions):
-        if self.parent is None:
-            if self.function is not None:
-                self.parent = self.function.find_parent_of(instructions[0])
-            else:
-                self._raise("self.parent or self.function must be provided")
+    def check(self, instruction, ctx):
+        parent = ctx["current_function_tree"].body.find_parent_of(instruction)
+        
 
         # There is can be no sequence unless its parent is a cblock instruction
-        if self.parent.op != idaapi.cit_cblock:
+        if parent is None or parent.op != idaapi.cit_block:
             return False
-    
+
+        container = parent.cinsn.cblock
+        start_from = container.index(instruction)
+
         for i in range(self.length):
-            if not self.seq[i].check(instructions[i]):
+            if not self.seq[i].check(container[start_from + i], ctx):
                 return False
         return True
 
@@ -96,9 +88,9 @@ class OrPat(AbstractPattern):
         self._assert(len(pats) > 1, "Passing one or less patterns to OrPat is useless")
         self.pats = tuple(pats)
     
-    def check(self, item):
+    def check(self, item, ctx):
         for p in self.pats:
-            if p.check(item):
+            if p.check(item, ctx):
                 return True
         
         return False
@@ -109,16 +101,28 @@ class OrPat(AbstractPattern):
 
 class SkipCasts(AbstractPattern):
     op = -1
+
     def __init__(self, pat):
         self.pat = pat
 
-    def check(self, item):
-        while item.x.op == idaapi.cot_cast:
+    def check(self, item, ctx):
+        while item.op == idaapi.cot_cast:
             item = item.x
         
-        return self.check.pat(item)
+        return self.pat.check(item, ctx)
 
     @property
     def children(self):
         return self.pat
         
+
+class BindExpr(AbstractPattern):
+    op = -1
+
+    def __init__(self, name, pat):
+        self.pat = pat
+        self.name = name
+    
+    def check(self, expr, ctx):
+        ctx[self.name] = expr
+        return self.pat.check(expr, ctx)
