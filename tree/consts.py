@@ -39,7 +39,7 @@ binary_expressions_ops = [
     idaapi.cot_ne, idaapi.cot_sge, idaapi.cot_uge, idaapi.cot_sle, idaapi.cot_ule, idaapi.cot_sgt,
     idaapi.cot_ugt, idaapi.cot_slt, idaapi.cot_ult, idaapi.cot_sshr, idaapi.cot_ushr, idaapi.cot_shl,
     idaapi.cot_add, idaapi.cot_sub, idaapi.cot_mul, idaapi.cot_sdiv, idaapi.cot_udiv, idaapi.cot_smod,
-    idaapi.cot_umod, idaapi.cot_fadd, idaapi.cot_fsub, idaapi.cot_fmul, idaapi.cot_fdiv
+    idaapi.cot_umod, idaapi.cot_fadd, idaapi.cot_fsub, idaapi.cot_fmul, idaapi.cot_fdiv, idaapi.cot_idx
 ]
 
 unary_expressions_ops = [
