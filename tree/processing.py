@@ -48,6 +48,7 @@ class TreeProcessor:
             idaapi.cit_expr: self._process_cexpr,
             idaapi.cit_empty: self.__stub,
             idaapi.cit_break: self.__stub,
+            idaapi.cit_continue: self.__stub,
             idaapi.cit_return: self._process_creturn,
             idaapi.cit_block: self._process_cblock,
             idaapi.cit_if: self._process_cif,
@@ -97,7 +98,7 @@ class TreeProcessor:
     @revert_check
     def process_tree(self) -> None:
         self.check_patterns(self.tree_root)
-        self._process_cblock(self.tree_root)
+        self.op2func[self.tree_root.op](self.tree_root)
 
     def __stub(*args, **kwargs) -> None:
         pass

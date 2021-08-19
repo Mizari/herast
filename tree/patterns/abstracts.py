@@ -1,10 +1,9 @@
 import idaapi
 
-# idaapi.require('tree.processing')
-# idaapi.require('tree.matcher')
+idaapi.require('tree.processing')
 
-# from tree.processing import TreeProcessor
-# from tree.matcher import Matcher
+from tree.processing import TreeProcessor
+
 # [TODO]: for some reason i've thought that not-recursive check of children may be useful, but forget how can i use it
 # [TODO]: so should think about it and also think about splitting AbstractPattern to BasePattern(for "real" patterns with `op` == cot_*|cit_*)
 # [TODO]: and BaseAbstractPattern(for abstract patterns, which doesn't have any `op` and performs checking in other way)
@@ -131,15 +130,42 @@ class BindExpr(AbstractPattern):
         ctx[self.name] = expr
         return self.pat.check(expr, ctx)
 
-# class DeepExpr(AbstractPattern):
-#     op = -1
+class BindVar(AbstractPattern):
+    op = -1
 
-#     def __init__(self, pat):
-#         self.pat = pat
+    def __init__(self, name, pat):
+        self.pat = pat
+        self.name = name
 
-#     def check(self, expr, ctx):
-        
-        
-#         m = Matcher()
-#         t = TreeProcessor(expr, m)
+    def check(self, expr, ctx):
 
+        return self.pat.check(expr, ctx)
+
+class DeepExpr(AbstractPattern):
+    op = -1
+
+    class FakeMatcher:
+        def __init__(self, pat, ctx):
+            self.pat = pat
+            self.ctx = ctx
+            self.found = False
+
+        def expressions_traversal_is_needed(self):
+            return True
+
+        def check_patterns(self, item):
+            if not self.found:
+                if self.pat.check(item, self.ctx):
+                    self.found = True
+
+            return False
+
+    def __init__(self, pat):
+        self.pat = pat
+
+    def check(self, expr, ctx):
+        m = DeepExpr.FakeMatcher(self.pat, ctx)
+        t = TreeProcessor(expr, m)
+        t.process_tree()
+
+        return m.found
