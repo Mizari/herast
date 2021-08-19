@@ -1,5 +1,10 @@
 import idaapi
 
+# idaapi.require('tree.processing')
+# idaapi.require('tree.matcher')
+
+# from tree.processing import TreeProcessor
+# from tree.matcher import Matcher
 # [TODO]: for some reason i've thought that not-recursive check of children may be useful, but forget how can i use it
 # [TODO]: so should think about it and also think about splitting AbstractPattern to BasePattern(for "real" patterns with `op` == cot_*|cit_*)
 # [TODO]: and BaseAbstractPattern(for abstract patterns, which doesn't have any `op` and performs checking in other way)
@@ -115,7 +120,6 @@ class SkipCasts(AbstractPattern):
     def children(self):
         return self.pat
         
-
 class BindExpr(AbstractPattern):
     op = -1
 
@@ -126,3 +130,16 @@ class BindExpr(AbstractPattern):
     def check(self, expr, ctx):
         ctx[self.name] = expr
         return self.pat.check(expr, ctx)
+
+# class DeepExpr(AbstractPattern):
+#     op = -1
+
+#     def __init__(self, pat):
+#         self.pat = pat
+
+#     def check(self, expr, ctx):
+        
+        
+#         m = Matcher()
+#         t = TreeProcessor(expr, m)
+
