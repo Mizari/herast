@@ -1,5 +1,12 @@
 # herast
 
+## TODO
+  - generating of patterns via selection pseudocode
+  - dynamic reloading of user-scripts
+  - simple form mb for reloader
+  - deepexpr
+  - support of all operations
+
 | Operation | Description | Done |
 |-----------|-------------|------|
 | cot_comma | `x, y` | |
@@ -71,16 +78,16 @@
 | cot_sizeof | `sizeof(x)` | |
 | cot_helper | `arbitrary name` | |
 | cot_type | `arbitrary type` | |
-| cit_empty | `instruction types start here` | |
-| cit_block | `block-statement: { ... }` | |
-| cit_expr | `expression-statement: expr;` | |
-| cit_if | `if-statement` | |
-| cit_for | `for-statement` | |
-| cit_while | `while-statement` | |
-| cit_do | `do-statement` | |
-| cit_switch | `switch-statement` | |
-| cit_break | `break-statement` | |
-| cit_continue | `continue-statement` | |
-| cit_return | `return-statement` | |
-| cit_goto | `goto-statement` | |
-| cit_asm | `asm-statement` | |
+| cit_empty | `instruction types start here` | Done|
+| cit_block | `block-statement: { ... }` |Done |
+| cit_expr | `expression-statement: expr;` |Done |
+| cit_if | `if-statement` | Done|
+| cit_for | `for-statement` | Done|
+| cit_while | `while-statement` |Done |
+| cit_do | `do-statement` |Done |
+| cit_switch | `switch-statement` | Done|
+| cit_break | `break-statement` | Done|
+| cit_continue | `continue-statement` | Done |
+| cit_return | `return-statement` | Done|
+| cit_goto | `goto-statement` | Done|
+| cit_asm | `asm-statement` | Done |
