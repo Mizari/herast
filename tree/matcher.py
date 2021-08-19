@@ -18,8 +18,9 @@ class Matcher:
         for p, h, c in self.patterns:
             try:
                 if p.check(item, c):
-                    if h is not None and h(item, c):
-                        return True
+                    if h is not None:
+                        return h(item, c)
+                        
             except Exception as e:
                 print('[!] Got an exception: %s' % e)
                 raise e
