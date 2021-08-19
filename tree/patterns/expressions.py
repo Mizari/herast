@@ -9,14 +9,14 @@ from tree.consts import binary_expressions_ops, unary_expressions_ops, op2str
 from tree.utils import resolve_name_address
 
 
-# [TODO]: Add check of arguments, atm it's just not checked at all
 class CallExprPat(AbstractPattern):
     op = idaapi.cot_call
 
-    def __init__(self, calling_function, *arguments, ignore_arguments=False):
+    def __init__(self, calling_function, *arguments, ignore_arguments=False, skip_missing=False):
         self.calling_function = calling_function
         self.arguments = arguments
         self.ignore_arguments = ignore_arguments
+        self.skip_missing = skip_missing
 
     @AbstractPattern.initial_check
     def check(self, expression, ctx) -> bool:
@@ -24,7 +24,7 @@ class CallExprPat(AbstractPattern):
             return False
 
         if not self.ignore_arguments:
-            if len(self.arguments) != len(expression.a):
+            if len(self.arguments) != len(expression.a) and not self.skip_missing:
                 return False
 
             return all((pat.check(arg, ctx) for pat, arg in zip(self.arguments, expression.a)))
