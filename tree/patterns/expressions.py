@@ -55,7 +55,7 @@ class ObjPat(AbstractPattern):
         if self.ea is None:
             return True
         
-        return self.ea == expression.obj_ea 
+        return self.ea == expression.obj_ea
                 
 
 class AbstractUnaryOpPattern(AbstractPattern):
