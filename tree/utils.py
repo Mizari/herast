@@ -48,36 +48,25 @@ def resolve_name_address(name):
     return idc.get_name_ea_simple(name)
 
 
-# [TODO]: remove instruction from ast completly by replacing parent-block with identical, but without unwanted instruction
 def remove_instruction_from_ast(unwanted_ins, parent):
     assert type(unwanted_ins) is idaapi.cinsn_t, "Removing item must be an instruction (cinsn_t)"
 
     block = None
     if type(parent) is idaapi.cinsn_t and parent.op == idaapi.cit_block:
-        block = parent
+        block = parent.cblock
 
     elif type(parent) is idaapi.cfuncptr_t or type(parent) is idaapi.cfunc_t:
         ins = parent.body.find_parent_of(unwanted_ins).cinsn
         assert type(ins) is idaapi.cinsn_t and ins.op == idaapi.cit_block, "block is not cinsn_t or op != idaapi.cit_block"
-        block = ins
+        block = ins.cblock
 
     else:
         raise TypeError("Parent must be cfuncptr_t or cblock_t")
 
     try:
-        new_block = idaapi.cblock_t()
-        for i in block.cblock:
-            if i == unwanted_ins:
-                continue
-            
-            new_block.push_back(i)
-        
-        new_insn = make_block_insn(new_block, block.ea)
-
-        # block.cleanup()
-        idaapi.qswap(block, new_insn)
+        block.remove(unwanted_ins)
     except Exception as e:
-        print(e)
+        print('Got an exception %s' % e)
 
 
 def make_cblock(instructions):
