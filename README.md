@@ -1,11 +1,11 @@
 # herast
 
 ## TODO
-  - generating of patterns via selection pseudocode
-  - dynamic reloading of user-scripts
-  - simple form mb for reloader
-  - deepexpr
-  - support of all operations
+  - [ ] generating of patterns via selection pseudocode
+  - [ ] dynamic reloading of user-scripts
+  - [ ] simple form mb for reloader
+  - [ ] deepexpr
+  - [ ] support of all operations
 
 | Operation | Description | Done |
 |-----------|-------------|------|
