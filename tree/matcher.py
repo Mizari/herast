@@ -13,37 +13,25 @@ class Matcher:
     def __init__(self, processed_function):
         self.function = processed_function
         self.patterns = list()
-        self.cache = list()
 
     def check_patterns(self, item):
         for p, h, c in self.patterns:
             try:
-                if p.check(item, c) is True:
-                    if h is not None:
-                        h(item, c)
+                if p.check(item, c):
+                    if h is not None and h(item, c):
+                        return True
             except Exception as e:
                 print('[!] Got an exception: %s' % e)
                 raise e
-
+        
+        return False
 
     def insert_pattern(self, pat, handler=None):
         ctx = dict()
-        ctx.update({"current_function_tree": self.function})
+        ctx.update({"current_function": self.function})
         self.patterns.append((pat, handler, ctx))
 
-    # def prepare_cache(self):
-    #     def traverse_pattern(pattern):
-    #         children = pattern.children
-    #         for c in children:
-    #             if isinstance(c, SeqPat):
-    #                 if c not in self.cache:
-    #                     self.cache.append(c)
-    #             traverse_pattern(c)
-        
-    #     for pattern in self.patterns:
-    #         traverse_pattern(pattern)
-
-    def has_deep_expressions(self):
+    def expressions_traversal_is_needed(self):
         for p, _, _ in self.patterns:
             if p.op >= 0 and p.op < idaapi.cit_empty or isinstance(p, BindExpr):
                 return True
