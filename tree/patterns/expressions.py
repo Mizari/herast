@@ -13,14 +13,23 @@ from tree.utils import resolve_name_address
 class CallExprPat(AbstractPattern):
     op = idaapi.cot_call
 
-    def __init__(self, calling_function, *arguments, skip_missing_args=True):
+    def __init__(self, calling_function, *arguments, ignore_arguments=False):
         self.calling_function = calling_function
         self.arguments = arguments
-        self.skip_missing_args = skip_missing_args
+        self.ignore_arguments = ignore_arguments
 
     @AbstractPattern.initial_check
     def check(self, expression, ctx) -> bool:
-        return self.calling_function.check(expression.x, ctx)
+        if not self.calling_function.check(expression.x, ctx):
+            return False
+
+        if not self.ignore_arguments:
+            if len(self.arguments) != len(expression.a):
+                return False
+
+            return all((pat.check(arg, ctx) for pat, arg in zip(self.arguments, expression.a)))
+
+        return True
 
     @property
     def children(self):
