@@ -12,8 +12,8 @@ from tree.processing import TreeProcessor
 from tree.matcher import Matcher
 
 idaapi.require('test_patterns.call_explore')
-# from test_patterns.call_explore import test_pattern, test_handler
-from test_patterns.collapse_exception_branch import test_pattern, test_handler
+from test_patterns.call_explore import test_pattern, test_handler
+# from test_patterns.collapse_exception_branch import test_pattern, test_handler
 
 # from graph.view import CFuncGraphViewer
 # from views.patterns_edit import PatternsManager
@@ -44,11 +44,11 @@ def herast_callback(*args):
                 m = Matcher(cfunc)
                 m.insert_pattern(test_pattern, test_handler)
 
-                tp = TreeProcessor(cfunc, m)
+                tp = TreeProcessor.from_cfunc(cfunc, m)
                 
                 traversal_start = time.time()
 
-                tp.process_function()
+                tp.process_tree()
 
                 traversal_end = time.time()
 
