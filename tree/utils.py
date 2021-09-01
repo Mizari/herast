@@ -1,7 +1,6 @@
 import idaapi
 import idc
 
-# [TODO]: resolving global objects to get their names or at least their addresses
 
 def _resolve_obj_address(obj):
     if obj.op != idaapi.cot_obj:
@@ -43,10 +42,9 @@ def get_obj_from_call_node(call_node):
         return node.x
 
     return None
-
-def resolve_name_address(name):
-    return idc.get_name_ea_simple(name)
-
+    
+def resolve_name_address(addr):
+    return idc.get_name_ea_simple(addr)
 
 def remove_instruction_from_ast(unwanted_ins, parent):
     assert type(unwanted_ins) is idaapi.cinsn_t, "Removing item must be an instruction (cinsn_t)"
