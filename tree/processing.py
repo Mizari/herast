@@ -34,12 +34,12 @@ def trace_method(method):
 
 class TreeProcessor:
 
-    def __init__(self, tree_root, matcher):
+    def __init__(self, tree_root, matcher, need_expression_traversal=False):
         self.tree_root = tree_root
         self.matcher = matcher
-        self.need_expression_traversal = matcher.expressions_traversal_is_needed()
+        self.need_expression_traversal = need_expression_traversal
         self.should_revisit_parent = False
-
+        
         debug_print('has_deep_expressions = %s' % self.need_expression_traversal)
 
         self.op2func = {i:self.__stub for i in range(100)}
@@ -71,11 +71,11 @@ class TreeProcessor:
         })
     
     @classmethod
-    def from_cfunc(cls, cfunc, matcher):
+    def from_cfunc(cls, cfunc, *args, **kwargs):
         assert isinstance(cfunc.body, idaapi.cinsn_t), "Function body is not cinsn_t"
         assert isinstance(cfunc.body.cblock, idaapi.cblock_t), "Function body must be a cblock_t"
 
-        return cls(cfunc.body, matcher)
+        return cls(cfunc.body, *args, **kwargs)
 
     def _assert(self, cond, msg=""):
         assert cond, "%s: %s" % (self.__class__.__name__, msg)
