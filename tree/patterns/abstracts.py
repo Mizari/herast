@@ -127,19 +127,27 @@ class BindExpr(AbstractPattern):
         self.name = name
     
     def check(self, expr, ctx):
-        ctx[self.name] = expr
-        return self.pat.check(expr, ctx)
+        if self.pat.check(expr, ctx):
+            ctx[self.name] = expr
+            return True
+        return False
 
-class BindVar(AbstractPattern):
+
+class VarBind(AbstractPattern):
     op = -1
 
-    def __init__(self, name, pat):
-        self.pat = pat
+    def __init__(self, name):
         self.name = name
 
     def check(self, expr, ctx):
+        if expr.op == idaapi.cot_var:
+            if ctx.get(self.name) is None:
+                # save var here
+                return True
+            else:
+                return ctx.get(self.name).idx == expr.v.idx
 
-        return self.pat.check(expr, ctx)
+        return False
 
 class DeepExpr(AbstractPattern):
     op = -1
@@ -149,9 +157,6 @@ class DeepExpr(AbstractPattern):
             self.pat = pat
             self.ctx = ctx
             self.found = False
-
-        def expressions_traversal_is_needed(self):
-            return True
 
         def check_patterns(self, item):
             if not self.found:
@@ -165,7 +170,7 @@ class DeepExpr(AbstractPattern):
 
     def check(self, expr, ctx):
         m = DeepExpr.FakeMatcher(self.pat, ctx)
-        t = TreeProcessor(expr, m)
+        t = TreeProcessor(expr, m, need_expression_traversal=True)
         t.process_tree()
 
         return m.found
