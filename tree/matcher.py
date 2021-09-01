@@ -20,7 +20,7 @@ class Matcher:
                 if p.check(item, c):
                     if h is not None:
                         return h(item, c)
-                        
+
             except Exception as e:
                 print('[!] Got an exception: %s' % e)
                 raise e
@@ -38,3 +38,15 @@ class Matcher:
                 return True
 
         return False
+
+
+# class SavedContext:
+#     def __init__(self, current_function):
+#         self.current_function = None
+
+#     def get_var(self, varname):
+#         return self.data.get(varname)
+
+#     def save_var(self, varname):
+#         self.data[varname] = 
+

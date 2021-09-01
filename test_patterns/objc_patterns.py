@@ -5,6 +5,6 @@ idaapi.require('tree.patterns.expressions')
 idaapi.require('tree.utils')
 
 from tree.patterns.abstracts import *
-from tree.patterns.expressions import CallExprPat, HelperExprPat
+from tree.patterns.expressions import CallExprPat, HelperExprPat, ObjPat
 
 obj_release_pattern = CallExprPat(ObjPat('_objc_release'))
