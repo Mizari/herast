@@ -113,7 +113,7 @@ class PatternStorage:
 
 
 
-class LoadedPattern:
+class ReadyPattern:
     def __init__(self, path, module, enabled=False):
         self.path = path
         self.filename = os.path.basename(path)
@@ -126,7 +126,3 @@ class LoadedPattern:
             return True
         else:
             return False
-
-
-class LoaderViewForm:
-    pass
