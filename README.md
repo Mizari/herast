@@ -1,5 +1,8 @@
 # herast
 
+Rewritten version of [@groke](https://github.com/grokeus)'s [HRAST](https://github.com/sibears/hrast)
+
+
 ## TODO
   - [ ] generating of patterns via selection pseudocode
   - [ ] dynamic reloading of user-scripts
