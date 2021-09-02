@@ -7,6 +7,7 @@ Rewritten version of [@groke](https://github.com/grokeus)'s [HRAST](https://gith
   - [ ] generating of patterns via selection pseudocode
   - [ ] dynamic reloading of user-scripts
   - [ ] simple form mb for reloader
+  - [ ] python syntax-highliting in form-view of patterns [example](https://wiki.python.org/moin/PyQt/Python%20syntax%20highlighting)
   - [x] deepexpr
   - [ ] var binding
   - [ ] ctx as custom object (save vars, expressions)
