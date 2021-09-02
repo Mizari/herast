@@ -12,7 +12,7 @@ Rewritten version of [@groke](https://github.com/grokeus)'s [HRAST](https://gith
   - [ ] ctx as custom object (save vars, expressions)
   - [ ] support of all operations
 
-| Operation | Description | Done |
+| Operation | Description | Progress |
 |-----------|-------------|------|
 | cot_comma | `x, y` |Done |
 | cot_asg | `x = y` |Done |
