@@ -1,12 +1,12 @@
-from PyQt5 import QtCore, QtWidgets
+from PyQt5 import QtCore, QtWidgets, QtGui
 
 import idaapi
 
 
 class ScriptManager(idaapi.PluginForm):
-    def __init__(self, patterns_model):
+    def __init__(self, patterns_storage_model):
         super(ScriptManager, self).__init__()
-        self.patterns_model = patterns_model
+        self.patterns_storage_model = patterns_storage_model
         self.parent = None
     
     def OnCreate(self, form):
@@ -18,7 +18,6 @@ class ScriptManager(idaapi.PluginForm):
             "QTableView {background-color: transparent; selection-background-color: #87bdd8;}"
             "QHeaderView::section {background-color: transparent; border: 0.5px solid;}"
             "QPushButton {width: 50px; height: 20px;}"
-            # "QPushButton::pressed {background-color: #ccccff}"
         )
         self.parent.resize(400, 600)
         self.parent.setWindowTitle('HeRAST Patterns View')
@@ -26,18 +25,19 @@ class ScriptManager(idaapi.PluginForm):
         btn_disable = QtWidgets.QPushButton("&Disable")
         btn_enable = QtWidgets.QPushButton("&Enable")
         btn_reload = QtWidgets.QPushButton("&Reload")
-        btn_reload_all = QtWidgets.QPushButton("&Reload All")
-        btn_disable_all = QtWidgets.QPushButton("&Disable All")
-        # btn_reload_all.setStyleSheet("QPushButton {width: 300px; height: 20px;}")
-        
+        btn_reload_all = QtWidgets.QPushButton("Reload All")
+        btn_disable_all = QtWidgets.QPushButton("Disable All")
+
+        btn_disable.setShortcut('d')
+        btn_enable.setShortcut('e')
+        btn_reload.setShortcut('r')
+        # btn_reload_all.setShortcut('???')
+        # btn_disable_all.setShortcut('???')
 
 
         patterns_list = QtWidgets.QListView()
-        patterns_list.setModel(self.patterns_model)
-        patterns_list.setMaximumWidth(patterns_list.size().width() / 3)
-
-        # pattern_description = QtWidgets.QListView()
-        # pattern_description.setModel(self.patterns_model)
+        patterns_list.setModel(self.patterns_storage_model)
+        patterns_list.setMaximumWidth(patterns_list.size().width() // 3)
 
         bottom_btns_grid_box = QtWidgets.QGridLayout()
         bottom_btns_grid_box.addWidget(btn_reload_all, 0, 0)
@@ -50,7 +50,6 @@ class ScriptManager(idaapi.PluginForm):
 
         pattern_text_area = QtWidgets.QTextEdit()
         pattern_text_area.setReadOnly(True)
-        # text_area.setFontPointSize(10)
         pattern_text_area.setText('''import idaapi
 
 idaapi.require('tree.context')
@@ -94,6 +93,7 @@ class Matcher:
 
         loading_log_area = QtWidgets.QTextEdit()
         loading_log_area.setReadOnly(True)
+        loading_log_area.setMaximumHeight(100)
         loading_log_area.setText("""IDAPython: Error while calling Python callback <OnCreate>:
 Traceback (most recent call last):
   File "D:/Share/git-stuff/herast/views/test_form.py", line 14, in OnCreate
@@ -102,19 +102,12 @@ Traceback (most recent call last):
     with open('./test_form.py', 'r') as f:
 FileNotFoundError: [Errno 2] No such file or directory: './test_form.py'""")
 
-        # [TODO]: do something with fucking height goddamnit, unless just limit maximum height of 150 (?) or something
-        loading_log_area.setStyleSheet("height: 50")
-
-        vertical_box = QtWidgets.QVBoxLayout()
-        vertical_box.setSpacing(0)
-
-        # inner_vertical_box = QtWidgets.QVBoxLayout()
         splitter = QtWidgets.QSplitter(QtCore.Qt.Vertical)
         splitter.addWidget(pattern_text_area)
         splitter.addWidget(loading_log_area)
 
-        # vertical_box.addWidget(pattern_text_area)
-        # vertical_box.addWidget(loading_log_area)
+        vertical_box = QtWidgets.QVBoxLayout()
+        vertical_box.setSpacing(0)
         vertical_box.addWidget(splitter)
         vertical_box.addLayout(top_btns_grid_box)
         vertical_box.addLayout(bottom_btns_grid_box)
@@ -122,8 +115,14 @@ FileNotFoundError: [Errno 2] No such file or directory: './test_form.py'""")
         horizontal_box = QtWidgets.QBoxLayout(QtWidgets.QBoxLayout.LeftToRight)
         horizontal_box.addWidget(patterns_list)
         horizontal_box.addLayout(vertical_box)
-        # horizontal_box.addWidget(pattern_description)
+
         
+        # [TODO]: after compliting part in module, don't forget to uncomment this lines
+        # btn_disable.clicked.connect(lambda: self.patterns_storage_model.disable_pattern(patterns_list.selectedIndexes()))
+        # btn_enable.clicked.connect(lambda: self.patterns_storage_model.enable_pattern(patterns_list.selectedIndexes()))
+        # btn_reload.clicked.connect(lambda: self.patterns_storage_model.reload_pattern(patterns_list.selectedIndexes()))
+        # btn_disable_all.clicked.connect(lambda: self.patterns_storage_model.disable_all_patterns())
+        # btn_reload_all.clicked.connect(lambda: self.patterns_storage_model.reload_all_patterns())
 
         self.parent.setLayout(horizontal_box)
 
@@ -148,40 +147,69 @@ class ShowScriptManager(idaapi.action_handler_t):
     def activate(self, ctx):
         tform = idaapi.find_widget("Script Manager")
         if tform:
-            tform.activate_widget(tform, true)
+            tform.activate_widget(tform, True)
         else:
-            ScriptManager(LoadedPatternsModel()).Show()
+            ScriptManager(PatternStorageModel()).Show()
 
     @property
     def name(self):
         return 'herast:' + type(self).__name__    
 
 
-class LoadedPatternsModel(QtCore.QAbstractListModel ):
+class PatternStorageModel(QtCore.QAbstractListModel):
     def __init__(self, *args):
-        super(LoadedPatternsModel, self).__init__(*args)
-        self.items = ['test1', 'test2', 'test3']
+        super(PatternStorageModel, self).__init__(*args)
+        self.ready_patterns = ['call_explore.py', 'collapse_exception_branch.bin', 'objc_patterns.txt', 'huuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuge_test.py']
     
     def rowCount(self, parent=QtCore.QModelIndex()):
-        return len(self.items)
+        return len(self.ready_patterns)
 
-    def data(self, index, role=QtCore.Qt.DisplayRole):
+    def data(self, index, role):
         if not index.isValid():
             return QtCore.QVariant()
 
-        if index.row() >= len(self.items):
+        if index.row() >= len(self.ready_patterns):
             return QtCore.QVariant()
 
+        item = self.ready_patterns[index.row()]
+
         if role == QtCore.Qt.DisplayRole:
-            return QtCore.QVariant(self.items[index.row()])
+            return QtCore.QVariant(item)
+
+        elif role == QtCore.Qt.BackgroundRole:
+            if item.endswith('py'):
+                return _color_with_opacity(QtCore.Qt.green)
+            elif item.endswith('txt'):
+                return _color_with_opacity(QtCore.Qt.red)
+            elif item.endswith('bin'):
+                return _color_with_opacity(QtCore.Qt.gray)
         else:
             return QtCore.QVariant()
 
-    # def setData(self, index, value, role):
-    #     return True
+    def disable_pattern(self, indices):
+        pass
+
+    def enable_pattern(self, indices):
+        pass
+        # for qindex in indices:
+            # self.ready_patterns[qindex.row()].
+
+    def reload_pattern(self, indices):
+        for qindex in indices:
+            self.ready_patterns[qindex.row()].reload()
+
+    def reload_all_patterns(self):
+        pass
+
+    def disable_all_patterns(self):
+        pass
+
+
+def _color_with_opacity(tone, opacity=160):
+    color = QtGui.QColor(tone)
+    color.setAlpha(opacity)
+    return color
+            
 
 action = ShowScriptManager()
 idaapi.register_action(idaapi.action_desc_t(action.name, action.description, action, action.hotkey))    
-
-# action = LoadedPatternsModel()
-# ShowScriptManager().activate(None)
