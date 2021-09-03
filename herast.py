@@ -67,7 +67,6 @@ def herast_callback(*args):
         cfunc, level = args[1], args[2]
         if level == idaapi.CMAT_FINAL:
             try:
-                print("CALLED!")
                 m = Matcher(cfunc)
 
                 global storage
@@ -83,7 +82,7 @@ def herast_callback(*args):
 
                 traversal_end = time.time()
 
-                print("[TIME] Traversal done within %f seconds" % (traversal_end - traversal_start))
+                print("[TIME] Tree traversal done within %f seconds" % (traversal_end - traversal_start))
 
                 # test purposes, show graph
                 # gv = CFuncGraphViewer("Huypizda")
