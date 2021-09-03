@@ -5,8 +5,9 @@ Rewritten for IDAPython3 (IDA_VERSION >= 7.4) version of [@groke](https://github
 
 ## TODO
   - [ ] generating of patterns via selection pseudocode
-  - [ ] dynamic reloading of user-scripts
-  - [ ] simple form mb for reloader
+  - [x] dynamic reloading of user-scripts
+  - [x] simple form mb for reloader
+  - [ ] make form for reloader useful :)
   - [ ] python syntax-highliting in form-view of patterns [example](https://wiki.python.org/moin/PyQt/Python%20syntax%20highlighting)
   - [x] deepexpr
   - [ ] var binding
