@@ -5,11 +5,11 @@ Rewritten for IDAPython3 (IDA_VERSION >= 7.4) version of [@groke](https://github
 
 ## TODO
   - [ ] generating of patterns via selection pseudocode
-  - [x] dynamic reloading of user-scripts
-  - [x] simple form mb for reloader
+  - [x] ~~dynamic reloading of user-scripts~~
+  - [x] ~~simple form mb for reloader~~
   - [ ] make form for reloader useful :)
   - [ ] python syntax-highliting in form-view of patterns [example](https://wiki.python.org/moin/PyQt/Python%20syntax%20highlighting)
-  - [x] deepexpr
+  - [x] ~~deepexpr~~
   - [ ] var binding
   - [ ] ctx as custom object (save vars, expressions)
   - [ ] support of all operations
