@@ -5,28 +5,26 @@ idaapi.require('tree.matcher')
 idaapi.require('tree.patterns.abstracts')
 idaapi.require('tree.patterns.instructions')
 idaapi.require('tree.patterns.expressions')
-idaapi.require('graph.view')
-idaapi.require('views.patterns_edit')
+# idaapi.require('graph.view')
 idaapi.require('loader')
+idaapi.require('views.patterns_manager_view')
+idaapi.require('tree.consts')
 
 from tree.processing import TreeProcessor
 from tree.matcher import Matcher
+from tree.consts import ReadyPatternState
 
+from views.patterns_manager_view import ShowScriptManager
 
-idaapi.require('test_patterns.call_explore')
-from test_patterns.call_explore import test_pattern, test_handler
+# idaapi.require('test_patterns.call_explore')
+# from test_patterns.call_explore import test_pattern, test_handler
 # from test_patterns.collapse_exception_branch import test_pattern, test_handler
 
 # from graph.view import CFuncGraphViewer
 # from views.patterns_edit import PatternsManager
 import time
 
-ldr = loader.Loader(HerastConfig.LOAD_DIRECTORY)
-
-class HerastConfig:
-
-    LOAD_DIRECTORY = 'test_patterns'
-
+storage = loader.PatternStorageModel("test_patterns")
 
 def unload_callback():
     try:
@@ -47,20 +45,20 @@ class UnloadCallbackAction(idaapi.action_handler_t):
     def update(self, ctx):
         return idaapi.AST_ENABLE_ALWAYS
 
-class ReloadScripts(idaapi.action_handler_t):
-    def __init__(self):
-        super(ReloadScripts, self).__init__()
-        self.name           = "ReloadScriptsAction"
-        self.description    = "Hot-reload of herast-scripts"
-        self.hotkey         = "Shift-R"
+# class ReloadScripts(idaapi.action_handler_t):
+#     def __init__(self):
+#         super(ReloadScripts, self).__init__()
+#         self.name           = "ReloadScriptsAction"
+#         self.description    = "Hot-reload of herast-scripts"
+#         self.hotkey         = "Shift-R"
     
-    def activate(self, ctx):
-        global ldr
-        ldr.reload()
-        print("Scripts of herast has been reloaded!")
+#     def activate(self, ctx):
+#         global ldr
+#         ldr.reload()
+#         print("Scripts of herast has been reloaded!")
 
-    def update(self, ctx):
-        return idaapi.AST_ENABLE_ALWAYS
+#     def update(self, ctx):
+#         return idaapi.AST_ENABLE_ALWAYS
 
 def herast_callback(*args):
     event = args[0]
@@ -69,20 +67,24 @@ def herast_callback(*args):
         cfunc, level = args[1], args[2]
         if level == idaapi.CMAT_FINAL:
             try:
-                pass
-                # print("CALLED!")
-                # m = Matcher(cfunc)
-                # m.insert_pattern(test_pattern, test_handler)
+                print("CALLED!")
+                m = Matcher(cfunc)
 
-                # tp = TreeProcessor.from_cfunc(cfunc, m, m.expressions_traversal_is_needed())
+                global storage
+                print(storage.ready_patterns)
+                for p in storage.ready_patterns:
+                    if p.state == ReadyPatternState.ENABLED:
+                        m.insert_pattern(p.module.pattern, p.module.handler)
+
+                tp = TreeProcessor.from_cfunc(cfunc, m, m.expressions_traversal_is_needed())
                 
-                # traversal_start = time.time()
+                traversal_start = time.time()
 
-                # tp.process_tree()
+                tp.process_tree()
 
-                # traversal_end = time.time()
+                traversal_end = time.time()
 
-                # print("[TIME] Traversal done within %f seconds" % (traversal_end - traversal_start))
+                print("[TIME] Traversal done within %f seconds" % (traversal_end - traversal_start))
 
                 # test purposes, show graph
                 # gv = CFuncGraphViewer("Huypizda")
@@ -92,6 +94,7 @@ def herast_callback(*args):
                 # pm = PatternsManager()
                 # pm.Show()
             except Exception as e:
+                print(e)
                 raise e
 
     return 0
@@ -108,14 +111,19 @@ def main():
     # dummy way to register action to unload hexrays-callback, thus it won't be triggered multiple times at once
     # 
     __register_action(UnloadCallbackAction())
-    __register_action(ReloadScripts())
+    # __register_action(ReloadScripts())
 
     if not idaapi.init_hexrays_plugin():
         print("Failed to initialize Hex-Rays SDK")
         return
 
+    global storage
+    action = ShowScriptManager(storage)
+    idaapi.register_action(idaapi.action_desc_t(action.name, action.description, action, action.hotkey))  
+
     print('Hooking for HexRays events')
     idaapi.install_hexrays_callback(herast_callback)
+
 
 
 if __name__ == '__main__':
