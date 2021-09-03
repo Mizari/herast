@@ -11,6 +11,8 @@ from tree.patterns.instructions import ExInsPat, IfInsPat, BlockPat
 
 from tree.utils import *
 
+test_pattern = AnyPat()
+
 test_pattern =  IfInsPat(
                     BindExpr('if_expr', AnyPat()),
                     BlockPat(
@@ -18,25 +20,25 @@ test_pattern =  IfInsPat(
                             ExInsPat(
                                 AsgExprPat(
                                     AnyPat(),
-                                    SkipCasts(CallExprPat(ObjPat(name='__cxa_allocate_exception')))
+                                    SkipCasts(CallExprPat(ObjPat(name='__cxa_allocate_exception'), ignore_arguments=True))
                             )),
                             ExInsPat(
-                                SkipCasts(CallExprPat(AnyPat()))
+                                SkipCasts(CallExprPat(AnyPat(), ignore_arguments=True))
                             ),
                             ExInsPat(
-                                SkipCasts(CallExprPat(ObjPat(name='__cxa_throw')))
+                                SkipCasts(CallExprPat(ObjPat(name='__cxa_throw'), ignore_arguments=True))
                             )
                         ])
                     )
                 )
 
 def test_handler(item, ctx):
-    print("%#x" % item.ea)
+    # print("%#x" % item.ea)
 
     tmp = ctx['if_expr']
     if_expr = idaapi.cexpr_t()
     if_expr.cleanup()
-    print(type(tmp), type(if_expr))
+    # print(type(tmp), type(if_expr))
     # tmp.swap(if_expr)
 
     if_expr = tmp
@@ -64,6 +66,4 @@ def test_handler(item, ctx):
 
     idaapi.qswap(item, insn)
 
-
-
-
+    return True
