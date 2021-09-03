@@ -11,9 +11,7 @@ from tree.patterns.instructions import ExInsPat, IfInsPat, BlockPat
 
 from tree.utils import *
 
-test_pattern = AnyPat()
-
-test_pattern =  IfInsPat(
+pattern = IfInsPat(
                     BindExpr('if_expr', AnyPat()),
                     BlockPat(
                         SeqPat([
@@ -32,7 +30,7 @@ test_pattern =  IfInsPat(
                     )
                 )
 
-def test_handler(item, ctx):
+def handler(item, ctx):
     # print("%#x" % item.ea)
 
     tmp = ctx['if_expr']
