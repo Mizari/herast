@@ -1,5 +1,4 @@
 import idaapi
-import enum
 
 # [NOTE]: Actual for 7.6
 op2str = {
@@ -114,7 +113,7 @@ class CMAT_LEVEL:
     FINAL   = 8
 
 
-class ReadyPatternState(enum.Enum):
+class ReadyPatternState:
     ENABLED = 1
     DISABLED = 2
     ERROR = 3
