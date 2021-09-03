@@ -71,7 +71,6 @@ def herast_callback(*args):
                 m = Matcher(cfunc)
 
                 global storage
-                print(storage.ready_patterns)
                 for p in storage.ready_patterns:
                     if p.state == ReadyPatternState.ENABLED:
                         m.insert_pattern(p.module.pattern, p.module.handler)

@@ -141,11 +141,14 @@ class PatternStorageModel(QtCore.QAbstractListModel):
                 del self.ready_patterns[qindex.row()]
                 # emit here that data was changed
 
+    def disable_all_patterns(self):
+        for p in self.ready_patterns:
+            if p.state == ReadyPatternState.ENABLED:
+                p.state = ReadyPatternState.DISABLED
+                # emit here that data was changed
+
 
     def reload_all_patterns(self):
-        pass
-
-    def disable_all_patterns(self):
         pass
 
 
@@ -201,6 +204,9 @@ class ReadyPattern:
                 self.module = None
                 self.state = ReadyPatternState.ERROR
                 self.log = traceback.format_exc()
+            
+            with open(self.path, 'r') as f:
+                self.source = f.read()
 
             return True
         else:
