@@ -81,8 +81,8 @@ class ScriptManager(idaapi.PluginForm):
         # [TODO]: after compliting part in module, don't forget to uncomment this lines
         btn_disable.clicked.connect(lambda: self.patterns_storage_model.disable_pattern(patterns_list.selectedIndexes()))
         btn_enable.clicked.connect(lambda: self.patterns_storage_model.enable_pattern(patterns_list.selectedIndexes()))
-        # btn_reload.clicked.connect(lambda: self.patterns_storage_model.reload_pattern(patterns_list.selectedIndexes()))
-        # btn_disable_all.clicked.connect(lambda: self.patterns_storage_model.disable_all_patterns())
+        btn_reload.clicked.connect(lambda: self.patterns_storage_model.reload_pattern(patterns_list.selectedIndexes()))
+        btn_disable_all.clicked.connect(lambda: self.patterns_storage_model.disable_all_patterns())
         # btn_reload_all.clicked.connect(lambda: self.patterns_storage_model.reload_all_patterns())
 
         self.parent.setLayout(horizontal_box)
