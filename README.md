@@ -83,7 +83,7 @@ Rewritten for IDAPython3 (IDA_VERSION >= 7.4) version of [@groke](https://github
 | cot_var | `v` | |
 | cot_insn | `instruction in expression, internal representation only` | |
 | cot_sizeof | `sizeof(x)` | |
-| cot_helper | `arbitrary name` | |
+| cot_helper | `arbitrary name` | Done |
 | cot_type | `arbitrary type` | |
 | cit_empty | `instruction types start here` | Done|
 | cit_block | `block-statement: { ... }` |Done |
