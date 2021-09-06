@@ -74,7 +74,7 @@ def make_cblock(instructions):
     
     return block
 
-def make_block_insn(instructions, address):
+def make_block_insn(instructions, address, label_num=-1):
     block = None
     if type(instructions) is idaapi.cblock_t:
         block = instructions
@@ -87,6 +87,7 @@ def make_block_insn(instructions, address):
     insn.ea = address
     insn.op = idaapi.cit_block
     insn.cblock = block
+    insn.label_num = label_num
     insn.thisown = False
 
     return insn    
