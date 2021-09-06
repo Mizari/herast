@@ -22,9 +22,9 @@ class ScriptManager(idaapi.PluginForm):
         self.parent.resize(400, 600)
         self.parent.setWindowTitle('HeRAST Patterns View')
 
-        btn_reload = QtWidgets.QPushButton("&Reload")
-        btn_enable = QtWidgets.QPushButton("&Enable")
-        btn_disable = QtWidgets.QPushButton("&Disable")
+        btn_reload = QtWidgets.QPushButton("Reload")
+        btn_enable = QtWidgets.QPushButton("Enable")
+        btn_disable = QtWidgets.QPushButton("Disable")
         btn_reload_all = QtWidgets.QPushButton("Reload All")
         btn_disable_all = QtWidgets.QPushButton("Disable All")
 
@@ -83,6 +83,8 @@ class ScriptManager(idaapi.PluginForm):
         btn_enable.clicked.connect(lambda: self.patterns_storage_model.enable_pattern(patterns_list.selectedIndexes()))
         btn_reload.clicked.connect(lambda: self.patterns_storage_model.reload_pattern(patterns_list.selectedIndexes()))
         btn_disable_all.clicked.connect(lambda: self.patterns_storage_model.disable_all_patterns())
+
+        btn_reload_all.setEnabled(False)
         # btn_reload_all.clicked.connect(lambda: self.patterns_storage_model.reload_all_patterns())
 
         self.parent.setLayout(horizontal_box)
