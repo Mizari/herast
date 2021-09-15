@@ -38,6 +38,7 @@ class ScriptManager(idaapi.PluginForm):
         patterns_list = QtWidgets.QListView()
         patterns_list.setModel(self.patterns_storage_model)
         patterns_list.setMaximumWidth(patterns_list.size().width() // 3)
+        patterns_list.setSelectionMode(QtWidgets.QAbstractItemView.SingleSelection)
 
 
         bottom_btns_grid_box = QtWidgets.QGridLayout()
@@ -49,23 +50,24 @@ class ScriptManager(idaapi.PluginForm):
         top_btns_grid_box.addWidget(btn_enable, 0, 1)
         top_btns_grid_box.addWidget(btn_reload, 0, 2)
 
-        pattern_text_area = PatternSourceView(self.patterns_storage_model)
+        pattern_text_area = PatternSourceView(patterns_list.model())
         pattern_text_area.setReadOnly(True)
-        # pattern_text_area.setPlainText()
         
-        loading_log_area = PatternLogView(self.patterns_storage_model)
+        loading_log_area = PatternLogView(patterns_list.model())
         loading_log_area.setReadOnly(True)
         loading_log_area.setMaximumHeight(100)
-        # loading_log_area.setPlainText()
 
         splitter = QtWidgets.QSplitter(QtCore.Qt.Vertical)
         splitter.addWidget(pattern_text_area)
         splitter.addWidget(loading_log_area)
 
 
-        patterns_list.selectionModel().currentChanged.connect(lambda cur, prev: pattern_text_area.change_source_data(cur, prev))
-        patterns_list.selectionModel().currentChanged.connect(lambda cur, prev: loading_log_area.change_log_data(cur, prev))
-        patterns_list.setCurrentIndex(self.patterns_storage_model.index(0))
+        patterns_list.selectionModel().currentChanged.connect(lambda cur, prev: pattern_text_area.switch_source_data(cur, prev))
+        patterns_list.selectionModel().currentChanged.connect(lambda cur, prev: loading_log_area.switch_log_data(cur, prev))
+        patterns_list.setCurrentIndex(patterns_list.model().index(0))
+
+        patterns_list.model().dataChanged.connect(lambda start, end: pattern_text_area.reload_source_data(start, end, patterns_list.selectedIndexes()))
+        patterns_list.model().dataChanged.connect(lambda start, end: loading_log_area.reload_log_data(start, end, patterns_list.selectedIndexes()))
 
         vertical_box = QtWidgets.QVBoxLayout()
         vertical_box.setSpacing(0)
@@ -79,13 +81,13 @@ class ScriptManager(idaapi.PluginForm):
 
         
         # [TODO]: after compliting part in module, don't forget to uncomment this lines
-        btn_disable.clicked.connect(lambda: self.patterns_storage_model.disable_pattern(patterns_list.selectedIndexes()))
-        btn_enable.clicked.connect(lambda: self.patterns_storage_model.enable_pattern(patterns_list.selectedIndexes()))
-        btn_reload.clicked.connect(lambda: self.patterns_storage_model.reload_pattern(patterns_list.selectedIndexes()))
-        btn_disable_all.clicked.connect(lambda: self.patterns_storage_model.disable_all_patterns())
+        btn_disable.clicked.connect(lambda: patterns_list.model().disable_pattern(patterns_list.selectedIndexes()))
+        btn_enable.clicked.connect(lambda: patterns_list.model().enable_pattern(patterns_list.selectedIndexes()))
+        btn_reload.clicked.connect(lambda: patterns_list.model().reload_pattern(patterns_list.selectedIndexes()))
+        btn_disable_all.clicked.connect(lambda: patterns_list.model().disable_all_patterns())
 
         btn_reload_all.setEnabled(False)
-        # btn_reload_all.clicked.connect(lambda: self.patterns_storage_model.reload_all_patterns())
+        # btn_reload_all.clicked.connect(lambda: patterns_list.model().reload_all_patterns())
 
         self.parent.setLayout(horizontal_box)
 
@@ -100,22 +102,40 @@ class PatternSourceView(QtWidgets.QTextEdit):
         self.storage = storage
         super(PatternSourceView, self).__init__(*args, **kwargs)
 
-    def change_source_data(self, current, previous):
+    def switch_source_data(self, current, previous):
         if current.row() < len(self.storage.ready_patterns):
             self.setPlainText(self.storage.ready_patterns[current.row()].source)
         else:
             self.setPlaintText('')
+
+    # [BUG]: as we can delete some of patterns (if files was changed on system), we can still point to valid index, but it would be wrong object
+    def reload_source_data(self, changed_start, changed_end, selected):
+        inside = lambda _start, _end, _val: _start <= _val <= _end
+
+        if changed_start.row() < len(self.storage.ready_patterns) and changed_end.row() < len(self.storage.ready_patterns) \
+                and changed_end.row() >= changed_start.row() and inside(changed_start.row(), changed_end.row(), selected[0].row()):
+            self.setPlainText(self.storage.ready_patterns[selected[0].row()].source)
+        
+            
 
 class PatternLogView(QtWidgets.QTextEdit):
     def __init__(self, storage, *args, **kwargs):
         self.storage = storage
         super(PatternLogView, self).__init__(*args, **kwargs)
 
-    def change_log_data(self, current, previous):
+    def switch_log_data(self, current, previous):
         if current.row() < len(self.storage.ready_patterns):
             self.setPlainText(self.storage.ready_patterns[current.row()].log)
         else:
             self.setPlaintText('')
+
+    # [BUG]: as we can delete some of patterns (if files was changed on system), we can still point to valid index, but it would be wrong object
+    def reload_log_data(self, changed_start, changed_end, selected):
+        inside = lambda _start, _end, _val: _start <= _val <= _end
+
+        if changed_start.row() < len(self.storage.ready_patterns) and changed_end.row() < len(self.storage.ready_patterns) \
+                and changed_end.row() >= changed_start.row() and inside(changed_start.row(), changed_end.row(), selected[0].row()):
+            self.setPlainText(self.storage.ready_patterns[selected[0].row()].log)
 
 
 class ShowScriptManager(idaapi.action_handler_t):

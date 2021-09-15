@@ -46,6 +46,10 @@ def _color_with_opacity(tone, opacity=160):
     color.setAlpha(opacity)
     return color
 
+def exports_assert(module):
+    assert hasattr(module, "pattern")
+    assert hasattr(module, "handler")
+
 def singleton(cls):
     instances = {}
     def getinstance(*args, **kwargs):
@@ -93,8 +97,8 @@ class PatternStorageModel(QtCore.QAbstractListModel):
         else:
             return QtCore.QVariant()
 
-    def dataChanged(self):
-        pass
+    # def dataChanged(self):
+    #     pass
 
     # Helper functions
     def _load_patterns(self):
@@ -110,12 +114,15 @@ class PatternStorageModel(QtCore.QAbstractListModel):
             if len(tmp) != stored_enabled_array:
                 print("[!] Missing some of patterns stored inside IDB, they was excluded.")
         
+        # self.dataChanged.emit()
+        
     def _cold_load_patterns(self):
         print("[*] No patterns were stored inside IDB, performing cold init.")
 
         for file_path in glob.glob(self.directory + '/*.py'):
             try:
                 m = load_module_from_file(file_path)
+                exports_assert(m)
                 state = ReadyPatternState.DISABLED
                 log = "Success!"
             except Exception as e:
@@ -127,26 +134,32 @@ class PatternStorageModel(QtCore.QAbstractListModel):
         
     def disable_pattern(self, indices):
         for qindex in indices:
-            if self.ready_patterns[qindex.row()].state != ReadyPatternState.ERROR:
-                self.ready_patterns[qindex.row()].state = ReadyPatternState.DISABLED
+            row = qindex.row()
+            if self.ready_patterns[row].state != ReadyPatternState.ERROR:
+                self.ready_patterns[row].state = ReadyPatternState.DISABLED
+                self.dataChanged.emit(qindex, qindex)
 
     def enable_pattern(self, indices):
         for qindex in indices:
-            if self.ready_patterns[qindex.row()].state != ReadyPatternState.ERROR:
-                self.ready_patterns[qindex.row()].state = ReadyPatternState.ENABLED
+            row = qindex.row()
+            if self.ready_patterns[row].state != ReadyPatternState.ERROR:
+                self.ready_patterns[row].state = ReadyPatternState.ENABLED
+                self.dataChanged.emit(qindex, qindex)
+            
 
     def reload_pattern(self, indices):
         for qindex in indices:
-            if not self.ready_patterns[qindex.row()].reload():
-                del self.ready_patterns[qindex.row()]
-                # emit here that data was changed
+            row = qindex.row()
+            if not self.ready_patterns[row].reload():
+                del self.ready_patterns[row]
+            self.dataChanged.emit(qindex, qindex)
+    
 
     def disable_all_patterns(self):
-        for p in self.ready_patterns:
+        for i, p in enumerate(self.ready_patterns):
             if p.state == ReadyPatternState.ENABLED:
                 p.state = ReadyPatternState.DISABLED
-                # emit here that data was changed
-
+                self.dataChanged.emit(self.index(i))
 
     def reload_all_patterns(self):
         pass
@@ -200,6 +213,7 @@ class ReadyPattern:
         if os.path.isfile(self.path):
             try:
                 self.module = load_module_from_file(self.path)
+                exports_assert(self.module)
             except Exception as e:
                 self.module = None
                 self.state = ReadyPatternState.ERROR
