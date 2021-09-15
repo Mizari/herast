@@ -108,11 +108,11 @@ class PatternStorageModel(QtCore.QAbstractListModel):
             self._cold_load_patterns()
 
         else:
-            available_files = list(glob.glob(self.directory + '/*.py'))
-            available_basenames = [os.path.basename(full_path) for full_path in available_files]
-            tmp = list(filter(lambda x: x in available_basenames, stored_enabled_array))
-            if len(tmp) != stored_enabled_array:
-                print("[!] Missing some of patterns stored inside IDB, they was excluded.")
+            available_basenames = [os.path.basename(full_path) for full_path in glob.glob(self.directory + '/*.py')]
+            presented_on_fs = [s for s in stored_enabled_array if s in available_basenames]
+            if len(presented_on_fs) != len(stored_enabled_array):
+                print("[!] Some of patterns stored inside IDB missing on fs, they will be excluded from database.")
+                save_long_str_to_idb(self.ARRAY_NAME, presented_on_fs)
         
         # self.dataChanged.emit()
         
@@ -206,7 +206,7 @@ class ReadyPattern:
 
         if os.path.isfile(self.path) and os.access(self.path, os.R_OK):
             with open(self.path, 'r') as f:
-                self.source = f.read()
+                self.source = f.read().encode('utf-8')
         
 
     def reload(self):
@@ -220,7 +220,7 @@ class ReadyPattern:
                 self.log = traceback.format_exc()
             
             with open(self.path, 'r') as f:
-                self.source = f.read()
+                self.source = f.read().encode('utf-8')
 
             return True
         else:
