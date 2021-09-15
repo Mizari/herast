@@ -206,7 +206,7 @@ class ReadyPattern:
 
         if os.path.isfile(self.path) and os.access(self.path, os.R_OK):
             with open(self.path, 'r') as f:
-                self.source = f.read().encode('utf-8')
+                self.source = f.read()
         
 
     def reload(self):
@@ -220,7 +220,7 @@ class ReadyPattern:
                 self.log = traceback.format_exc()
             
             with open(self.path, 'r') as f:
-                self.source = f.read().encode('utf-8')
+                self.source = f.read()
 
             return True
         else:
