@@ -61,17 +61,17 @@ Rewritten for IDAPython3 (IDA_VERSION >= 7.4) version of [@groke](https://github
 | cot_fsub | `x - y fp` | Done|
 | cot_fmul | `x * y fp` | Done|
 | cot_fdiv | `x / y fp` | Done|
-| cot_fneg | `-x fp` | |
-| cot_neg | `-x` | |
-| cot_cast | `(type)x` | |
-| cot_lnot | `!x` | |
-| cot_bnot | `~x` | |
-| cot_ptr | `*x, access size in 'ptrsize'` | |
-| cot_ref | `&x` | |
-| cot_postinc | `x++` | |
-| cot_postdec | `x–` | |
-| cot_preinc | `++x` | |
-| cot_predec | `–x` | |
+| cot_fneg | `-x fp` |Done |
+| cot_neg | `-x` |Done |
+| cot_cast | `(type)x` | Done|
+| cot_lnot | `!x` | Done|
+| cot_bnot | `~x` | Done|
+| cot_ptr | `*x, access size in 'ptrsize'` | Done|
+| cot_ref | `&x` |Done |
+| cot_postinc | `x++` | Done|
+| cot_postdec | `x–` | Done|
+| cot_preinc | `++x` | Done|
+| cot_predec | `–x` |Done |
 | cot_call | `x(...)` | Done|
 | cot_idx | `x[y]` | Done|
 | cot_memref | `x.m` | |
@@ -81,7 +81,7 @@ Rewritten for IDAPython3 (IDA_VERSION >= 7.4) version of [@groke](https://github
 | cot_str | `string constant` | |
 | cot_obj | `obj_ea` | Done|
 | cot_var | `v` | |
-| cot_insn | `instruction in expression, internal representation only` | |
+| cot_insn | `instruction in expression, internal representation only` |Done |
 | cot_sizeof | `sizeof(x)` | |
 | cot_helper | `arbitrary name` | Done |
 | cot_type | `arbitrary type` | |
@@ -92,7 +92,7 @@ Rewritten for IDAPython3 (IDA_VERSION >= 7.4) version of [@groke](https://github
 | cit_for | `for-statement` | Done|
 | cit_while | `while-statement` |Done |
 | cit_do | `do-statement` |Done |
-| cit_switch | `switch-statement` | Done|
+| cit_switch | `switch-statement` | |
 | cit_break | `break-statement` | Done|
 | cit_continue | `continue-statement` | Done |
 | cit_return | `return-statement` | Done|
