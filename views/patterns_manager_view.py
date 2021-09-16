@@ -25,13 +25,13 @@ class ScriptManager(idaapi.PluginForm):
         btn_reload = QtWidgets.QPushButton("Reload")
         btn_enable = QtWidgets.QPushButton("Enable")
         btn_disable = QtWidgets.QPushButton("Disable")
-        btn_reload_all = QtWidgets.QPushButton("Reload All")
+        btn_refresh_all = QtWidgets.QPushButton("Refresh all")
         btn_disable_all = QtWidgets.QPushButton("Disable All")
 
         btn_disable.setShortcut('d')
         btn_enable.setShortcut('e')
         btn_reload.setShortcut('r')
-        # btn_reload_all.setShortcut('???')
+        # btn_refresh.setShortcut('???')
         # btn_disable_all.setShortcut('???')
 
 
@@ -42,7 +42,7 @@ class ScriptManager(idaapi.PluginForm):
 
 
         bottom_btns_grid_box = QtWidgets.QGridLayout()
-        bottom_btns_grid_box.addWidget(btn_reload_all, 0, 0)
+        bottom_btns_grid_box.addWidget(btn_refresh_all, 0, 0)
         bottom_btns_grid_box.addWidget(btn_disable_all, 0, 1)
 
         top_btns_grid_box = QtWidgets.QGridLayout()
@@ -86,8 +86,7 @@ class ScriptManager(idaapi.PluginForm):
         btn_reload.clicked.connect(lambda: patterns_list.model().reload_pattern(patterns_list.selectedIndexes()))
         btn_disable_all.clicked.connect(lambda: patterns_list.model().disable_all_patterns())
 
-        btn_reload_all.setEnabled(False)
-        # btn_reload_all.clicked.connect(lambda: patterns_list.model().reload_all_patterns())
+        btn_refresh_all.clicked.connect(lambda: patterns_list.model().refresh_patterns())
 
         self.parent.setLayout(horizontal_box)
 
