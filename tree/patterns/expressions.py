@@ -65,7 +65,35 @@ class ObjPat(AbstractPattern):
             return True
         
         return self.ea == expression.obj_ea
-                
+
+
+class MemrefPat(AbstractPattern):
+    op = idaapi.cot_memref
+
+    def __init__(self, referenced_object, field):
+        self.referenced_object = referenced_object
+        self.field = field
+
+    # [NOTE]: field is actually just an int, but consider about creating a primitives for Integers, Strings and other literals
+    @AbstractPattern.initial_check
+    def check(self, expression, ctx) -> bool:
+        return self.referenced_object.check(expression.x, ctx) and \
+            self.field.check(expression.m, ctx)
+
+class MemptrPat(AbstractPattern):
+    op = idaapi.cot_memptr
+
+    def __init__(self, pointed_object, field):
+        self.pointed_object = pointed_object
+        self.field = field
+
+    # [TODO]: we can access ptrsize of memptr, it may be useful to check
+    # [NOTE]: field is actually just an int, but consider about creating a primitives for Integers, Strings and other literals
+    @AbstractPattern.initial_check
+    def check(self, expression, ctx) -> bool:
+        return self.pointed_object.check(expression.x, ctx) and \
+            self.field.check(expression.m, ctx)
+
 
 class AbstractUnaryOpPattern(AbstractPattern):
     op = None

@@ -44,7 +44,7 @@ binary_expressions_ops = [
 
 unary_expressions_ops = [
     idaapi.cot_fneg, idaapi.cot_neg, idaapi.cot_cast, idaapi.cot_lnot, idaapi.cot_bnot, idaapi.cot_ptr,
-     idaapi.cot_ref, idaapi.cot_postinc, idaapi.cot_postdec, idaapi.cot_preinc, idaapi.cot_predec
+     idaapi.cot_ref, idaapi.cot_postinc, idaapi.cot_postdec, idaapi.cot_preinc, idaapi.cot_predec, idaapi.sizeof
 ]
 
 # [NOTE]: Actual for 7.6
