@@ -10,7 +10,6 @@ import traceback
 import json
 
 idaapi.require('tree.consts')
-from tree.consts import ReadyPatternState
 
 from PyQt5 import QtCore, QtGui
 
@@ -20,6 +19,7 @@ def load_module_from_file(path):
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
     return module
+
 
 def save_long_str_to_idb(array_name, value):
     """ Overwrites old array completely in process """
@@ -33,6 +33,7 @@ def save_long_str_to_idb(array_name, value):
         r.append(s)
         idc.set_array_string(id, idx, s)
 
+
 def load_long_str_from_idb(array_name):
     id = idc.get_array_id(array_name)
     if id == -1:
@@ -41,14 +42,16 @@ def load_long_str_from_idb(array_name):
     result = [idc.get_array_element(idc.AR_STR, id, idx) for idx in range(max_idx + 1)]
     return b"".join(result).decode("utf-8")
 
+
 def _color_with_opacity(tone, opacity=160):
     color = QtGui.QColor(tone)
     color.setAlpha(opacity)
     return color
 
+
 def exports_assert(module):
-    assert hasattr(module, "pattern")
-    assert hasattr(module, "handler")
+    assert hasattr(module, "__exported")
+
 
 def singleton(cls):
     instances = {}
@@ -57,6 +60,7 @@ def singleton(cls):
             instances[cls] = cls(*args, **kwargs)
         return instances[cls]
     return getinstance
+
 
 @singleton
 class PatternStorageModel(QtCore.QAbstractListModel):
@@ -88,11 +92,11 @@ class PatternStorageModel(QtCore.QAbstractListModel):
             return QtCore.QVariant(pat.filename)
 
         elif role == QtCore.Qt.BackgroundRole:
-            if pat.state == ReadyPatternState.ENABLED:
-                return _color_with_opacity(QtCore.Qt.green)
-            elif pat.state == ReadyPatternState.ERROR:
+            if pat.error:
                 return _color_with_opacity(QtCore.Qt.red)
-            elif pat.state == ReadyPatternState.DISABLED:
+            elif pat.enabled:
+                return _color_with_opacity(QtCore.Qt.green)
+            else:
                 return _color_with_opacity(QtCore.Qt.gray)
         else:
             return QtCore.QVariant()
@@ -102,50 +106,50 @@ class PatternStorageModel(QtCore.QAbstractListModel):
 
     # Helper functions
     def _load_patterns(self):
-        stored_string = load_long_str_from_idb(self.ARRAY_NAME) or b'[]'
+        stored_string = load_long_str_from_idb(self.ARRAY_NAME) or '[]'
         stored_enabled_array = json.loads(stored_string)
-        if len(stored_enabled_array) == 0:
-            self._cold_load_patterns()
+        enabled_presented_on_fs = list()
 
-        else:
-            available_files = list(glob.glob(self.directory + '/*.py'))
-            available_basenames = [os.path.basename(full_path) for full_path in available_files]
-            tmp = list(filter(lambda x: x in available_basenames, stored_enabled_array))
-            if len(tmp) != stored_enabled_array:
-                print("[!] Missing some of patterns stored inside IDB, they was excluded.")
-        
-        # self.dataChanged.emit()
-        
-    def _cold_load_patterns(self):
-        print("[*] No patterns were stored inside IDB, performing cold init.")
-
-        for file_path in glob.glob(self.directory + '/*.py'):
-            try:
-                m = load_module_from_file(file_path)
-                exports_assert(m)
-                state = ReadyPatternState.DISABLED
-                log = "Success!"
-            except Exception as e:
+        for file_path in glob.iglob(self.directory + '/*.py'):
+            basename = os.path.basename(file_path)
+            if basename in stored_enabled_array:
+                enabled_presented_on_fs.append(basename)
+                try:
+                    m = load_module_from_file(file_path)
+                    exports_assert(m)
+                    enabled = True
+                    error = False
+                    log = "Enabled!"
+                except Exception as e:
+                    m = None
+                    enabled = False
+                    error = False
+                    log = traceback.format_exc()
+            else:
                 m = None
-                state = ReadyPatternState.ERROR
-                log = traceback.format_exc()
-            finally:
-                self.ready_patterns.append(ReadyPattern(file_path, m, state, log))
-        
+                enabled = False
+                error = False
+                log = "Disabled!"
+            
+            self.ready_patterns.append(ReadyPattern(file_path, m, enabled, error, log))
+
+        if len(stored_enabled_array) != 0 and len(enabled_presented_on_fs) != len(stored_enabled_array):
+                print("[!] Some of patterns stored inside IDB missing on fs, they will be excluded from IDB.")
+                save_long_str_to_idb(self.ARRAY_NAME, json.dumps(enabled_presented_on_fs))
+
     def disable_pattern(self, indices):
         for qindex in indices:
             row = qindex.row()
-            if self.ready_patterns[row].state != ReadyPatternState.ERROR:
-                self.ready_patterns[row].state = ReadyPatternState.DISABLED
-                self.dataChanged.emit(qindex, qindex)
+            self.ready_patterns[row].disable()
+            self.dataChanged.emit(qindex, qindex)
+        self.sync_idb_array()
 
     def enable_pattern(self, indices):
         for qindex in indices:
             row = qindex.row()
-            if self.ready_patterns[row].state != ReadyPatternState.ERROR:
-                self.ready_patterns[row].state = ReadyPatternState.ENABLED
-                self.dataChanged.emit(qindex, qindex)
-            
+            self.ready_patterns[row].enable()
+            self.dataChanged.emit(qindex, qindex)
+        self.sync_idb_array()
 
     def reload_pattern(self, indices):
         for qindex in indices:
@@ -153,70 +157,63 @@ class PatternStorageModel(QtCore.QAbstractListModel):
             if not self.ready_patterns[row].reload():
                 del self.ready_patterns[row]
             self.dataChanged.emit(qindex, qindex)
-    
+            self.sync_idb_array()
 
     def disable_all_patterns(self):
         for i, p in enumerate(self.ready_patterns):
-            if p.state == ReadyPatternState.ENABLED:
-                p.state = ReadyPatternState.DISABLED
-                self.dataChanged.emit(self.index(i))
+            p.disable()
+            qindex = self.index(i)
+            self.dataChanged.emit(qindex, qindex)
+        self.sync_idb_array()
 
-    def reload_all_patterns(self):
-        pass
+    def refresh_patterns(self):
+        self.ready_patterns = list()
+        self._load_patterns()
+        self.dataChanged.emit(self.index(0), self.index(len(self.ready_patterns)))
 
-
-class IDBStoring:
-    ARRAY_NAME = "$herast:PatternStorage"
-
-    def __init__(self):
-        self.__patterns = list()
-
-        self.__load()
-
-    def put(self, pattern_name):
-        self.__patterns.append(pattern_name)
-
-        self.__save()
-
-    def remove(self, pattern_name):
-        if pattern_name in self.__patterns:
-            idx = self.__patterns.index(pattern_name)
-            del self.__patterns[idx]
-
-        self.__save()
-
-    def __save(self):
-        if len(self.__patterns) > 0:
-            save_long_str_to_idb(self.ARRAY_NAME, json.dumps(self.__patterns))
-
-    def __load(self):
-        stored_string = load_long_str_from_idb(self.ARRAY_NAME)
-        if stored_string is not None:
-            self.__patterns = json.loads(stored_string)
+    def sync_idb_array(self):
+        new_array_to_store = [p.filename for p in self.ready_patterns if p.enabled]
+        save_long_str_to_idb(self.ARRAY_NAME, json.dumps(new_array_to_store))
 
 
 class ReadyPattern:
-    def __init__(self, path, module, state, log):
+    def __init__(self, path, module, enabled, error, log):
         self.path = path
         self.filename = os.path.basename(path)
         self.module = module
-        self.state = state
+        self.enabled = enabled
+        self.error = error
         self.log = log
         self.source = str()
 
         if os.path.isfile(self.path) and os.access(self.path, os.R_OK):
             with open(self.path, 'r') as f:
                 self.source = f.read()
-        
+    
+    def enable(self):
+        if not self.error:
+            self.log = "Enabled!"
+            if self.module is None:
+                # [TODO]: assert is ok as temporary, but we should handle properly if file was deleted before we enabled corresponding pattern
+                assert self.reload()
+            if not self.error:
+                self.enabled = True
+
+    def disable(self):
+        self.enabled = False
+        if not self.error:
+            self.log = "Disabled!"
 
     def reload(self):
-        if os.path.isfile(self.path):
+        if os.path.isfile(self.path) and os.access(self.path, os.R_OK):
             try:
+                del self.module
                 self.module = load_module_from_file(self.path)
                 exports_assert(self.module)
             except Exception as e:
                 self.module = None
-                self.state = ReadyPatternState.ERROR
+                self.error = True
+                self.enabled = False
                 self.log = traceback.format_exc()
             
             with open(self.path, 'r') as f:

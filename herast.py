@@ -5,26 +5,18 @@ idaapi.require('tree.matcher')
 idaapi.require('tree.patterns.abstracts')
 idaapi.require('tree.patterns.instructions')
 idaapi.require('tree.patterns.expressions')
-# idaapi.require('graph.view')
 idaapi.require('loader')
 idaapi.require('views.patterns_manager_view')
 idaapi.require('tree.consts')
 
 from tree.processing import TreeProcessor
 from tree.matcher import Matcher
-from tree.consts import ReadyPatternState
-
 from views.patterns_manager_view import ShowScriptManager
+from loader import PatternStorageModel
 
-# idaapi.require('test_patterns.call_explore')
-# from test_patterns.call_explore import test_pattern, test_handler
-# from test_patterns.collapse_exception_branch import test_pattern, test_handler
-
-# from graph.view import CFuncGraphViewer
-# from views.patterns_edit import PatternsManager
 import time
 
-storage = loader.PatternStorageModel("test_patterns")
+storage = PatternStorageModel()
 
 def unload_callback():
     try:
@@ -71,8 +63,9 @@ def herast_callback(*args):
 
                 global storage
                 for p in storage.ready_patterns:
-                    if p.state == ReadyPatternState.ENABLED:
-                        m.insert_pattern(p.module.pattern, p.module.handler)
+                    if p.enabled:
+                        for exported_pattern, exported_handler in p.module.__exported:
+                            m.insert_pattern(exported_pattern, exported_handler)
 
                 tp = TreeProcessor.from_cfunc(cfunc, m, m.expressions_traversal_is_needed())
                 
@@ -81,16 +74,7 @@ def herast_callback(*args):
                 tp.process_tree()
 
                 traversal_end = time.time()
-
                 print("[TIME] Tree traversal done within %f seconds" % (traversal_end - traversal_start))
-
-                # test purposes, show graph
-                # gv = CFuncGraphViewer("Huypizda")
-                # gv.Show()
-
-                # test purposes, show qt gui
-                # pm = PatternsManager()
-                # pm.Show()
             except Exception as e:
                 print(e)
                 raise e
