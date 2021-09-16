@@ -81,7 +81,7 @@ Rewritten for IDAPython3 (IDA_VERSION >= 7.4) version of [@groke](https://github
 | cot_str | `string constant` | |
 | cot_obj | `obj_ea` | Done|
 | cot_var | `v` | |
-| cot_insn | `instruction in expression, internal representation only` | |
+| cot_insn | `instruction in expression, internal representation only` |Done |
 | cot_sizeof | `sizeof(x)` | |
 | cot_helper | `arbitrary name` | Done |
 | cot_type | `arbitrary type` | |
