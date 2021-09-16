@@ -1,5 +1,7 @@
+from importlib.util import resolve_name
 import idaapi
 import idc
+import idautils
 
 
 def _resolve_obj_address(obj):
@@ -43,8 +45,15 @@ def get_obj_from_call_node(call_node):
 
     return None
     
-def resolve_name_address(addr):
-    return idc.get_name_ea_simple(addr)
+def resolve_name_address(name):
+    return idc.get_name_ea_simple(name)
+
+def resolve_addresses_by_prefix(prefix):
+    return [resolve_name_address(name) for name in idautils.Names() if name.startswith(prefix)]
+
+def resolve_addresses_by_suffix(suffix):
+    return [resolve_name_address(name) for name in idautils.Names() if name.startswith(suffix)]
+            
 
 def remove_instruction_from_ast(unwanted_ins, parent):
     assert type(unwanted_ins) is idaapi.cinsn_t, "Removing item must be an instruction (cinsn_t)"
