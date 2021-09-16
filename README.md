@@ -13,6 +13,7 @@ Rewritten for IDAPython3 (IDA_VERSION >= 7.4) version of [@groke](https://github
   - [ ] var binding
   - [ ] ctx as custom object (save vars, expressions)
   - [ ] support of all operations
+  - [ ] Make all of primitives as patterns (numbers, strings, etc.)
 
 | Operation | Description | Progress |
 |-----------|-------------|------|
