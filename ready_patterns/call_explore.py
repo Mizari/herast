@@ -14,6 +14,8 @@ from tree.utils import *
 # test_pattern = CallExprPat(AnyPat(), AnyPat())
 # test_pattern = ExInsPat(AnyPat())
 # test_pattern = ExInsPat(DeepExpr(CallExprPat(AnyPat(), ignore_arguments=True)))
+
+
 test_pattern = ExInsPat(CallExprPat(ObjPat(name='_objc_release'), ignore_arguments=True))
 
 def test_handler(item, ctx):
@@ -31,3 +33,7 @@ def test_handler(item, ctx):
 
     return False
 
+
+__exported = [
+        (test_pattern, test_handler)
+]

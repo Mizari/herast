@@ -65,3 +65,8 @@ def handler(item, ctx):
     idaapi.qswap(item, insn)
 
     return True
+
+
+__exported = [
+    (pattern, handler)
+]
