@@ -74,8 +74,8 @@ Rewritten for IDAPython3 (IDA_VERSION >= 7.4) version of [@groke](https://github
 | cot_predec | `–x` |Done |
 | cot_call | `x(...)` | Done|
 | cot_idx | `x[y]` | Done|
-| cot_memref | `x.m` | |
-| cot_memptr | `x->m, access size in 'ptrsize'` | |
+| cot_memref | `x.m` | Done|
+| cot_memptr | `x->m, access size in 'ptrsize'` | Done|
 | cot_num | `n` | |
 | cot_fnum | `fpc` | |
 | cot_str | `string constant` | |
