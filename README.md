@@ -92,7 +92,7 @@ Rewritten for IDAPython3 (IDA_VERSION >= 7.4) version of [@groke](https://github
 | cit_for | `for-statement` | Done|
 | cit_while | `while-statement` |Done |
 | cit_do | `do-statement` |Done |
-| cit_switch | `switch-statement` | Done|
+| cit_switch | `switch-statement` | |
 | cit_break | `break-statement` | Done|
 | cit_continue | `continue-statement` | Done |
 | cit_return | `return-statement` | Done|
