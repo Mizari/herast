@@ -210,6 +210,7 @@ class ReadyPattern:
                 del self.module
                 self.module = load_module_from_file(self.path)
                 exports_assert(self.module)
+                self.error = False
             except Exception as e:
                 self.module = None
                 self.error = True
