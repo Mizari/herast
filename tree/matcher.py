@@ -1,9 +1,7 @@
 import idaapi
 
-idaapi.require('tree.context')
 idaapi.require('tree.patterns.abstracts')
 
-from tree.context import Context
 from tree.patterns.abstracts import SeqPat, BindExpr
 
 # [TODO]: mb somehow it should have architecture when patterns can provide some more feedback to matcher, not only True/False
@@ -19,7 +17,7 @@ class Matcher:
             try:
                 if p.check(item, c) and h(item, c):
                     return True
-                      
+
             except Exception as e:
                 print('[!] Got an exception due checking and handling AST: %s' % e)
         
