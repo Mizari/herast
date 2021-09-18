@@ -67,7 +67,7 @@ def herast_callback(*args):
                         for exported_pattern, exported_handler in p.module.__exported:
                             m.insert_pattern(exported_pattern, exported_handler)
 
-                tp = TreeProcessor.from_cfunc(cfunc, m, m.expressions_traversal_is_needed())
+                tp = TreeProcessor.from_cfunc(cfunc, m, need_expression_traversal=False)
                 
                 traversal_start = time.time()
 

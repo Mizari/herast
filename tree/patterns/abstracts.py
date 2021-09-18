@@ -133,18 +133,19 @@ class BindExpr(AbstractPattern):
 
 
 class VarBind(AbstractPattern):
-    op = -1
+    op = idaapi.cot_var
 
     def __init__(self, name):
         self.name = name
 
+    @AbstractPattern.initial_check
     def check(self, expr, ctx):
         if expr.op == idaapi.cot_var:
-            if ctx.get_var(self.name) is None:
-                # save var here
-                return True
-            else:
+            if ctx.has_var(self.name):
                 return ctx.get_var(self.name).idx == expr.v.idx
+            else:
+                ctx.save_var(self.name, expr.v.idx)
+                return True
 
         return False
 

@@ -27,14 +27,6 @@ class Matcher:
         ctx = SavedContext(self.function)
         self.patterns.append((pat, handler, ctx))
 
-    def expressions_traversal_is_needed(self):
-        for p, _, _ in self.patterns:
-            if p.op >= 0 and p.op < idaapi.cit_empty or isinstance(p, BindExpr):
-                return True
-
-        return False
-
-
 class SavedContext:
     def __init__(self, current_function):
         self.current_function = current_function
@@ -44,8 +36,8 @@ class SavedContext:
     def get_var(self, name):
         return self.variables.get(name, None)
 
-    def save_var(self, name, variable):
-        self.variables[name] = variable
+    def save_var(self, name, local_variable_index):
+        self.variables[name] = SavedVariable(local_variable_index)
 
     def has_var(self, name):
         return self.variables.get(name, None) is not None
@@ -55,3 +47,8 @@ class SavedContext:
 
     def save_expr(self, name, expression):
         self.expressions[name] = expression
+
+
+class SavedVariable:
+    def __init__(self, idx):
+        self.idx = idx

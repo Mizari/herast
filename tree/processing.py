@@ -144,7 +144,8 @@ class TreeProcessor:
         creturn = cinsn.creturn
 
         self.check_patterns(creturn.expr)
-        self._process_cexpr(creturn.expr)
+        if self.need_expression_traversal:
+            self._process_cexpr(creturn.expr)
 
 
     @revert_check
@@ -154,7 +155,8 @@ class TreeProcessor:
         cif = cinsn.cif
 
         self.check_patterns(cif.expr)
-        self.op2func[cif.expr.op](cif.expr)
+        if self.need_expression_traversal:
+            self.op2func[cif.expr.op](cif.expr)
 
         self.check_patterns(cif.ithen)
         self.op2func[cif.ithen.op](cif.ithen)
@@ -172,15 +174,18 @@ class TreeProcessor:
         
         if cfor.init is not None:
             self.check_patterns(cfor.init)
-            self._process_cexpr(cfor.init)
+            if self.need_expression_traversal:
+                self._process_cexpr(cfor.init)
 
         if cfor.expr is not None:
             self.check_patterns(cfor.expr)
-            self._process_cexpr(cfor.expr)
+            if self.need_expression_traversal:
+                self._process_cexpr(cfor.expr)
 
         if cfor.step is not None:
             self.check_patterns(cfor.step)
-            self._process_cexpr(cfor.step)
+            if self.need_expression_traversal:
+                self._process_cexpr(cfor.step)
 
         if cfor.body is not None:
             self.check_patterns(cfor.body)
@@ -194,7 +199,8 @@ class TreeProcessor:
         cwhile = cinsn.cwhile
         
         self.check_patterns(cwhile.expr)
-        self._process_cexpr(cwhile.expr)
+        if self.need_expression_traversal:
+            self._process_cexpr(cwhile.expr)
 
         if cwhile.body is not None:
             self.check_patterns(cwhile.body)
@@ -208,7 +214,8 @@ class TreeProcessor:
         cdo = cinsn.cdo
 
         self.check_patterns(cinsn)
-        self._process_cexpr(cdo.expr)
+        if self.need_expression_traversal:
+            self._process_cexpr(cdo.expr)
 
         if cdo.body is not None:
             self.check_patterns(cdo.body)
@@ -223,7 +230,8 @@ class TreeProcessor:
         cswitch = cinsn.cswitch
         
         self.check_patterns(cswitch.expr)
-        self._process_cexpr(cswitch.expr)
+        if self.need_expression_traversal:
+            self._process_cexpr(cswitch.expr)
         
         for c in cswitch.cases:
             self.check_patterns(c)
