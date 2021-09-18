@@ -24,8 +24,7 @@ class Matcher:
         return False
 
     def insert_pattern(self, pat, handler):
-        ctx = dict()
-        ctx.update({"current_function": self.function})
+        ctx = SavedContext(self.function)
         self.patterns.append((pat, handler, ctx))
 
     def expressions_traversal_is_needed(self):
@@ -36,13 +35,23 @@ class Matcher:
         return False
 
 
-# class SavedContext:
-#     def __init__(self, current_function):
-#         self.current_function = None
+class SavedContext:
+    def __init__(self, current_function):
+        self.current_function = current_function
+        self.expressions = dict()
+        self.variables = dict()
 
-#     def get_var(self, varname):
-#         return self.data.get(varname)
+    def get_var(self, name):
+        return self.variables.get(name, None)
 
-#     def save_var(self, varname):
-#         self.data[varname] = 
+    def save_var(self, name, variable):
+        self.variables[name] = variable
 
+    def has_var(self, name):
+        return self.variables.get(name, None) is not None
+
+    def get_expr(self, name):
+        return self.expressions.get(name, None)
+
+    def save_expr(self, name, expression):
+        self.expressions[name] = expression

@@ -33,7 +33,7 @@ pattern = IfInsPat(
 def handler(item, ctx):
     # print("%#x" % item.ea)
 
-    tmp = ctx['if_expr']
+    tmp = ctx.get_expr('if_expr')
     if_expr = idaapi.cexpr_t()
     if_expr.cleanup()
     # print(type(tmp), type(if_expr))

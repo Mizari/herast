@@ -24,7 +24,7 @@ def test_handler(item, ctx):
         # calling_func_addr, calling_func_name = resolve_calling_function_from_node(item)
         # print("[FOUND]: %#x -> %s" % (item.ea, calling_func_name))
         print("[FOUND]: %#x" % item.ea)
-        remove_instruction_from_ast(item, ctx['current_function'])
+        remove_instruction_from_ast(item, ctx.current_function)
 
         return True
         # print('[FOUND]: %#x' % item.ea)

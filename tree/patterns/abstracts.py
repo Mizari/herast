@@ -66,8 +66,7 @@ class SeqPat(AbstractPattern):
         self.length = len(pats)
 
     def check(self, instruction, ctx):
-        parent = ctx["current_function"].body.find_parent_of(instruction)
-        
+        parent = ctx.current_function.body.find_parent_of(instruction)
 
         # There is can be no sequence unless its parent is a cblock instruction
         if parent is None or parent.op != idaapi.cit_block:
@@ -128,7 +127,7 @@ class BindExpr(AbstractPattern):
     
     def check(self, expr, ctx):
         if self.pat.check(expr, ctx):
-            ctx[self.name] = expr
+            ctx.save_expr(self.name, expr)
             return True
         return False
 
@@ -141,13 +140,14 @@ class VarBind(AbstractPattern):
 
     def check(self, expr, ctx):
         if expr.op == idaapi.cot_var:
-            if ctx.get(self.name) is None:
+            if ctx.get_var(self.name) is None:
                 # save var here
                 return True
             else:
-                return ctx.get(self.name).idx == expr.v.idx
+                return ctx.get_var(self.name).idx == expr.v.idx
 
         return False
+
 
 class DeepExpr(AbstractPattern):
     op = -1

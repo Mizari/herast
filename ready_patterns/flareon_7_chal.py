@@ -39,16 +39,16 @@ def handler(item, ctx):
 
         p32 = lambda x: struct.pack("<I", x)
         ns =[]
-        ns.append(ctx['num0'].n._value)
-        ns.append(ctx['num1'].n._value)
-        ns.append(ctx['num2'].n._value)
-        ns.append(ctx['num3'].n._value)
-        # ns.append(ctx['num4'].n._value)
-        # ns.append(ctx['num5'].n._value)
-        # ns.append(ctx['num6'].n._value)
-        # ns.append(ctx['num7'].n._value)
-        xor = ctx['xor'].y.n._value
-        # gobj = ctx['gobj'].obj_ea
+        ns.append(ctx.get_expr('num0').n._value)
+        ns.append(ctx.get_expr('num1').n._value)
+        ns.append(ctx.get_expr('num2').n._value)
+        ns.append(ctx.get_expr('num3').n._value)
+        # ns.append(ctx.get_expr('num4').n._value)
+        # ns.append(ctx.get_expr('num5').n._value)
+        # ns.append(ctx.get_expr('num6').n._value)
+        # ns.append(ctx.get_expr('num7').n._value)
+        xor = ctx.get_expr('xor').y.n._value
+        # gobj = ctx.get_expr('gobj').obj_ea
 
         print(b''.join([p32(i ^ xor) for i in ns]))
         # print('%#x' % gobj)

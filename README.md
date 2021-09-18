@@ -11,7 +11,7 @@ Rewritten for IDAPython3 (IDA_VERSION >= 7.4) version of [@groke](https://github
   - [ ] python syntax-highliting in form-view of patterns [example](https://wiki.python.org/moin/PyQt/Python%20syntax%20highlighting)
   - [x] ~~deepexpr~~
   - [ ] var binding
-  - [ ] ctx as custom object (save vars, expressions)
+  - [x] ~~ctx as custom object (save vars, expressions)~~
   - [ ] support of all operations
   - [ ] Make all of primitives as patterns (numbers, strings, etc.)
 
