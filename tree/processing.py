@@ -23,10 +23,11 @@ def debug_print(*args, **kwargs):
 def trace_method(method):
     @functools.wraps(method)
     def method_wrapper(*args, **kwargs):
+        self = args[0]
         insn = args[1]
-        debug_print('%s   CALL: %s(%#x)' % (method.__name__, insn, insn.ea), message='TRACE')
+        debug_print('%s   CALL: %s(%#x)' % (method.__name__, insn, insn.ea), message='TRACE_%d' % id(self))
         result = method(*args, **kwargs)
-        debug_print('%s RETURN: %s' % (method.__name__, result), message='TRACE')
+        debug_print('%s RETURN: %s' % (method.__name__, result), message='TRACE_%d' % id(self))
 
         return result
     return method_wrapper
@@ -89,6 +90,7 @@ class TreeProcessor:
                 else:
                     func(self, *args, **kwargs)
                     while self.should_revisit_parent:
+                        0/0
                         self.should_revisit_parent = False
                         func(self, *args, **kwargs)
 
@@ -112,7 +114,6 @@ class TreeProcessor:
     def _process_cblock(self, cinsn) -> None:
         # [NOTE] cblock is just an array of cinsn_t (qlist<cinsn_t>)
         cblock = cinsn.cblock
-        self.check_patterns(cinsn)
         # [TODO]: make traversal with adjustments like reverting to parent (or mb root) node to reanalyze subtree
         try:
             for ins in cblock:
@@ -131,9 +132,9 @@ class TreeProcessor:
         # This is kinda tricky, cuz sometimes we calling process_cexpr with cinsn_t and sometimes with cexpr_t
         # but as cexpr_t also has cexpr member, so it works
         cexpr = cinsn.cexpr
-        self.check_patterns(cexpr)
 
         if self.need_expression_traversal:
+            self.check_patterns(cexpr)
             self.op2func[cexpr.op](cexpr)
 
 
@@ -143,9 +144,9 @@ class TreeProcessor:
         # [NOTE] as i understand, creturn just a cexpr_t nested inside of creturn_t
         creturn = cinsn.creturn
 
-        self.check_patterns(creturn.expr)
         if self.need_expression_traversal:
-            self._process_cexpr(creturn.expr)
+            self.check_patterns(creturn.expr)
+            self.op2func[creturn.expr.op](creturn.expr)
 
 
     @revert_check
@@ -154,8 +155,8 @@ class TreeProcessor:
         # [NOTE] cif has ithen<cinsn_t>, ielse<cinsn_t> and expr<cexpr_t>
         cif = cinsn.cif
 
-        self.check_patterns(cif.expr)
         if self.need_expression_traversal:
+            self.check_patterns(cif.expr)
             self.op2func[cif.expr.op](cif.expr)
 
         self.check_patterns(cif.ithen)
@@ -173,19 +174,19 @@ class TreeProcessor:
         cfor = cinsn.cfor
         
         if cfor.init is not None:
-            self.check_patterns(cfor.init)
             if self.need_expression_traversal:
-                self._process_cexpr(cfor.init)
+                self.check_patterns(cfor.init)
+                self.op2func[cfor.init.op](cfor.init)
 
         if cfor.expr is not None:
-            self.check_patterns(cfor.expr)
             if self.need_expression_traversal:
-                self._process_cexpr(cfor.expr)
+                self.check_patterns(cfor.expr)
+                self.op2func[cfor.expr.op](cfor.expr)
 
         if cfor.step is not None:
-            self.check_patterns(cfor.step)
             if self.need_expression_traversal:
-                self._process_cexpr(cfor.step)
+                self.check_patterns(cfor.step)
+                self.op2func[cfor.step.op](cfor.step)
 
         if cfor.body is not None:
             self.check_patterns(cfor.body)
@@ -198,9 +199,9 @@ class TreeProcessor:
         # [NOTE]: cwhile has body<cinsn_t>(inherited from cloop_t), expr<cexpr_t>
         cwhile = cinsn.cwhile
         
-        self.check_patterns(cwhile.expr)
         if self.need_expression_traversal:
-            self._process_cexpr(cwhile.expr)
+            self.check_patterns(cwhile.expr)
+            self.op2func[cwhile.expr.op](cwhile.expr)
 
         if cwhile.body is not None:
             self.check_patterns(cwhile.body)
@@ -213,9 +214,9 @@ class TreeProcessor:
         # [NOTE]: cdo has body<cinsn_t>(inherited from cloop_t), expr<cexpr_t>
         cdo = cinsn.cdo
 
-        self.check_patterns(cinsn)
         if self.need_expression_traversal:
-            self._process_cexpr(cdo.expr)
+            self.check_patterns(cinsn)
+            self.op2func[cdo.expr.op](cdo.expr)
 
         if cdo.body is not None:
             self.check_patterns(cdo.body)
@@ -229,9 +230,9 @@ class TreeProcessor:
         # [NOTE]: ccase_t is just a cinsn_t which also has values<uint64vec_t>
         cswitch = cinsn.cswitch
         
-        self.check_patterns(cswitch.expr)
         if self.need_expression_traversal:
-            self._process_cexpr(cswitch.expr)
+            self.check_patterns(cswitch.expr)
+            self.op2func[cswitch.expr.op](cswitch.expr)
         
         for c in cswitch.cases:
             self.check_patterns(c)
@@ -272,12 +273,15 @@ class TreeProcessor:
     @revert_check
     @trace_method
     def _process_call_expr(self, expr) -> None:
-        # [TODO]: processing of call arguments goes here
+        calling_expr = expr.x
         args = expr.a
+
+        self.check_patterns(calling_expr)
+        self.op2func[calling_expr.op](calling_expr)
 
         for arg in args:
             self.check_patterns(arg)
             if self.should_revisit_parent:
                 break
 
-            self.op2func[arg.op](arg)   
+            self.op2func[arg.op](arg)

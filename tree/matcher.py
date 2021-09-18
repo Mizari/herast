@@ -2,7 +2,7 @@ import idaapi
 
 idaapi.require('tree.patterns.abstracts')
 
-from tree.patterns.abstracts import SeqPat, BindExpr
+from tree.patterns.abstracts import SeqPat, BindExpr, VarBind
 
 # [TODO]: mb somehow it should have architecture when patterns can provide some more feedback to matcher, not only True/False
 # it can be useful to not traverse every expresion for every pattern-chain, and do it only with a particular-ones
@@ -15,9 +15,10 @@ class Matcher:
     def check_patterns(self, item) -> bool:
         for p, h, c in self.patterns:
             try:
+                c.cleanup()
                 if p.check(item, c) and h(item, c):
                     return True
-
+                    
             except Exception as e:
                 print('[!] Got an exception due checking and handling AST: %s' % e)
         
@@ -26,6 +27,13 @@ class Matcher:
     def insert_pattern(self, pat, handler):
         ctx = SavedContext(self.function)
         self.patterns.append((pat, handler, ctx))
+
+    def expressions_traversal_is_needed(self):
+        for p, _, _ in self.patterns:
+            if p.op >= 0 and p.op < idaapi.cit_empty or isinstance(p, BindExpr, VarBind):
+                return True
+
+        return False
 
 class SavedContext:
     def __init__(self, current_function):
@@ -48,6 +56,9 @@ class SavedContext:
     def save_expr(self, name, expression):
         self.expressions[name] = expression
 
+    def cleanup(self):
+        self.variables.clear()
+        self.expressions.clear()
 
 class SavedVariable:
     def __init__(self, idx):

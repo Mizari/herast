@@ -153,25 +153,46 @@ class VarBind(AbstractPattern):
 class DeepExpr(AbstractPattern):
     op = -1
 
-    class FakeMatcher:
-        def __init__(self, pat, ctx):
-            self.pat = pat
-            self.ctx = ctx
-            self.found = False
-
-        def check_patterns(self, item):
-            if not self.found:
-                if self.pat.check(item, self.ctx):
-                    self.found = True
-
-            return False
-
     def __init__(self, pat):
         self.pat = pat
 
     def check(self, expr, ctx):
-        m = DeepExpr.FakeMatcher(self.pat, ctx)
+        m = FakeMatcher(self.pat, ctx)
         t = TreeProcessor(expr, m, need_expression_traversal=True)
         t.process_tree()
 
         return m.found
+
+
+class FakeMatcher:
+    def __init__(self, pat, ctx):
+        self.pat = pat
+        self.ctx = ctx
+        self.found = False
+
+    def check_patterns(self, item):
+        if not self.found:
+            if self.pat.check(item, self.ctx):
+                self.found = True
+
+        return False
+
+
+import traceback, tree.consts
+# For debug purposes
+class DebugPattern(AbstractPattern):
+    op = -1
+    call_depth = 6
+
+    def __init__(self, return_value=False):
+        self.return_value = return_value
+
+    def check(self, item, ctx):
+        print('Debug calltrace, address of item: %#x (%s)' % (item.ea, tree.consts.op2str[item.op]))
+        print('---------------------------------')
+        for i in traceback.format_stack()[:self.call_depth]:
+            print(i)
+        print('---------------------------------')
+
+        return self.return_value
+        
