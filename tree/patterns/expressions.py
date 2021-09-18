@@ -50,6 +50,7 @@ class HelperExprPat(AbstractPattern):
     def children(self):
         return ()
 
+
 class ObjPat(AbstractPattern):
     op = idaapi.cot_obj
 
@@ -67,20 +68,21 @@ class ObjPat(AbstractPattern):
         return self.ea == expression.obj_ea
 
 
-class MemrefPat(AbstractPattern):
+class MemrefExprPat(AbstractPattern):
     op = idaapi.cot_memref
 
     def __init__(self, referenced_object, field):
         self.referenced_object = referenced_object
         self.field = field
 
-    # [NOTE]: field is actually just an int, but consider about creating a primitives for Integers, Strings and other literals
+    # [TODO]: field is actually just an int, but consider about creating a primitives for Integers, Strings and other literals
     @AbstractPattern.initial_check
     def check(self, expression, ctx) -> bool:
         return self.referenced_object.check(expression.x, ctx) and \
             self.field.check(expression.m, ctx)
 
-class MemptrPat(AbstractPattern):
+
+class MemptrExprPat(AbstractPattern):
     op = idaapi.cot_memptr
 
     def __init__(self, pointed_object, field):
@@ -93,6 +95,32 @@ class MemptrPat(AbstractPattern):
     def check(self, expression, ctx) -> bool:
         return self.pointed_object.check(expression.x, ctx) and \
             self.field.check(expression.m, ctx)
+
+
+class TernaryExprPat(AbstractPattern):
+    op = idaapi.cot_tern
+
+    def __init__(self, condition, positive_expression, negative_expression):
+        self.condition = condition
+        self.positive_expression = positive_expression
+        self.negative_expression = negative_expression
+        
+    @AbstractPattern.initial_check
+    def check(self, expression, ctx):
+        return self.condition.check(expression.x, ctx) and \
+            self.positive_expression.check(expression.y, ctx) and \
+            self.negative_expression.check(expression.z, ctx)
+
+
+class VarExprPat(AbstractPattern):
+    op = idaapi.cot_var
+
+    def __init__(self):
+        pass
+
+    @AbstractPattern.initial_check
+    def check(self, expression, ctx) -> bool:
+        return True
 
 
 class AbstractUnaryOpPattern(AbstractPattern):
