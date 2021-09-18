@@ -14,20 +14,18 @@ class Matcher:
         self.function = processed_function
         self.patterns = list()
 
-    def check_patterns(self, item):
+    def check_patterns(self, item) -> bool:
         for p, h, c in self.patterns:
             try:
-                if p.check(item, c):
-                    if h is not None:
-                        return h(item, c)
-
+                if p.check(item, c) and h(item, c):
+                    return True
+                      
             except Exception as e:
-                print('[!] Got an exception: %s' % e)
-                raise e
+                print('[!] Got an exception due checking and handling AST: %s' % e)
         
         return False
 
-    def insert_pattern(self, pat, handler=None):
+    def insert_pattern(self, pat, handler):
         ctx = dict()
         ctx.update({"current_function": self.function})
         self.patterns.append((pat, handler, ctx))
