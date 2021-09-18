@@ -90,7 +90,6 @@ class TreeProcessor:
                 else:
                     func(self, *args, **kwargs)
                     while self.should_revisit_parent:
-                        0/0
                         self.should_revisit_parent = False
                         func(self, *args, **kwargs)
 
