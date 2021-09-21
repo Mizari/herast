@@ -4,7 +4,7 @@ Rewritten for IDAPython3 (IDA_VERSION >= 7.4) version of [@groke](https://github
 
 
 ## TODO
-  - [ ] generating of patterns via selection pseudocode
+  - [ ] patterns generation from pseudocode selection
   - [x] ~~dynamic reloading of user-scripts~~
   - [x] ~~simple form mb for reloader~~
   - [ ] make form for reloader useful :)
