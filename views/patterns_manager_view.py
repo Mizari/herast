@@ -22,9 +22,9 @@ class ScriptManager(idaapi.PluginForm):
         self.parent.resize(400, 600)
         self.parent.setWindowTitle('HeRAST Patterns View')
 
-        btn_reload = QtWidgets.QPushButton("Reload")
-        btn_enable = QtWidgets.QPushButton("Enable")
-        btn_disable = QtWidgets.QPushButton("Disable")
+        btn_reload = QtWidgets.QPushButton("&Reload")
+        btn_enable = QtWidgets.QPushButton("&Enable")
+        btn_disable = QtWidgets.QPushButton("&Disable")
         btn_refresh_all = QtWidgets.QPushButton("Refresh all")
         btn_disable_all = QtWidgets.QPushButton("Disable All")
 
