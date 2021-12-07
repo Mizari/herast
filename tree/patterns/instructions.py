@@ -19,15 +19,16 @@ from .abstracts import AnyPat, AbstractPattern, SeqPat
 class BlockPat(AbstractPattern):
     op = idaapi.cit_block
     
-    def __init__(self, seq=None):
+    def __init__(self, seq=None, skip_missing=False):
         self._assert(isinstance(seq, SeqPat) or isinstance(seq, AnyPat) or seq is None, \
             "Block pattern must be provided with Sequence pattern")
 
         self.sequence = seq or AnyPat()
+        self.skip_missing = skip_missing
 
     @AbstractPattern.initial_check
     def check(self, instruction, ctx) -> bool:
-        if not isinstance(self.sequence, AnyPat) and len(instruction.cblock) != self.sequence.length:
+        if not isinstance(self.sequence, AnyPat) and not self.skip_missing and len(instruction.cblock) != self.sequence.length:
             return False
         
         block = instruction.cblock
