@@ -76,6 +76,8 @@ class SeqPat(AbstractPattern):
         start_from = container.index(instruction)
 
         for i in range(self.length):
+            if (start_from + i) >= len(container):
+                return False
             if not self.seq[i].check(container[start_from + i], ctx):
                 return False
         return True
