@@ -87,7 +87,7 @@ class SeqPat(AbstractPattern):
 class OrPat(AbstractPattern):
     op = -1
 
-    def __init__(self, pats):
+    def __init__(self, *pats):
         self._assert(len(pats) > 1, "Passing one or less patterns to OrPat is useless")
         self.pats = tuple(pats)
     
