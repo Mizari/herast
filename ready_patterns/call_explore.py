@@ -19,21 +19,21 @@ from tree.utils import *
 test_pattern = ExInsPat(CallExprPat(ObjPat(name='_objc_release'), ignore_arguments=True))
 
 def test_handler(item, ctx):
-    try:
-        # print(item.x.helper)
-        # calling_func_addr, calling_func_name = resolve_calling_function_from_node(item)
-        # print("[FOUND]: %#x -> %s" % (item.ea, calling_func_name))
-        print("[FOUND]: %#x" % item.ea)
-        remove_instruction_from_ast(item, ctx.current_function)
+	try:
+		# print(item.x.helper)
+		# calling_func_addr, calling_func_name = resolve_calling_function_from_node(item)
+		# print("[FOUND]: %#x -> %s" % (item.ea, calling_func_name))
+		print("[FOUND]: %#x" % item.ea)
+		remove_instruction_from_ast(item, ctx.current_function)
 
-        return True
-        # print('[FOUND]: %#x' % item.ea)
-    except Exception as e:
-        print('Got an exception due handling: %s' % e)
+		return True
+		# print('[FOUND]: %#x' % item.ea)
+	except Exception as e:
+		print('Got an exception due handling: %s' % e)
 
-    return False
+	return False
 
 
 __exported = [
-        (test_pattern, test_handler)
+		(test_pattern, test_handler)
 ]

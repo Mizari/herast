@@ -12,61 +12,61 @@ from tree.patterns.instructions import ExInsPat, IfInsPat, BlockPat
 from tree.utils import *
 
 pattern = IfInsPat(
-                    BindExpr('if_expr', AnyPat()),
-                    BlockPat(
-                        SeqPat([
-                            ExInsPat(
-                                AsgExprPat(
-                                    AnyPat(),
-                                    SkipCasts(CallExprPat(ObjPat(name='__cxa_allocate_exception'), ignore_arguments=True))
-                            )),
-                            ExInsPat(
-                                SkipCasts(CallExprPat(AnyPat(), ignore_arguments=True))
-                            ),
-                            ExInsPat(
-                                SkipCasts(CallExprPat(ObjPat(name='__cxa_throw'), ignore_arguments=True))
-                            )
-                        ])
-                    )
-                )
+					BindExpr('if_expr', AnyPat()),
+					BlockPat(
+						SeqPat([
+							ExInsPat(
+								AsgExprPat(
+									AnyPat(),
+									SkipCasts(CallExprPat(ObjPat(name='__cxa_allocate_exception'), ignore_arguments=True))
+							)),
+							ExInsPat(
+								SkipCasts(CallExprPat(AnyPat(), ignore_arguments=True))
+							),
+							ExInsPat(
+								SkipCasts(CallExprPat(ObjPat(name='__cxa_throw'), ignore_arguments=True))
+							)
+						])
+					)
+				)
 
 def handler(item, ctx):
-    # print("%#x" % item.ea)
+	# print("%#x" % item.ea)
 
-    tmp = ctx.get_expr('if_expr')
-    if_expr = idaapi.cexpr_t()
-    if_expr.cleanup()
-    # print(type(tmp), type(if_expr))
-    # tmp.swap(if_expr)
+	tmp = ctx.get_expr('if_expr')
+	if_expr = idaapi.cexpr_t()
+	if_expr.cleanup()
+	# print(type(tmp), type(if_expr))
+	# tmp.swap(if_expr)
 
-    if_expr = tmp
+	if_expr = tmp
 
-    arglist = idaapi.carglist_t()
+	arglist = idaapi.carglist_t()
 
-    arg1 = idaapi.carg_t()
-    arg1.assign(if_expr)
-    # arg1.op = if_expr.op
-    # arg1.ea = if_expr.ea
-    # arg1.cexpr = if_expr.cexpr
-    # arg1.type = idaapi.get_unk_type(8)
+	arg1 = idaapi.carg_t()
+	arg1.assign(if_expr)
+	# arg1.op = if_expr.op
+	# arg1.ea = if_expr.ea
+	# arg1.cexpr = if_expr.cexpr
+	# arg1.type = idaapi.get_unk_type(8)
 
-    arglist.push_back(arg1)
+	arglist.push_back(arg1)
 
-    helper = idaapi.call_helper(idaapi.get_unk_type(8), arglist, "__throw_if")
-    insn = idaapi.cinsn_t()
-    insn.ea = item.ea
-    insn.op = idaapi.cit_expr
-    insn.cexpr = helper
-    insn.thisown = False
-    insn.label_num = item.label_num
+	helper = idaapi.call_helper(idaapi.get_unk_type(8), arglist, "__throw_if")
+	insn = idaapi.cinsn_t()
+	insn.ea = item.ea
+	insn.op = idaapi.cit_expr
+	insn.cexpr = helper
+	insn.thisown = False
+	insn.label_num = item.label_num
 
-    # item.cleanup()
+	# item.cleanup()
 
-    idaapi.qswap(item, insn)
+	idaapi.qswap(item, insn)
 
-    return True
+	return True
 
 
 __exported = [
-    (pattern, handler)
+	(pattern, handler)
 ]
