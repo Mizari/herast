@@ -34,7 +34,7 @@ def make_sequence_pattern(n_additional_instrs):
 
 def make_collapse_exception_pattern(n_additional_instrs=1):
 	sequence_pattern = make_sequence_pattern(n_additional_instrs)
-	return IfInsPat(BindExpr('if_expr', AnyPat()), BlockPat(sequence_pattern))
+	return IfInsPat(BindExpr('if_expr'), BlockPat(sequence_pattern))
 
 def handler(item, ctx):
 	# print("%#x" % item.ea)

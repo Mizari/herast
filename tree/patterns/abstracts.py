@@ -119,12 +119,12 @@ class SkipCasts(AbstractPattern):
 	@property
 	def children(self):
 		return self.pat
-		
+
 class BindExpr(AbstractPattern):
 	op = -1
 
-	def __init__(self, name, pat):
-		self.pat = pat
+	def __init__(self, name, pat=None):
+		self.pat = pat or AnyPat()
 		self.name = name
 	
 	def check(self, expr, ctx):
