@@ -11,24 +11,30 @@ from tree.patterns.instructions import ExInsPat, IfInsPat, BlockPat
 
 from tree.utils import *
 
-pattern = IfInsPat(
-					BindExpr('if_expr', AnyPat()),
-					BlockPat(
-						SeqPat([
-							ExInsPat(
-								AsgExprPat(
-									AnyPat(),
-									SkipCasts(CallExprPat(ObjPat(name='__cxa_allocate_exception'), ignore_arguments=True))
-							)),
-							ExInsPat(
-								SkipCasts(CallExprPat(AnyPat(), ignore_arguments=True))
-							),
-							ExInsPat(
-								SkipCasts(CallExprPat(ObjPat(name='__cxa_throw'), ignore_arguments=True))
+def make_call_expr(fname=None):
+	if fname is None:
+		obj_pat = AnyPat()
+	else:
+		obj_pat = ObjPat(name=fname)
+	return SkipCasts(CallExprPat(obj_pat, ignore_arguments=True))
+
+first_call_pattern = ExInsPat(
+							AsgExprPat(
+								AnyPat(),
+								make_call_expr("__cxa_allocate_exception")
 							)
-						])
-					)
-				)
+						)
+
+last_call_pattern = ExInsPat(make_call_expr('__cxa_throw'))
+
+def make_sequence_pattern(n_additional_instrs):
+	pats = [ExInsPat()] * n_additional_instrs
+	pats = [first_call_pattern] + pats + [last_call_pattern]
+	return SeqPat(pats)
+
+def make_collapse_exception_pattern(n_additional_instrs=1):
+	sequence_pattern = make_sequence_pattern(n_additional_instrs)
+	return IfInsPat(BindExpr('if_expr', AnyPat()), BlockPat(sequence_pattern))
 
 def handler(item, ctx):
 	# print("%#x" % item.ea)
@@ -68,5 +74,8 @@ def handler(item, ctx):
 
 
 __exported = [
-	(pattern, handler)
+	(make_collapse_exception_pattern(1), handler),
+	(make_collapse_exception_pattern(7), handler),
+	(make_collapse_exception_pattern(8), handler),
+	(make_collapse_exception_pattern(9), handler),
 ]
