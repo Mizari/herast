@@ -13,15 +13,28 @@ class Matcher:
 		self.patterns = list()
 
 	def check_patterns(self, item) -> bool:
-		for p, h, c in self.patterns:
+		for pattern, handler, ctx in self.patterns:
 			try:
-				c.cleanup()
-				if p.check(item, c) and h(item, c):
-					return True
-					
+				ctx.cleanup()
 			except Exception as e:
-				print('[!] Got an exception due checking and handling AST: %s' % e)
-		
+				print('[!] Got an exception during context cleanup: %s' % e)
+
+			try:
+				if not pattern.check(item, ctx):
+					continue
+			except Exception as e:
+				print('[!] Got an exception during pattern matching: %s' % e)
+
+			try:
+				rv = handler(item, ctx)
+				if not isinstance(rv, bool):
+					raise Exception("Handler return invalid return type, should be bool")
+
+				if rv:
+					return True
+			except Exception as e:
+				print('[!] Got an exception during pattern handling: %s' % e)
+
 		return False
 
 	def insert_pattern(self, pat, handler):
