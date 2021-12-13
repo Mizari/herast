@@ -74,10 +74,10 @@ class SeqPat(AbstractPattern):
 
 		container = parent.cinsn.cblock
 		start_from = container.index(instruction)
+		if start_from + self.length > len(container):
+			return False
 
 		for i in range(self.length):
-			if (start_from + i) >= len(container):
-				return False
 			if not self.seq[i].check(container[start_from + i], ctx):
 				return False
 		return True
