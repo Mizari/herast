@@ -1,4 +1,5 @@
 import idaapi
+import ida_hexrays
 
 idaapi.require('tree.processing')
 idaapi.require('tree.matcher')
@@ -80,6 +81,7 @@ def herast_callback(*args):
 				raise e
 
 	return 0
+herast_callback.__reload_helper = True
 
 
 def __register_action(action):
@@ -102,6 +104,11 @@ def main():
 	global storage
 	action = ShowScriptManager(storage)
 	idaapi.register_action(idaapi.action_desc_t(action.name, action.description, action, action.hotkey))  
+
+	for cb in ida_hexrays.__cbhooks_t.instances:
+		callback = cb.callback
+		if callback.__dict__.get("__reload_helper", False):
+			idaapi.remove_hexrays_callback(callback)
 
 	print('Hooking for HexRays events')
 	idaapi.install_hexrays_callback(herast_callback)
