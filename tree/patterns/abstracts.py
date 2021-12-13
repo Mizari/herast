@@ -1,7 +1,9 @@
 import idaapi
 
 idaapi.require('tree.processing')
+idaapi.require('tree.consts')
 
+import tree.consts as consts
 from tree.processing import TreeProcessor
 
 # [TODO]: for some reason i've thought that not-recursive check of children may be useful, but forget how can i use it
@@ -24,6 +26,10 @@ class AbstractPattern:
 
 	def check(self, item, ctx, *args, **kwargs):
 		raise NotImplementedError("This is an abstract class")
+
+	@classmethod
+	def get_opname(cls):
+		return consts.op2str(cls.op)
 
 	@staticmethod
 	def initial_check(func):
