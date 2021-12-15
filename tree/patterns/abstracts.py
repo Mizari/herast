@@ -110,6 +110,25 @@ class OrPat(AbstractPattern):
 	def children(self):
 		return self.pats
 
+class AndPat(AbstractPattern):
+	op = -1
+
+	def __init__(self, *pats):
+		self._assert(len(pats) > 1, "Passing one or less patterns to AndPat is useless")
+		self.pats = tuple(pats)
+	
+	def check(self, item, ctx):
+		for p in self.pats:
+			if not p.check(item, ctx):
+				print("andpat false", p.get_opname())
+				return False
+
+		return True
+
+	@property
+	def children(self):
+		return self.pats
+
 class SkipCasts(AbstractPattern):
 	op = -1
 
