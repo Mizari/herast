@@ -120,7 +120,6 @@ class AndPat(AbstractPattern):
 	def check(self, item, ctx):
 		for p in self.pats:
 			if not p.check(item, ctx):
-				print("andpat false", p.get_opname())
 				return False
 
 		return True
