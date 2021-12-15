@@ -18,12 +18,14 @@ class Matcher:
 				ctx.cleanup()
 			except Exception as e:
 				print('[!] Got an exception during context cleanup: %s' % e)
+				continue
 
 			try:
 				if not pattern.check(item, ctx):
 					continue
 			except Exception as e:
 				print('[!] Got an exception during pattern matching: %s' % e)
+				continue
 
 			try:
 				rv = handler(item, ctx)
@@ -34,6 +36,7 @@ class Matcher:
 					return True
 			except Exception as e:
 				print('[!] Got an exception during pattern handling: %s' % e)
+				continue
 
 		return False
 
