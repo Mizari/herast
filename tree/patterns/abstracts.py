@@ -29,7 +29,7 @@ class AbstractPattern:
 
 	@classmethod
 	def get_opname(cls):
-		return consts.op2str(cls.op)
+		return consts.op2str.get(cls.op, None)
 
 	@staticmethod
 	def initial_check(func):
