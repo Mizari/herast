@@ -18,17 +18,14 @@ from .abstracts import AnyPat, AbstractPattern, SeqPat
 # [TODO]: consider of using SeqPat implicitly and providing to ctor just *args or iterable (list, tuple) of patterns
 class BlockPat(AbstractPattern):
 	op = idaapi.cit_block
-	
-	def __init__(self, seq=None, skip_missing=False):
-		self._assert(isinstance(seq, SeqPat) or isinstance(seq, AnyPat) or seq is None, \
-			"Block pattern must be provided with Sequence pattern")
 
+	def __init__(self, seq=None, skip_missing=False):
 		self.sequence = seq or AnyPat()
 		self.skip_missing = skip_missing
 
 	@AbstractPattern.initial_check
 	def check(self, instruction, ctx) -> bool:
-		if not isinstance(self.sequence, AnyPat) and not self.skip_missing and len(instruction.cblock) != self.sequence.length:
+		if isinstance(self.sequence, SeqPat) and not self.skip_missing and len(instruction.cblock) != self.sequence.length:
 			return False
 		
 		block = instruction.cblock
