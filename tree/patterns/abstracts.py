@@ -222,3 +222,13 @@ class DebugPattern(AbstractPattern):
 
 		return self.return_value
 		
+
+# useful pattern to determine where big and complex pattern went wrong
+class DebugWrapper(AbstractPattern):
+	def __init__(self, pat):
+		self.pat = pat
+
+	def check(self, item, ctx):
+		rv = self.pat.check(item, ctx)
+		print("Debug pattern rv:", rv)
+		return rv
