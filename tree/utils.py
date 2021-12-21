@@ -73,6 +73,9 @@ def remove_instruction_from_ast(unwanted_ins, parent):
 	if unwanted_ins.contains_label():
 		return False
 
+	if len(block) <= 1:
+		return False
+
 	try:
 		return block.remove(unwanted_ins)
 	except Exception as e:
