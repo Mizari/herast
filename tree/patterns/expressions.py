@@ -52,16 +52,24 @@ class ObjPat(AbstractPattern):
 
 	def __init__(self, name=None, ea=None):
 		self.ea = ea
+		self.name = name
 		if ea is None and name is not None:
 			self.ea = resolve_name_address(name)
-			self._assert(self.ea != idaapi.BADADDR, "Unable to resolve '%s' address" % (name))
 
 	@AbstractPattern.initial_check
 	def check(self, expression, ctx) -> bool:
 		if self.ea is None:
 			return True
 		
-		return self.ea == expression.obj_ea
+		if self.ea == expression.obj_ea:
+			return True
+
+		ea_name = idaapi.get_name(self.ea)
+		if self.name == ea_name:
+			return True
+
+		demangled_ea_name = idaapi.demangle_name(ea_name, idaapi.MNG_NODEFINIT | idaapi.MNG_NORETTYPE)
+		return demangled_ea_name == self.name
 
 
 class MemrefExprPat(AbstractPattern):
