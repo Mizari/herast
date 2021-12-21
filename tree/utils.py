@@ -70,10 +70,14 @@ def remove_instruction_from_ast(unwanted_ins, parent):
 	else:
 		raise TypeError("Parent must be cfuncptr_t or cblock_t")
 
+	if unwanted_ins.contains_label():
+		return False
+
 	try:
-		block.remove(unwanted_ins)
+		return block.remove(unwanted_ins)
 	except Exception as e:
-		print('Got an exception %s' % e)
+		print('Got an exception %s while trying to remove instruction from block' % e)
+		return False
 
 
 def make_cblock(instructions):
