@@ -20,38 +20,68 @@ first_call_pattern = ExInsPat(
 							)
 						)
 
+excstr_getter_pattern = ExInsPat(
+	AsgExprPat(
+		AnyPat(),
+		CallExprPat(AnyPat(), AnyPat(), SkipCasts(BindExpr("exception_str", AnyPat())))
+	)
+)
 last_call_pattern = ExInsPat(make_call_expr('__cxa_throw'))
 
-def make_sequence_pattern(n_additional_instrs):
-	pats = [ExInsPat()] * n_additional_instrs
-	pats = [first_call_pattern] + pats + [last_call_pattern]
-	return SeqPat(pats)
+class ExceptionBody(AbstractPattern):
+	op = idaapi.cit_block
+	def __init__(self, first_call, excstr_getter, last_call):
+		self.first_call = first_call
+		self.last_call = last_call
+		self.excstr_getter = excstr_getter
 
-def make_collapse_exception_pattern(n_additional_instrs=1):
-	sequence_pattern = make_sequence_pattern(n_additional_instrs)
-	return IfInsPat(BindExpr('if_expr'), BlockPat(sequence_pattern))
+	@AbstractPattern.initial_check
+	def check(self, item, ctx):
+		block = item.cblock
+
+		if len(block) < 3:
+			print("len false")
+			return False
+
+		if not self.first_call.check(block[0], ctx):
+			print("first false")
+			return False
+		if not self.last_call.check(block[len(block) - 1], ctx):
+			print("last false")
+			return False
+
+		for i in range(1, len(block) - 2):
+			if block[i].op != idaapi.cit_expr:
+				return False
+
+		for i in range(1, len(block) - 2):
+			if self.excstr_getter.check(block[i], ctx):
+				break
+
+		return True
+
+pattern = IfInsPat(
+	BindExpr("if_expr"),
+	ExceptionBody(first_call_pattern, excstr_getter_pattern, last_call_pattern)
+)
 
 def handler(item, ctx):
-	# print("%#x" % item.ea)
-
-	tmp = ctx.get_expr('if_expr')
-	if_expr = idaapi.cexpr_t()
-	if_expr.cleanup()
-	# print(type(tmp), type(if_expr))
-	# tmp.swap(if_expr)
-
-	if_expr = tmp
-
 	arglist = idaapi.carglist_t()
+	if_expr = ctx.get_expr("if_expr")
+	if if_expr is not None:
+		arg1 = idaapi.carg_t()
+		arg1.assign(if_expr)
+		arglist.push_back(arg1)
 
-	arg1 = idaapi.carg_t()
-	arg1.assign(if_expr)
-	# arg1.op = if_expr.op
-	# arg1.ea = if_expr.ea
-	# arg1.cexpr = if_expr.cexpr
-	# arg1.type = idaapi.get_unk_type(8)
+	exception_str = ctx.get_expr("exception_str")
+	arg2 = None
+	if exception_str is not None:
+		if exception_str.op == idaapi.cot_obj:
+			arg2 = idaapi.carg_t()
+			arg2.assign(exception_str)
 
-	arglist.push_back(arg1)
+	if arg2 is not None:
+		arglist.push_back(arg2)
 
 	helper = idaapi.call_helper(idaapi.get_unk_type(8), arglist, "__throw_if")
 	insn = idaapi.cinsn_t()
@@ -67,10 +97,6 @@ def handler(item, ctx):
 
 	return True
 
-
 __exported = [
-	(make_collapse_exception_pattern(1), handler),
-	(make_collapse_exception_pattern(7), handler),
-	(make_collapse_exception_pattern(8), handler),
-	(make_collapse_exception_pattern(9), handler),
+	(pattern, handler),
 ]
