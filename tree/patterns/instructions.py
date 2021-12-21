@@ -27,8 +27,11 @@ class BlockPat(AbstractPattern):
 	def check(self, instruction, ctx) -> bool:
 		if isinstance(self.sequence, SeqPat) and not self.skip_missing and len(instruction.cblock) != self.sequence.length:
 			return False
-		
+
 		block = instruction.cblock
+		# hexrays allows deleting single instruction from block (yeah, weird, I know)
+		if len(block) == 0:
+			return False
 
 		return self.sequence.check(block[0], ctx)
 
