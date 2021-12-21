@@ -40,14 +40,11 @@ class ExceptionBody(AbstractPattern):
 		block = item.cblock
 
 		if len(block) < 3:
-			print("len false")
 			return False
 
 		if not self.first_call.check(block[0], ctx):
-			print("first false")
 			return False
 		if not self.last_call.check(block[len(block) - 1], ctx):
-			print("last false")
 			return False
 
 		for i in range(1, len(block) - 2):
@@ -90,8 +87,6 @@ def handler(item, ctx):
 	insn.cexpr = helper
 	insn.thisown = False
 	insn.label_num = item.label_num
-
-	# item.cleanup()
 
 	idaapi.qswap(item, insn)
 
