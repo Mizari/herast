@@ -64,7 +64,7 @@ class ObjPat(AbstractPattern):
 		if self.ea == expression.obj_ea:
 			return True
 
-		ea_name = idaapi.get_name(self.ea)
+		ea_name = idaapi.get_name(expression.obj_ea)
 		if self.name == ea_name:
 			return True
 
