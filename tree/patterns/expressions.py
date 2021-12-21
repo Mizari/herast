@@ -1,9 +1,5 @@
 import idaapi
 
-idaapi.require('tree.patterns.abstracts')
-idaapi.require('tree.consts')
-idaapi.require('tree.utils')
-
 from tree.patterns.abstracts import AnyPat, AbstractPattern, SeqPat
 from tree.consts import binary_expressions_ops, unary_expressions_ops, op2str
 from tree.utils import resolve_name_address

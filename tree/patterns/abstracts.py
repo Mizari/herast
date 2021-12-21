@@ -1,8 +1,5 @@
 import idaapi
 
-idaapi.require('tree.processing')
-idaapi.require('tree.consts')
-
 import tree.consts as consts
 from tree.processing import TreeProcessor
 

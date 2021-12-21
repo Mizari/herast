@@ -1,14 +1,16 @@
 import idaapi
 import ida_hexrays
 
+# order of requires from imported to importers) is most likely important
+idaapi.require('tree.consts')
+idaapi.require('tree.utils')
 idaapi.require('tree.processing')
-idaapi.require('tree.matcher')
 idaapi.require('tree.patterns.abstracts')
+idaapi.require('tree.matcher')
 idaapi.require('tree.patterns.instructions')
 idaapi.require('tree.patterns.expressions')
 idaapi.require('loader')
 idaapi.require('views.patterns_manager_view')
-idaapi.require('tree.consts')
 
 from tree.processing import TreeProcessor
 from tree.matcher import Matcher

@@ -2,8 +2,6 @@ from __future__ import print_function
 import idaapi
 import functools
 
-idaapi.require('tree.consts')
-
 from tree.consts import binary_expressions_ops, unary_expressions_ops, op2str, str2op
 
 

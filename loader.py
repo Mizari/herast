@@ -9,8 +9,6 @@ import glob
 import traceback
 import json
 
-idaapi.require('tree.consts')
-
 from PyQt5 import QtCore, QtGui
 
 
