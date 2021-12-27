@@ -79,7 +79,6 @@ class MemrefExprPat(AbstractPattern):
 		self.referenced_object = referenced_object
 		self.field = field
 
-	# [TODO]: field is actually just an int, but consider about creating a primitives for Integers, Strings and other literals
 	@AbstractPattern.initial_check
 	def check(self, expression, ctx) -> bool:
 		return self.referenced_object.check(expression.x, ctx) and \
@@ -93,8 +92,6 @@ class MemptrExprPat(AbstractPattern):
 		self.pointed_object = pointed_object
 		self.field = field
 
-	# [TODO]: we can access ptrsize of memptr, it may be useful to check
-	# [NOTE]: field is actually just an int, but consider about creating a primitives for Integers, Strings and other literals
 	@AbstractPattern.initial_check
 	def check(self, expression, ctx) -> bool:
 		return self.pointed_object.check(expression.x, ctx) and \
@@ -167,7 +164,6 @@ class AbstractBinaryOpPattern(AbstractPattern):
 import sys
 module = sys.modules[__name__]
 
-# [TODO]: name-overwriting check
 for op in unary_expressions_ops:
 	name = '%sExprPat' % op2str[op].replace('cot_', '').capitalize()
 	vars(module)[name] = type(name, (AbstractUnaryOpPattern,), {'op': op})

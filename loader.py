@@ -192,7 +192,6 @@ class ReadyPattern:
 		if not self.error:
 			self.log = "Enabled!"
 			if self.module is None:
-				# [TODO]: assert is ok as temporary, but we should handle properly if file was deleted before we enabled corresponding pattern
 				assert self.reload()
 			if not self.error:
 				self.enabled = True

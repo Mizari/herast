@@ -40,7 +40,6 @@ class ScriptManager(idaapi.PluginForm):
 		patterns_list.setMaximumWidth(patterns_list.size().width() // 3)
 		patterns_list.setSelectionMode(QtWidgets.QAbstractItemView.SingleSelection)
 
-
 		bottom_btns_grid_box = QtWidgets.QGridLayout()
 		bottom_btns_grid_box.addWidget(btn_refresh_all, 0, 0)
 		bottom_btns_grid_box.addWidget(btn_disable_all, 0, 1)
@@ -79,8 +78,6 @@ class ScriptManager(idaapi.PluginForm):
 		horizontal_box.addWidget(patterns_list)
 		horizontal_box.addLayout(vertical_box)
 
-		
-		# [TODO]: after compliting part in module, don't forget to uncomment this lines
 		btn_disable.clicked.connect(lambda: patterns_list.model().disable_pattern(patterns_list.selectedIndexes()))
 		btn_enable.clicked.connect(lambda: patterns_list.model().enable_pattern(patterns_list.selectedIndexes()))
 		btn_reload.clicked.connect(lambda: patterns_list.model().reload_pattern(patterns_list.selectedIndexes()))
@@ -107,7 +104,6 @@ class PatternSourceView(QtWidgets.QTextEdit):
 		else:
 			self.setPlaintText('')
 
-	# [BUG]: as we can delete some of patterns (if files was changed on system), we can still point to valid index, but it would be wrong object
 	def reload_source_data(self, changed_start, changed_end, selected):
 		inside = lambda _start, _end, _val: _start <= _val <= _end
 
@@ -128,7 +124,6 @@ class PatternLogView(QtWidgets.QTextEdit):
 		else:
 			self.setPlaintText('')
 
-	# [BUG]: as we can delete some of patterns (if files was changed on system), we can still point to valid index, but it would be wrong object
 	def reload_log_data(self, changed_start, changed_end, selected):
 		inside = lambda _start, _end, _val: _start <= _val <= _end
 

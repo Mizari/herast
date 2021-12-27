@@ -111,7 +111,6 @@ class TreeProcessor:
 	def _process_cblock(self, cinsn) -> None:
 		# [NOTE] cblock is just an array of cinsn_t (qlist<cinsn_t>)
 		cblock = cinsn.cblock
-		# [TODO]: make traversal with adjustments like reverting to parent (or mb root) node to reanalyze subtree
 		try:
 			for ins in cblock:
 				self.check_patterns(ins)

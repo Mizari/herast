@@ -3,12 +3,6 @@ import idaapi
 import tree.consts as consts
 from tree.processing import TreeProcessor
 
-# [TODO]: for some reason i've thought that not-recursive check of children may be useful, but forget how can i use it
-# [TODO]: so should think about it and also think about splitting AbstractPattern to BasePattern(for "real" patterns with `op` == cot_*|cit_*)
-# [TODO]: and BaseAbstractPattern(for abstract patterns, which doesn't have any `op` and performs checking in other way)
-
-# [TODO]: add stripping of cot_cast's before passing node to actual pattern-object, we can call super(self).__init__ with some kwargs
-# [TODO]: like skip_casts=False|True and add skipping in __perform_inital_check
 class AbstractPattern:
 	op = None
 
@@ -40,7 +34,6 @@ class AbstractPattern:
 	@property
 	def children(self):
 		raise NotImplementedError("An abstract class doesn't have any children")
-
 
 
 # any pattern

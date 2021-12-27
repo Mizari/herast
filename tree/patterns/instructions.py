@@ -1,21 +1,7 @@
 import idaapi
 from .abstracts import AnyPat, AbstractPattern, SeqPat
 
-# [TODO]: consider about merging somehow cit_cdo and cit_cwhile patterns
 
-
-# block:    
-# if:       Done
-# while:    Done
-# do:       Done
-# for:      Done
-# switch:   
-# return:   Done
-# goto:     nope
-# asm:      nope
-
-
-# [TODO]: consider of using SeqPat implicitly and providing to ctor just *args or iterable (list, tuple) of patterns
 class BlockPat(AbstractPattern):
 	op = idaapi.cit_block
 
