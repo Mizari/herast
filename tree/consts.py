@@ -1,7 +1,10 @@
 import idaapi
 
-op2str = dict(idaapi.cexpr_t.op_to_typename)
-op2str.update(idaapi.cinsn_t.op_to_typename)
+cexpr_op2str = dict(idaapi.cexpr_t.op_to_typename)
+cinsn_op2str = dict(idaapi.cinsn_t.op_to_typename)
+op2str = {}
+op2str.update(cexpr_op2str)
+op2str.update(cinsn_op2str)
 
 
 binary_expressions_ops = [

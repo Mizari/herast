@@ -58,6 +58,12 @@ class SeqPat(AbstractPattern):
 		if len(pats) == 1 and isinstance(pats[0], list):
 			pats = pats[0]
 
+		for p in pats:
+			if p.op < 0:
+				continue
+			if consts.cexpr_op2str.get(p.op, None) is not None:
+				print("[*] WARNING: SeqPat expects instructions, not expression")
+
 		self.seq = tuple(pats)
 		self.length = len(pats)
 
