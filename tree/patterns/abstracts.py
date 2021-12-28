@@ -221,10 +221,14 @@ class DebugPattern(AbstractPattern):
 
 # useful pattern to determine where big and complex pattern went wrong
 class DebugWrapper(AbstractPattern):
-	def __init__(self, pat):
+	def __init__(self, pat, msg=None):
 		self.pat = pat
+		self.msg = msg
 
 	def check(self, item, ctx):
 		rv = self.pat.check(item, ctx)
-		print("Debug pattern rv:", rv)
+		if self.msg is None:
+			print("Debug pattern rv:", rv)
+		else:
+			print("Debug pattern", self.msg, "rv:", rv)
 		return rv
