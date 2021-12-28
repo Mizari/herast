@@ -53,9 +53,13 @@ class IfInsPat(AbstractPattern):
 	def check(self, instruction, ctx) -> bool:
 		cif = instruction.cif
 
-		return self.condition.check(cif.expr, ctx) and \
-			self.then_branch.check(cif.ithen, ctx) and \
-			self.else_branch.check(cif.ielse, ctx)
+		rv = self.condition.check(cif.expr, ctx)
+		if not rv: return False
+
+		rv = self.then_branch.check(cif.ithen, ctx)
+		if not rv: return False
+
+		return self.else_branch.check(cif.ielse, ctx)
 
 	@property
 	def children(self):
