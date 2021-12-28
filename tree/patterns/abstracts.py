@@ -54,11 +54,11 @@ class AnyPat(AbstractPattern):
 class SeqPat(AbstractPattern):
 	op = -1
 
-	def __init__(self, pats):
-		if type(pats) is not tuple and type(pats) is not list:
-			pats = (pats, )
+	def __init__(self, *pats):
+		if len(pats) == 1 and isinstance(pats[0], list):
+			pats = pats[0]
 
-		self.seq = pats
+		self.seq = tuple(pats)
 		self.length = len(pats)
 
 	def check(self, instruction, ctx):
