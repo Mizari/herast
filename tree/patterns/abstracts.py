@@ -54,7 +54,9 @@ class AnyPat(AbstractPattern):
 class SeqPat(AbstractPattern):
 	op = -1
 
-	def __init__(self, *pats):
+	def __init__(self, *pats, skip_missing=True):
+		self.skip_missing = skip_missing
+
 		if len(pats) == 1 and isinstance(pats[0], list):
 			pats = pats[0]
 
@@ -77,6 +79,9 @@ class SeqPat(AbstractPattern):
 		container = parent.cinsn.cblock
 		start_from = container.index(instruction)
 		if start_from + self.length > len(container):
+			return False
+
+		if not self.skip_missing and len(container) != self.length + start_from:
 			return False
 
 		for i in range(self.length):

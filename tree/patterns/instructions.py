@@ -7,18 +7,14 @@ class BlockPat(AbstractPattern):
 
 	def __init__(self, seq=None, skip_missing=False):
 		self.sequence = seq or AnyPat()
-		self.skip_missing = skip_missing
+
+		# backwards compatibility, will be removed later
+		if isinstance(seq, SeqPat):
+			seq.skip_missing = skip_missing
 
 	@AbstractPattern.initial_check
 	def check(self, instruction, ctx) -> bool:
-		if isinstance(self.sequence, SeqPat) and not self.skip_missing and len(instruction.cblock) != self.sequence.length:
-			return False
-
 		block = instruction.cblock
-		# hexrays allows deleting single instruction from block (yeah, weird, I know)
-		if len(block) == 0:
-			return False
-
 		return self.sequence.check(block[0], ctx)
 
 	@property
