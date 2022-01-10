@@ -17,6 +17,9 @@ from tree.matcher import Matcher
 from views.patterns_manager_view import ShowScriptManager
 from loader import PatternStorageModel
 
+from tree.actions import action_manager, hx_callback_manager
+from tree.selection_factory import PatternCreationHandler
+
 import time
 
 storage = PatternStorageModel()
@@ -114,6 +117,9 @@ def main():
 
 	print('Hooking for HexRays events')
 	idaapi.install_hexrays_callback(herast_callback)
+
+	action_manager.initialize()
+	hx_callback_manager.initialize()
 
 
 
