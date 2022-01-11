@@ -226,6 +226,7 @@ class DebugPattern(AbstractPattern):
 
 # useful pattern to determine where big and complex pattern went wrong
 class DebugWrapper(AbstractPattern):
+	op = -1
 	def __init__(self, pat, msg=None):
 		self.pat = pat
 		self.msg = msg
