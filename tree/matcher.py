@@ -69,6 +69,9 @@ class SavedContext:
 	def save_expr(self, name, expression):
 		self.expressions[name] = expression
 
+	def has_expr(self, name):
+		return self.expressions.get(name, None) is not None
+
 	def cleanup(self):
 		self.variables.clear()
 		self.expressions.clear()
