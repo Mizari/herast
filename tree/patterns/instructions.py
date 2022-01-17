@@ -155,3 +155,13 @@ class DoInsPat(AbstractPattern):
 	@property
 	def children(self):
 		return (self.expr, self.body)
+
+
+class GotoPat(AbstractPattern):
+	op = idaapi.cit_goto
+	def __init__(self):
+		return
+
+	@AbstractPattern.initial_check
+	def check(self, item, ctx):
+		return True
