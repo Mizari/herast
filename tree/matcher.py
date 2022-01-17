@@ -40,10 +40,9 @@ class Matcher:
 		self.patterns.append((pat, handler, ctx))
 
 	def expressions_traversal_is_needed(self):
-		abstract_expression_patterns = [VarBind, BindExpr]
-		
+		abstract_expression_patterns = (VarBind, BindExpr)
 		for p, _, _ in self.patterns:
-			if p.op >= 0 and p.op < idaapi.cit_empty or any((isinstance(p, abstract_class) for abstract_class in abstract_expression_patterns)):
+			if p.op >= 0 and p.op < idaapi.cit_empty or isinstance(p, abstract_expression_patterns):
 				return True
 
 		return False
