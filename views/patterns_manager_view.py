@@ -97,6 +97,7 @@ class PatternSourceView(QtWidgets.QTextEdit):
 	def __init__(self, storage, *args, **kwargs):
 		self.storage = storage
 		super(PatternSourceView, self).__init__(*args, **kwargs)
+		self.setTabStopDistance(QtGui.QFontMetricsF(self.font()).width(' ') * 4)
 
 	def switch_source_data(self, current, previous):
 		if current.row() < len(self.storage.ready_patterns):
