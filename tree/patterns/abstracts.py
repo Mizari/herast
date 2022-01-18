@@ -205,6 +205,18 @@ class FakeMatcher:
 		return False
 
 
+class LabeledInstruction(AbstractPattern):
+	op = -1
+	def __init__(self):
+		return
+
+	def check(self, item, ctx):
+		lbl = item.label_num
+		if lbl == -1:
+			return False
+		return True
+
+
 import traceback, tree.consts
 # For debug purposes
 class DebugPattern(AbstractPattern):
