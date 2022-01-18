@@ -81,16 +81,16 @@ def handler(item, ctx):
 		arglist.push_back(arg2)
 
 	helper = idaapi.call_helper(idaapi.get_unk_type(8), arglist, "__throw_if")
-	insn = idaapi.cinsn_t()
-	insn.ea = item.ea
-	insn.op = idaapi.cit_expr
-	insn.cexpr = helper
-	insn.thisown = False
-	insn.label_num = item.label_num
+	new_item = idaapi.cinsn_t()
+	new_item.ea = item.ea
+	new_item.op = idaapi.cit_expr
+	new_item.cexpr = helper
+	new_item.thisown = False
+	new_item.label_num = item.label_num
 
-	idaapi.qswap(item, insn)
+	ctx.modify_instr(item, new_item)
 
-	return True
+	return False
 
 __exported = [
 	(pattern, handler),
