@@ -1,6 +1,7 @@
 import idaapi
 
-from tree.patterns.abstracts import BindExpr, VarBind
+from tree.patterns.abstracts import BindExpr, ItemsCollector, LabeledInstruction, VarBind
+from tree.patterns.instructions import GotoPat
 import tree.utils as utils
 
 
@@ -8,6 +9,8 @@ class Matcher:
 	def __init__(self, processed_function):
 		self.function = processed_function
 		self.patterns = list()
+		self.gotos_collector = ItemsCollector(GotoPat(), SavedContext(self.function))
+		self.labels_collector = ItemsCollector(LabeledInstruction(), SavedContext(self.function))
 
 	def check_patterns(self, item) -> bool:
 		for pattern, handler, ctx in self.patterns:
@@ -61,6 +64,16 @@ class Matcher:
 		return tree_changed
 
 	def remove_item(self, ctx, removed_item):
+		gotos = self.gotos_collector.collect_items(removed_item)
+		if len(gotos) > 0:
+			print("[!] failed removing item with gotos in it")
+			return False
+
+		labels = self.labels_collector.collect_items(removed_item)
+		if len(labels) > 0:
+			print("[!] failed removing item with labels in it")
+			return False
+
 		parent = ctx.get_parent_block(removed_item)
 		if parent is None:
 			print("[*] Failed to remove item from tree, because no parent is found", removed_item.opname)
@@ -74,6 +87,16 @@ class Matcher:
 			return False
 
 	def replace_item(self, ctx, item, new_item):
+		gotos = self.gotos_collector.collect_items(item)
+		if len(gotos) > 0:
+			print("[!] failed replacing item with gotos in it")
+			return False
+
+		labels = self.labels_collector.collect_items(item)
+		if len(labels) > 0:
+			print("[!] failed replacing item with labels in it")
+			return False
+
 		try:
 			idaapi.qswap(item, new_item)
 			return True

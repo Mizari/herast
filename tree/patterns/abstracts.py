@@ -217,6 +217,30 @@ class LabeledInstruction(AbstractPattern):
 		return True
 
 
+class ItemsCollector:
+	op = -1
+	def __init__(self, pat, ctx):
+		self.pat = pat
+		self.ctx = ctx
+		self.collected_items = []
+
+	def check_patterns(self, item):
+		self.ctx.cleanup()
+		try:
+			if self.pat.check(item, self.ctx):
+				self.collected_items.append(item)
+		except Exception as e:
+			print("[!] exception happend during collecting pattern in item")
+
+		return False
+
+	def collect_items(self, item):
+		self.collected_items.clear()
+		t = TreeProcessor(item, self, need_expression_traversal=True)
+		t.process_tree()
+		return self.collected_items
+
+
 import traceback, tree.consts
 # For debug purposes
 class DebugPattern(AbstractPattern):
