@@ -236,7 +236,7 @@ class ItemsCollector:
 
 	def collect_items(self, item):
 		self.collected_items.clear()
-		t = TreeProcessor(item, self, need_expression_traversal=True)
+		t = TreeProcessor(item, self)
 		t.process_tree()
 		return self.collected_items
 
