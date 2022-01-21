@@ -29,7 +29,9 @@ class Matcher:
 				continue
 
 			try:
-				is_tree_modified = handler(item, ctx)
+				is_tree_modified = False
+				if handler is not None:
+					is_tree_modified = handler(item, ctx)
 				if not isinstance(is_tree_modified, bool):
 					raise Exception("Handler return invalid return type, should be bool")
 
