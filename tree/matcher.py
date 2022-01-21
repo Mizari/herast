@@ -2,6 +2,7 @@ import idaapi
 
 from tree.patterns.abstracts import BindExpr, ItemsCollector, LabeledInstruction, VarBind
 from tree.patterns.instructions import GotoPat
+from tree.pattern_context import PatternContext
 import tree.utils as utils
 
 
@@ -9,8 +10,8 @@ class Matcher:
 	def __init__(self, processed_function):
 		self.function = processed_function
 		self.patterns = list()
-		self.gotos_collector = ItemsCollector(GotoPat(), SavedContext(self.function))
-		self.labels_collector = ItemsCollector(LabeledInstruction(), SavedContext(self.function))
+		self.gotos_collector = ItemsCollector(GotoPat(), PatternContext(self.function))
+		self.labels_collector = ItemsCollector(LabeledInstruction(), PatternContext(self.function))
 
 	def check_patterns(self, item) -> bool:
 		for pattern, handler, ctx in self.patterns:
@@ -105,7 +106,7 @@ class Matcher:
 			return False
 
 	def insert_pattern(self, pat, handler):
-		ctx = SavedContext(self.function)
+		ctx = PatternContext(self.function)
 		self.patterns.append((pat, handler, ctx))
 
 	def expressions_traversal_is_needed(self):
@@ -115,55 +116,3 @@ class Matcher:
 				return True
 
 		return False
-
-class InstrModification:
-	def __init__(self, item, new_item):
-		self.item = item
-		self.new_item = new_item
-
-class SavedContext:
-	def __init__(self, current_function):
-		self.current_function = current_function
-		self.expressions = dict()
-		self.variables = dict()
-		self.instrs_to_modify = []
-
-	def get_var(self, name):
-		return self.variables.get(name, None)
-
-	def save_var(self, name, local_variable_index):
-		self.variables[name] = SavedVariable(local_variable_index)
-
-	def has_var(self, name):
-		return self.variables.get(name, None) is not None
-
-	def get_expr(self, name):
-		return self.expressions.get(name, None)
-
-	def save_expr(self, name, expression):
-		self.expressions[name] = expression
-
-	def has_expr(self, name):
-		return self.expressions.get(name, None) is not None
-
-	def cleanup(self):
-		self.variables.clear()
-		self.expressions.clear()
-		self.instrs_to_modify.clear()
-
-	def modify_instr(self, item, new_item):
-		self.instrs_to_modify.append(InstrModification(item, new_item))
-
-	def modified_instrs(self):
-		for itm in self.instrs_to_modify:
-			yield itm
-
-	def get_parent_block(self, item):
-		parent = self.current_function.body.find_parent_of(item)
-		if parent is None or parent.op != idaapi.cit_block:
-			return None
-		return parent
-
-class SavedVariable:
-	def __init__(self, idx):
-		self.idx = idx
