@@ -72,14 +72,23 @@ class Matcher:
 			print("[!] failed removing item with gotos in it")
 			return False
 
-		labels = self.labels_collector.collect_items(removed_item)
-		if len(labels) > 0:
-			print("[!] failed removing item with labels in it")
-			return False
-
 		parent = ctx.get_parent_block(removed_item)
 		if parent is None:
 			print("[*] Failed to remove item from tree, because no parent is found", removed_item.opname)
+			return False
+
+		labels = self.labels_collector.collect_items(removed_item)
+		if len(labels) == 1 and labels[0] == removed_item:
+			next_item = utils.get_following_instr(parent, removed_item)
+			if next_item is None:
+				print("[!] failed2removing item with labels in it", next_item)
+				return False
+			else:
+				next_item.label_num = removed_item.label_num
+				removed_item.label_num = -1
+
+		elif len(labels) > 0:
+			print("[!] failed removing item with labels in it")
 			return False
 
 		rv = utils.remove_instruction_from_ast(removed_item, parent.cinsn)
@@ -96,7 +105,10 @@ class Matcher:
 			return False
 
 		labels = self.labels_collector.collect_items(item)
-		if len(labels) > 0:
+		if len(labels) > 1:
+			print("[!] failed replacing item with labels in it", labels, item)
+			return False
+		elif len(labels) == 1 and labels[0] != item:
 			print("[!] failed replacing item with labels in it")
 			return False
 
@@ -105,6 +117,7 @@ class Matcher:
 
 		if new_item.label_num == -1 and item.label_num != -1:
 			new_item.label_num = item.label_num
+			item.label_num = -1
 
 		try:
 			idaapi.qswap(item, new_item)
