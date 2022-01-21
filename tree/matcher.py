@@ -98,6 +98,12 @@ class Matcher:
 			print("[!] failed replacing item with labels in it")
 			return False
 
+		if new_item.ea == idaapi.BADADDR and item.ea != idaapi.BADADDR:
+			new_item.ea = item.ea
+
+		if new_item.label_num == -1 and item.label_num != -1:
+			new_item.label_num = item.label_num
+
 		try:
 			idaapi.qswap(item, new_item)
 			return True
