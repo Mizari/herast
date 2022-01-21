@@ -7,11 +7,7 @@ from tree.patterns.instructions import ExInsPat, IfInsPat, BlockPat
 from tree.utils import *
 
 def make_call_expr(fname=None):
-	if fname is None:
-		obj_pat = AnyPat()
-	else:
-		obj_pat = ObjPat(name=fname)
-	return SkipCasts(CallExprPat(obj_pat, ignore_arguments=True))
+	return SkipCasts(CallExprPat(fname, ignore_arguments=True))
 
 first_call_pattern = ExInsPat(
 							AsgExprPat(
@@ -63,30 +59,22 @@ pattern = IfInsPat(
 )
 
 def handler(item, ctx):
-	arglist = idaapi.carglist_t()
+	helper_args = []
+
 	if_expr = ctx.get_expr("if_expr")
 	if if_expr is not None:
 		arg1 = idaapi.carg_t()
 		arg1.assign(if_expr)
-		arglist.push_back(arg1)
+		helper_args.append(arg1)
 
 	exception_str = ctx.get_expr("exception_str")
-	arg2 = None
 	if exception_str is not None:
 		if exception_str.op == idaapi.cot_obj:
 			arg2 = idaapi.carg_t()
 			arg2.assign(exception_str)
+			helper_args.append(arg2)
 
-	if arg2 is not None:
-		arglist.push_back(arg2)
-
-	helper = idaapi.call_helper(idaapi.get_unk_type(8), arglist, "__throw_if")
-	new_item = idaapi.cinsn_t()
-	new_item.ea = item.ea
-	new_item.op = idaapi.cit_expr
-	new_item.cexpr = helper
-	new_item.thisown = False
-	new_item.label_num = item.label_num
+	new_item = make_helper_instr("__throw_if", *helper_args)
 
 	ctx.modify_instr(item, new_item)
 
