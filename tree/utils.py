@@ -106,4 +106,16 @@ def make_block_insn(instructions, address, label_num=-1):
 	insn.label_num = label_num
 	insn.thisown = False
 
-	return insn    
+	return insn
+
+def make_helper_instr(name, *args):
+	arglist = idaapi.carglist_t()
+	for arg in args:
+		arglist.push_back(arg)
+
+	helper = idaapi.call_helper(idaapi.get_unk_type(8), arglist, name)
+	new_item = idaapi.cinsn_t()
+	new_item.op = idaapi.cit_expr
+	new_item.cexpr = helper
+	new_item.thisown = False
+	return new_item
