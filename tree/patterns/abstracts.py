@@ -1,6 +1,7 @@
 import idaapi
 
 import tree.consts as consts
+from tree.pattern_context import PatternContext
 from tree.processing import TreeProcessor
 
 class AbstractPattern:
@@ -219,9 +220,9 @@ class LabeledInstruction(AbstractPattern):
 
 class ItemsCollector:
 	op = -1
-	def __init__(self, pat, ctx):
+	def __init__(self, pat, function):
 		self.pat = pat
-		self.ctx = ctx
+		self.ctx = PatternContext(function)
 		self.collected_items = []
 
 	def check_patterns(self, item):

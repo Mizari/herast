@@ -10,8 +10,8 @@ class Matcher:
 	def __init__(self, processed_function):
 		self.function = processed_function
 		self.patterns = list()
-		self.gotos_collector = ItemsCollector(GotoPat(), PatternContext(self.function))
-		self.labels_collector = ItemsCollector(LabeledInstruction(), PatternContext(self.function))
+		self.gotos_collector = ItemsCollector(GotoPat(), self.function)
+		self.labels_collector = ItemsCollector(LabeledInstruction(), self.function)
 
 	def check_patterns(self, item) -> bool:
 		for pattern, handler, ctx in self.patterns:
