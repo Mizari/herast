@@ -9,6 +9,7 @@ idaapi.require('tree.patterns.abstracts')
 idaapi.require('tree.matcher')
 idaapi.require('tree.patterns.instructions')
 idaapi.require('tree.patterns.expressions')
+idaapi.require('tree.pattern_context')
 idaapi.require('loader')
 idaapi.require('views.patterns_manager_view')
 
