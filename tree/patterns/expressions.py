@@ -9,6 +9,12 @@ class CallExprPat(AbstractPattern):
 	op = idaapi.cot_call
 
 	def __init__(self, calling_function, *arguments, ignore_arguments=False, skip_missing=False):
+		if isinstance(calling_function, str):
+			calling_function = ObjPat(calling_function)
+
+		if calling_function is None:
+			calling_function = AnyPat()
+
 		self.calling_function = calling_function
 		self.arguments = arguments
 		self.ignore_arguments = ignore_arguments
