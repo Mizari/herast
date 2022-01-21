@@ -44,6 +44,13 @@ def get_obj_from_call_node(call_node):
 		return node.x
 
 	return None
+
+def get_following_instr(parent_block, item):
+	container = parent_block.cinsn.cblock
+	item_idx = container.index(item)
+	if item_idx == len(container) - 1:
+		return None
+	return container[item_idx + 1]
 	
 def resolve_name_address(name):
 	return idc.get_name_ea_simple(name)
