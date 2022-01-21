@@ -71,10 +71,8 @@ class SeqPat(AbstractPattern):
 		self.length = len(pats)
 
 	def check(self, instruction, ctx):
-		parent = ctx.current_function.body.find_parent_of(instruction)
-
-		# There is can be no sequence unless its parent is a cblock instruction
-		if parent is None or parent.op != idaapi.cit_block:
+		parent = ctx.get_parent_block(instruction)
+		if parent is None:
 			return False
 
 		container = parent.cinsn.cblock
