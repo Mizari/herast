@@ -241,6 +241,18 @@ class ItemsCollector:
 		t.process_tree()
 		return self.collected_items
 
+class RemovePattern(AbstractPattern):
+	op = -1
+	def __init__(self, pat):
+		self.pat = pat
+
+	def check(self, item, ctx):
+		if not self.pat.check(item, ctx):
+			return False
+
+		ctx.modify_instr(item, None)
+		return True
+
 
 import traceback, tree.consts
 # For debug purposes
