@@ -229,7 +229,7 @@ class ItemsCollector:
 			if self.pat.check(item, self.ctx):
 				self.collected_items.append(item)
 		except Exception as e:
-			print("[!] exception happend during collecting pattern in item")
+			print("[!] exception happend during collecting pattern in item :%s" % e)
 
 		return False
 
