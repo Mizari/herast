@@ -130,14 +130,16 @@ class TreeProcessor:
 
 	def process_tree2(self):
 		while self._process_tree():
-			pass
+			for subitem in iterate_all_subitems(self.tree_root):
+				self.is_tree_modified = self.matcher.check_patterns(self.cfunc, subitem)
 
-	def _process_tree2(self):
-		for subitem in iterate_all_subitems(self.tree_root):
-			if self.matcher.check_patterns(self.cfunc, subitem):
-				return True
+				# goto outer loop to iterate from start again
+				if self.is_tree_modified:
+					break
 
-		return False
+			# if tree is not modified, then iteration is complete
+			if not self.is_tree_modified:
+				break
 
 	@revert_check
 	def process_tree(self) -> None:
