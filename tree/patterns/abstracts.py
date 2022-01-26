@@ -183,11 +183,13 @@ class DeepExpr(AbstractPattern):
 		self.pat = pat
 
 	def check(self, expr, ctx):
-		m = FakeMatcher(self.pat, ctx)
-		t = TreeProcessor(ctx.current_function, expr, m, need_expression_traversal=True)
-		t.process_tree()
+		matcher = FakeMatcher(self.pat, ctx)
+		t = TreeProcessor(ctx.current_function, expr, matcher, need_expression_traversal=True)
+		def processing_callback(func, item):
+			return matcher.check_patterns(func, item)
+		t.process_tree2(processing_callback, True)
 
-		return m.found
+		return matcher.found
 
 
 class FakeMatcher:
@@ -236,7 +238,9 @@ class ItemsCollector:
 	def collect_items(self, item):
 		self.collected_items.clear()
 		t = TreeProcessor(self.ctx.current_function, item, self)
-		t.process_tree()
+		def processing_callback(func, item):
+			return self.check_patterns(func, item)
+		t.process_tree2(processing_callback, True)
 		return self.collected_items
 
 class RemovePattern(AbstractPattern):
