@@ -117,12 +117,12 @@ class TreeProcessor:
 	def __revert_check(func):
 		@functools.wraps(func)
 		def func_wrapper(self, *args, **kwargs):
-			if self.should_revisit_parent:
+			if self.is_tree_modified:
 				return
 			else:
 				func(self, *args, **kwargs)
-				while self.should_revisit_parent:
-					self.should_revisit_parent = False
+				while self.is_tree_modified:
+					self.is_tree_modified = False
 					func(self, *args, **kwargs)
 
 		return func_wrapper
