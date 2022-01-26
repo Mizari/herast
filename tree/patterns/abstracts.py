@@ -221,27 +221,25 @@ class LabeledInstruction(AbstractPattern):
 
 class ItemsCollector:
 	op = -1
-	def __init__(self, pat, tree_proc):
+	def __init__(self, pat):
 		self.pat = pat
-		self.ctx = PatternContext(tree_proc)
 		self.collected_items = []
 
-	def check_patterns(self, tree_proc, item):
-		self.ctx.cleanup()
+	def check_pattern(self, tree_proc, item):
+		ctx = PatternContext(tree_proc)
 		try:
-			if self.pat.check(item, self.ctx):
+			if self.pat.check(item, ctx):
 				self.collected_items.append(item)
 		except Exception as e:
 			print("[!] exception happend during collecting pattern in item :%s" % e)
 
 		return False
 
-	def collect_items(self, item):
+	def collect_items(self, tree_proc, item):
 		self.collected_items.clear()
 		def processing_callback(tree_proc, item):
-			return self.check_patterns(tree_proc, item)
-		t = self.ctx.tree_proc
-		t.process_tree(item, processing_callback, True)
+			return self.check_pattern(tree_proc, item)
+		tree_proc.process_tree(item, processing_callback, True)
 		return self.collected_items
 
 class RemovePattern(AbstractPattern):

@@ -13,8 +13,8 @@ class Matcher:
 		self.labels_collector = None
 
 	def check_patterns(self, tree_processor, item) -> bool:
-		self.gotos_collector = ItemsCollector(GotoPat(), tree_processor)
-		self.labels_collector = ItemsCollector(LabeledInstruction(), tree_processor)
+		self.gotos_collector = ItemsCollector(GotoPat())
+		self.labels_collector = ItemsCollector(LabeledInstruction())
 		ctx = PatternContext(tree_processor)
 
 		for pattern, handler in self.patterns:
@@ -70,7 +70,7 @@ class Matcher:
 		return tree_changed
 
 	def remove_item(self, ctx, removed_item):
-		gotos = self.gotos_collector.collect_items(removed_item)
+		gotos = self.gotos_collector.collect_items(ctx.tree_proc, removed_item)
 		if len(gotos) > 0:
 			print("[!] failed removing item with gotos in it")
 			return False
@@ -80,7 +80,7 @@ class Matcher:
 			print("[*] Failed to remove item from tree, because no parent is found", removed_item.opname)
 			return False
 
-		labels = self.labels_collector.collect_items(removed_item)
+		labels = self.labels_collector.collect_items(ctx.tree_proc, removed_item)
 		if len(labels) == 1 and labels[0] == removed_item:
 			next_item = utils.get_following_instr(parent, removed_item)
 			if next_item is None:
@@ -102,12 +102,12 @@ class Matcher:
 			return False
 
 	def replace_item(self, ctx, item, new_item):
-		gotos = self.gotos_collector.collect_items(item)
+		gotos = self.gotos_collector.collect_items(ctx.tree_proc, item)
 		if len(gotos) > 0:
 			print("[!] failed replacing item with gotos in it")
 			return False
 
-		labels = self.labels_collector.collect_items(item)
+		labels = self.labels_collector.collect_items(ctx.tree_proc, item)
 		if len(labels) > 1:
 			print("[!] failed replacing item with labels in it", labels, item)
 			return False
