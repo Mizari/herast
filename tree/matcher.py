@@ -14,7 +14,8 @@ class Matcher:
 		self.labels_collector = ItemsCollector(LabeledInstruction(), self.function)
 
 	def check_patterns(self, item) -> bool:
-		for pattern, handler, ctx in self.patterns:
+		ctx = PatternContext(self.function)
+		for pattern, handler in self.patterns:
 			try:
 				ctx.cleanup()
 			except Exception as e:
@@ -127,8 +128,7 @@ class Matcher:
 			return False
 
 	def insert_pattern(self, pat, handler):
-		ctx = PatternContext(self.function)
-		self.patterns.append((pat, handler, ctx))
+		self.patterns.append((pat, handler))
 
 	def expressions_traversal_is_needed(self):
 		abstract_expression_patterns = (VarBind, BindExpr)
