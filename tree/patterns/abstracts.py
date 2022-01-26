@@ -184,9 +184,9 @@ class DeepExpr(AbstractPattern):
 
 	def check(self, expr, ctx):
 		matcher = FakeMatcher(self.pat, ctx)
-		t = TreeProcessor(ctx.current_function)
 		def processing_callback(func, item):
 			return matcher.check_patterns(func, item)
+		t = TreeProcessor(ctx.current_function)
 		t.process_tree(expr, processing_callback, True)
 
 		return matcher.found
@@ -198,7 +198,8 @@ class FakeMatcher:
 		self.ctx = ctx
 		self.found = False
 
-	def check_patterns(self, function, item):
+	def check_patterns(self, tree_proc, item):
+		self.ctx.cleanup()
 		if not self.found:
 			if self.pat.check(item, self.ctx):
 				self.found = True
@@ -220,12 +221,12 @@ class LabeledInstruction(AbstractPattern):
 
 class ItemsCollector:
 	op = -1
-	def __init__(self, pat, function):
+	def __init__(self, pat, tree_proc):
 		self.pat = pat
-		self.ctx = PatternContext(function)
+		self.ctx = PatternContext(tree_proc)
 		self.collected_items = []
 
-	def check_patterns(self, function, item):
+	def check_patterns(self, tree_proc, item):
 		self.ctx.cleanup()
 		try:
 			if self.pat.check(item, self.ctx):
@@ -237,9 +238,9 @@ class ItemsCollector:
 
 	def collect_items(self, item):
 		self.collected_items.clear()
-		t = TreeProcessor(self.ctx.current_function)
-		def processing_callback(func, item):
-			return self.check_patterns(func, item)
+		def processing_callback(tree_proc, item):
+			return self.check_patterns(tree_proc, item)
+		t = self.ctx.tree_proc
 		t.process_tree(item, processing_callback, True)
 		return self.collected_items
 

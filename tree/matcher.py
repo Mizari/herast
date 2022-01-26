@@ -12,10 +12,10 @@ class Matcher:
 		self.gotos_collector = None
 		self.labels_collector = None
 
-	def check_patterns(self, function, item) -> bool:
-		self.gotos_collector = ItemsCollector(GotoPat(), function)
-		self.labels_collector = ItemsCollector(LabeledInstruction(), function)
-		ctx = PatternContext(function)
+	def check_patterns(self, tree_processor, item) -> bool:
+		self.gotos_collector = ItemsCollector(GotoPat(), tree_processor)
+		self.labels_collector = ItemsCollector(LabeledInstruction(), tree_processor)
+		ctx = PatternContext(tree_processor)
 
 		for pattern, handler in self.patterns:
 			try:

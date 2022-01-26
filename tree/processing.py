@@ -52,7 +52,7 @@ class TreeProcessor:
 				if not need_expression_traversal and subitem.is_expr():
 					continue
 
-				is_tree_modified = callback(self.cfunc, subitem)
+				is_tree_modified = callback(self, subitem)
 
 				# goto outer loop to iterate from start again
 				if is_tree_modified:

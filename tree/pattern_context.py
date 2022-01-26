@@ -10,8 +10,8 @@ class SavedVariable:
 		self.idx = idx
 
 class PatternContext:
-	def __init__(self, current_function):
-		self.current_function = current_function
+	def __init__(self, tree_proc):
+		self.tree_proc = tree_proc
 		self.expressions = dict()
 		self.variables = dict()
 		self.instrs_to_modify = []
@@ -47,7 +47,7 @@ class PatternContext:
 			yield itm
 
 	def get_parent_block(self, item):
-		parent = self.current_function.body.find_parent_of(item)
+		parent = self.tree_proc.cfunc.body.find_parent_of(item)
 		if parent is None or parent.op != idaapi.cit_block:
 			return None
 		return parent

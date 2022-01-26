@@ -75,8 +75,8 @@ def herast_callback(*args):
 				assert isinstance(cfunc.body.cblock, idaapi.cblock_t), "Function body must be a cblock_t"
 				tp = TreeProcessor(cfunc)
 
-				def processing_callback(cfunc, item):
-					return matcher.check_patterns(cfunc, item)
+				def processing_callback(tree_proc, item):
+					return matcher.check_patterns(tree_proc, item)
 
 				traversal_start = time.time()
 
