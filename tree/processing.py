@@ -66,7 +66,8 @@ def iterate_all_subitems(item):
 		unprocessed_items += get_children(current_item)
 
 class TreeProcessor:
-	def __init__(self, tree_root, matcher, need_expression_traversal=False):
+	def __init__(self, cfunc, tree_root, matcher, need_expression_traversal=False):
+		self.cfunc = cfunc
 		self.tree_root = tree_root
 		self.matcher = matcher
 		self.need_expression_traversal = need_expression_traversal
@@ -107,7 +108,7 @@ class TreeProcessor:
 		assert isinstance(cfunc.body, idaapi.cinsn_t), "Function body is not cinsn_t"
 		assert isinstance(cfunc.body.cblock, idaapi.cblock_t), "Function body must be a cblock_t"
 
-		return cls(cfunc.body, *args, **kwargs)
+		return cls(cfunc, cfunc.body, *args, **kwargs)
 
 	def _assert(self, cond, msg=""):
 		assert cond, "%s: %s" % (self.__class__.__name__, msg)
@@ -133,13 +134,13 @@ class TreeProcessor:
 
 	def _process_tree2(self):
 		for subitem in iterate_all_subitems(self.tree_root):
-			if self.matcher.check_patterns(subitem):
+			if self.matcher.check_patterns(self.cfunc, subitem):
 				return True
 
 		return False
 
 	@revert_check
-	def process_tree2(self) -> None:
+	def process_tree(self) -> None:
 		self.check_patterns(self.tree_root)
 		self.op2func[self.tree_root.op](self.tree_root)
 
@@ -148,7 +149,7 @@ class TreeProcessor:
 
 	def check_patterns(self, item):
 		if not self.should_revisit_parent:
-			self.should_revisit_parent = self.matcher.check_patterns(item)
+			self.should_revisit_parent = self.matcher.check_patterns(self.cfunc, item)
 
 	@revert_check
 	@trace_method

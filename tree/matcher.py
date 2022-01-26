@@ -7,14 +7,16 @@ import tree.utils as utils
 
 
 class Matcher:
-	def __init__(self, processed_function):
-		self.function = processed_function
+	def __init__(self):
 		self.patterns = list()
-		self.gotos_collector = ItemsCollector(GotoPat(), self.function)
-		self.labels_collector = ItemsCollector(LabeledInstruction(), self.function)
+		self.gotos_collector = None
+		self.labels_collector = None
 
-	def check_patterns(self, item) -> bool:
-		ctx = PatternContext(self.function)
+	def check_patterns(self, function, item) -> bool:
+		self.gotos_collector = ItemsCollector(GotoPat(), function)
+		self.labels_collector = ItemsCollector(LabeledInstruction(), function)
+		ctx = PatternContext(function)
+
 		for pattern, handler in self.patterns:
 			try:
 				ctx.cleanup()
@@ -132,7 +134,7 @@ class Matcher:
 
 	def expressions_traversal_is_needed(self):
 		abstract_expression_patterns = (VarBind, BindExpr)
-		for p, _, _ in self.patterns:
+		for p, _, in self.patterns:
 			if p.op >= 0 and p.op < idaapi.cit_empty or isinstance(p, abstract_expression_patterns):
 				return True
 

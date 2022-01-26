@@ -63,7 +63,7 @@ def herast_callback(*args):
 		cfunc, level = args[1], args[2]
 		if level == idaapi.CMAT_FINAL:
 			try:
-				m = Matcher(cfunc)
+				m = Matcher()
 
 				global storage
 				for p in storage.ready_patterns:
