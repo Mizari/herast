@@ -186,8 +186,7 @@ class DeepExpr(AbstractPattern):
 		matcher = FakeMatcher(self.pat, ctx)
 		def processing_callback(func, item):
 			return matcher.check_patterns(func, item)
-		t = TreeProcessor(ctx.current_function)
-		t.process_tree(expr, processing_callback, True)
+		ctx.tree_proc.process_tree(expr, processing_callback, True)
 
 		return matcher.found
 
