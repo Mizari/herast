@@ -40,16 +40,15 @@ def iterate_all_subitems(item):
 		unprocessed_items += get_children(current_item)
 
 class TreeProcessor:
-	def __init__(self, cfunc, tree_root):
+	def __init__(self, cfunc):
 		self.cfunc = cfunc
-		self.tree_root = tree_root
 		self.is_tree_modified = False
 
-	def process_tree(self, callback, need_expression_traversal=False):
+	def process_tree(self, tree_root, callback, need_expression_traversal=False):
 		iterate_from_start = True
 		while iterate_from_start:
 			iterate_from_start = False
-			for subitem in iterate_all_subitems(self.tree_root):
+			for subitem in iterate_all_subitems(tree_root):
 				if not need_expression_traversal and subitem.is_expr():
 					continue
 

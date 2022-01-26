@@ -73,14 +73,14 @@ def herast_callback(*args):
 
 				assert isinstance(cfunc.body, idaapi.cinsn_t), "Function body is not cinsn_t"
 				assert isinstance(cfunc.body.cblock, idaapi.cblock_t), "Function body must be a cblock_t"
-				tp = TreeProcessor(cfunc, cfunc.body)
+				tp = TreeProcessor(cfunc)
 
 				def processing_callback(cfunc, item):
 					return matcher.check_patterns(cfunc, item)
 
 				traversal_start = time.time()
 
-				tp.process_tree(processing_callback, need_expression_traversal=matcher.expressions_traversal_is_needed())
+				tp.process_tree(cfunc.body, processing_callback, need_expression_traversal=matcher.expressions_traversal_is_needed())
 
 				traversal_end = time.time()
 				print("[TIME] Tree traversal done within %f seconds" % (traversal_end - traversal_start))
