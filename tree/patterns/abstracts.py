@@ -181,29 +181,18 @@ class DeepExpr(AbstractPattern):
 
 	def __init__(self, pat):
 		self.pat = pat
-
-	def check(self, expr, ctx):
-		matcher = FakeMatcher(self.pat, ctx)
-		def processing_callback(func, item):
-			return matcher.check_patterns(func, item)
-		ctx.tree_proc.process_tree(expr, processing_callback, True)
-
-		return matcher.found
-
-
-class FakeMatcher:
-	def __init__(self, pat, ctx):
-		self.pat = pat
-		self.ctx = ctx
 		self.found = False
 
-	def check_patterns(self, tree_proc, item):
-		self.ctx.cleanup()
-		if not self.found:
-			if self.pat.check(item, self.ctx):
-				self.found = True
+	def check(self, expr, ctx):
+		self.found = False
+		def processing_callback(tree_proc, item):
+			if not self.found:
+				if self.pat.check(item, ctx):
+					self.found = True
+			return False
+		ctx.tree_proc.process_tree(expr, processing_callback, True)
 
-		return False
+		return self.found
 
 
 class LabeledInstruction(AbstractPattern):
