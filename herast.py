@@ -63,19 +63,22 @@ def herast_callback(*args):
 		cfunc, level = args[1], args[2]
 		if level == idaapi.CMAT_FINAL:
 			try:
-				m = Matcher()
+				matcher = Matcher()
 
 				global storage
 				for p in storage.ready_patterns:
 					if p.enabled:
 						for exported_pattern, exported_handler in p.module.__exported:
-							m.insert_pattern(exported_pattern, exported_handler)
+							matcher.insert_pattern(exported_pattern, exported_handler)
 
-				tp = TreeProcessor.from_cfunc(cfunc, m, m.expressions_traversal_is_needed())
-				
+				tp = TreeProcessor.from_cfunc(cfunc, matcher, matcher.expressions_traversal_is_needed())
+
+				def processing_callback(cfunc, item):
+					return matcher.check_patterns(cfunc, item)
+
 				traversal_start = time.time()
 
-				tp.process_tree2(need_expression_traversal=m.expressions_traversal_is_needed())
+				tp.process_tree2(processing_callback, need_expression_traversal=matcher.expressions_traversal_is_needed())
 
 				traversal_end = time.time()
 				print("[TIME] Tree traversal done within %f seconds" % (traversal_end - traversal_start))

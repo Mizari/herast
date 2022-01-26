@@ -128,7 +128,7 @@ class TreeProcessor:
 		return func_wrapper
 	revert_check = __revert_check.__func__
 
-	def process_tree2(self, need_expression_traversal=False):
+	def process_tree2(self, callback, need_expression_traversal=False):
 		iterate_from_start = True
 		while iterate_from_start:
 			iterate_from_start = False
@@ -136,7 +136,7 @@ class TreeProcessor:
 				if not need_expression_traversal and subitem.is_expr():
 					continue
 
-				is_tree_modified = self.matcher.check_patterns(self.cfunc, subitem)
+				is_tree_modified = callback(self.cfunc, subitem)
 
 				# goto outer loop to iterate from start again
 				if is_tree_modified:
