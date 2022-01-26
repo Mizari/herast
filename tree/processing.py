@@ -31,14 +31,47 @@ def trace_method(method):
 	return method_wrapper
 
 
-class TreeProcessor:
+# handler, that maps item_op to children_items_getter
+op2func = {}
+op2func.update({
+	idaapi.cit_expr:     lambda x: [x.cexpr],
+	idaapi.cit_return:   lambda x: [x.creturn.expr],
+	idaapi.cit_block:    lambda x: [i for i in x.cblock],
+	idaapi.cit_if:       lambda x: [x.cif.ithen, x.cif.ielse, x.cif.expr],
+	idaapi.cit_switch:   lambda x: [i for i in x.cswitch.cases] + [x.cswitch.expr],
+	idaapi.cit_while:    lambda x: [x.cwhile.body, x.cwhile.expr],
+	idaapi.cit_do:       lambda x: [x.cdo.body, x.cdo.expr],
+	idaapi.cit_for:      lambda x: [x.cfor.body, x.cfor.init, x.cfor.expr, x.cfor.init],
+	idaapi.cot_call:     lambda x: [i for i in x.a] + [x.x],
+})
 
+for i in unary_expressions_ops:
+	op2func[i] = lambda x: [x.x]
+
+for i in binary_expressions_ops:
+	op2func[i] = lambda x: [x.x, x.y]
+
+def get_children(item):
+	handler = op2func.get(item.op, None)
+	if handler is None:
+		return []
+	children = handler(item)
+	return list(filter(None, children))
+
+def iterate_all_subitems(item):
+	unprocessed_items = [item]
+	while len(unprocessed_items) != 0:
+		current_item = unprocessed_items.pop(0)
+		yield current_item
+		unprocessed_items += get_children(current_item)
+
+class TreeProcessor:
 	def __init__(self, tree_root, matcher, need_expression_traversal=False):
 		self.tree_root = tree_root
 		self.matcher = matcher
 		self.need_expression_traversal = need_expression_traversal
 		self.should_revisit_parent = False
-		
+
 		debug_print('has_deep_expressions = %s' % self.need_expression_traversal)
 
 		self.op2func = {i:self.__stub for i in range(100)}
@@ -68,7 +101,7 @@ class TreeProcessor:
 		self.op2func.update({
 			idaapi.cot_call: self._process_call_expr
 		})
-	
+
 	@classmethod
 	def from_cfunc(cls, cfunc, *args, **kwargs):
 		assert isinstance(cfunc.body, idaapi.cinsn_t), "Function body is not cinsn_t"
@@ -83,19 +116,30 @@ class TreeProcessor:
 	def __revert_check(func):
 		@functools.wraps(func)
 		def func_wrapper(self, *args, **kwargs):
-				if self.should_revisit_parent:
-					return
-				else:
+			if self.should_revisit_parent:
+				return
+			else:
+				func(self, *args, **kwargs)
+				while self.should_revisit_parent:
+					self.should_revisit_parent = False
 					func(self, *args, **kwargs)
-					while self.should_revisit_parent:
-						self.should_revisit_parent = False
-						func(self, *args, **kwargs)
 
 		return func_wrapper
 	revert_check = __revert_check.__func__
 
+	def process_tree2(self):
+		while self._process_tree():
+			pass
+
+	def _process_tree2(self):
+		for subitem in iterate_all_subitems(self.tree_root):
+			if self.matcher.check_patterns(subitem):
+				return True
+
+		return False
+
 	@revert_check
-	def process_tree(self) -> None:
+	def process_tree2(self) -> None:
 		self.check_patterns(self.tree_root)
 		self.op2func[self.tree_root.op](self.tree_root)
 
