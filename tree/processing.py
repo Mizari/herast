@@ -71,7 +71,7 @@ class TreeProcessor:
 		self.tree_root = tree_root
 		self.matcher = matcher
 		self.need_expression_traversal = need_expression_traversal
-		self.should_revisit_parent = False
+		self.is_tree_modified = False
 
 		debug_print('has_deep_expressions = %s' % self.need_expression_traversal)
 
@@ -148,8 +148,8 @@ class TreeProcessor:
 		pass
 
 	def check_patterns(self, item):
-		if not self.should_revisit_parent:
-			self.should_revisit_parent = self.matcher.check_patterns(self.cfunc, item)
+		if not self.is_tree_modified:
+			self.is_tree_modified = self.matcher.check_patterns(self.cfunc, item)
 
 	@revert_check
 	@trace_method
@@ -159,7 +159,7 @@ class TreeProcessor:
 		try:
 			for ins in cblock:
 				self.check_patterns(ins)
-				if self.should_revisit_parent:
+				if self.is_tree_modified:
 					break
 				
 				self.op2func[ins.op](ins)
@@ -322,7 +322,7 @@ class TreeProcessor:
 
 		for arg in args:
 			self.check_patterns(arg)
-			if self.should_revisit_parent:
+			if self.is_tree_modified:
 				break
 
 			self.op2func[arg.op](arg)
