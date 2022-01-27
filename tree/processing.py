@@ -58,3 +58,9 @@ class TreeProcessor:
 				if is_tree_modified:
 					iterate_from_start = True
 					break
+
+	def get_parent_block(self, item):
+		parent = self.cfunc.body.find_parent_of(item)
+		if parent is None or parent.op != idaapi.cit_block:
+			return None
+		return parent

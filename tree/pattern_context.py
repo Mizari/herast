@@ -47,4 +47,4 @@ class PatternContext:
 			yield itm
 
 	def get_parent_block(self, item):
-		return self.tree_proc.get_parent_block()
+		return self.tree_proc.get_parent_block(item)
