@@ -39,6 +39,15 @@ def iterate_all_subitems(item):
 		yield current_item
 		unprocessed_items += get_children(current_item)
 
+def iterate_all_subinstrs(instr):
+	unprocessed_items = [instr]
+	while len(unprocessed_items) != 0:
+		current_item = unprocessed_items.pop(0)
+		yield current_item
+		children = get_children(current_item)
+		children = [c for c in children if not c.is_expr()]
+		unprocessed_items += children
+
 class TreeModificationContext:
 	def __init__(self, tree_proc, item):
 		self.tree_proc = tree_proc
@@ -75,17 +84,14 @@ class TreeProcessor:
 		self.cfunc = cfunc
 		self.is_tree_modified = False
 
-	def process_tree(self, tree_root, callback, need_expression_traversal=False):
+	def process(self, tree_root, callback, iterator):
 		if self.is_tree_modified:
 			return
 
 		self.is_tree_modified = True # just to enter into while loop
 		while self.is_tree_modified:
 			self.is_tree_modified = False
-			for subitem in iterate_all_subitems(tree_root):
-				if not need_expression_traversal and subitem.is_expr():
-					continue
-
+			for subitem in iterator(tree_root):
 				is_tree_modified = callback(self, subitem)
 				if is_tree_modified:
 					self.is_tree_modified = True
@@ -93,6 +99,12 @@ class TreeProcessor:
 				# goto outer loop to iterate from start again
 				if self.is_tree_modified:
 					break
+
+	def process_all_items(self, tree_root, callback):
+		return self.process(tree_root, callback, iterate_all_subitems)
+
+	def process_all_instrs(self, tree_root, callback):
+		return self.process(tree_root, callback, iterate_all_subinstrs)
 
 	def get_parent_block(self, item):
 		parent = self.cfunc.body.find_parent_of(item)
@@ -102,7 +114,7 @@ class TreeProcessor:
 
 	def collect_gotos(self, haystack):
 		gotos = []
-		for potential_goto in iterate_all_subitems(haystack):
+		for potential_goto in iterate_all_subinstrs(haystack):
 			if potential_goto.op == idaapi.cit_goto:
 				gotos.append(potential_goto)
 
@@ -110,7 +122,7 @@ class TreeProcessor:
 
 	def collect_labels(self, haystack):
 		labels = []
-		for potential_label in iterate_all_subitems(haystack):
+		for potential_label in iterate_all_subinstrs(haystack):
 			if potential_label.label_num != -1:
 				labels.append(potential_label)
 

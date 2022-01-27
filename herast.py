@@ -80,7 +80,10 @@ def herast_callback(*args):
 
 		traversal_start = time.time()
 
-		tp.process_tree(cfunc.body, processing_callback, need_expression_traversal=matcher.expressions_traversal_is_needed())
+		if matcher.expressions_traversal_is_needed():
+			tp.process_all_items(cfunc.body, processing_callback)
+		else:
+			tp.process_all_instrs(cfunc.body, processing_callback)
 
 		traversal_end = time.time()
 		print("[TIME] Tree traversal done within %f seconds" % (traversal_end - traversal_start))
