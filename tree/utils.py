@@ -48,6 +48,8 @@ def get_obj_from_call_node(call_node):
 def get_following_instr(parent_block, item):
 	container = parent_block.cinsn.cblock
 	item_idx = container.index(item)
+	if item_idx is None:
+		return None
 	if item_idx == len(container) - 1:
 		return None
 	return container[item_idx + 1]
