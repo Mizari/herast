@@ -47,7 +47,4 @@ class PatternContext:
 			yield itm
 
 	def get_parent_block(self, item):
-		parent = self.tree_proc.cfunc.body.find_parent_of(item)
-		if parent is None or parent.op != idaapi.cit_block:
-			return None
-		return parent
+		return self.tree_proc.get_parent_block()
