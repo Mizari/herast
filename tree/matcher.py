@@ -58,72 +58,12 @@ class Matcher:
 			new_item = modified_instr.new_item
 
 			if new_item is None:
-				rv = self.remove_item(tree_proc, item)
+				rv = tree_proc.remove_item(item)
 			else:
-				rv = self.replace_item(tree_proc, item, new_item)
+				rv = tree_proc.replace_item(item, new_item)
 			if rv: tree_changed = True
 
 		return tree_changed
-
-	def remove_item(self, tree_proc, removed_item):
-		gotos = tree_proc.collect_gotos(removed_item)
-		if len(gotos) > 0:
-			print("[!] failed removing item with gotos in it")
-			return False
-
-		parent = tree_proc.get_parent_block(removed_item)
-		if parent is None:
-			print("[*] Failed to remove item from tree, because no parent is found", removed_item.opname)
-			return False
-
-		labels = tree_proc.collect_labels(removed_item)
-		if len(labels) == 1 and labels[0] == removed_item:
-			next_item = utils.get_following_instr(parent, removed_item)
-			if next_item is None:
-				print("[!] failed2removing item with labels in it", next_item)
-				return False
-			else:
-				next_item.label_num = removed_item.label_num
-				removed_item.label_num = -1
-
-		elif len(labels) > 0:
-			print("[!] failed removing item with labels in it")
-			return False
-
-		rv = utils.remove_instruction_from_ast(removed_item, parent.cinsn)
-		if rv:
-			return True
-		else:
-			print("[*] Failed to remove item from tree")
-			return False
-
-	def replace_item(self, tree_proc, item, new_item):
-		gotos = tree_proc.collect_gotos(item)
-		if len(gotos) > 0:
-			print("[!] failed replacing item with gotos in it")
-			return False
-
-		labels = tree_proc.collect_labels(item)
-		if len(labels) > 1:
-			print("[!] failed replacing item with labels in it", labels, item)
-			return False
-		elif len(labels) == 1 and labels[0] != item:
-			print("[!] failed replacing item with labels in it")
-			return False
-
-		if new_item.ea == idaapi.BADADDR and item.ea != idaapi.BADADDR:
-			new_item.ea = item.ea
-
-		if new_item.label_num == -1 and item.label_num != -1:
-			new_item.label_num = item.label_num
-			item.label_num = -1
-
-		try:
-			idaapi.qswap(item, new_item)
-			return True
-		except Exception as e:
-			print("[!] Got an exception during ctree instr replacing")
-			return False
 
 	def insert_pattern(self, pat, handler):
 		self.patterns.append((pat, handler))
