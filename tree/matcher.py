@@ -40,30 +40,26 @@ class Matcher:
 				continue
 
 			try:
-				is_tree_modified = self.finalize(ctx)
+				self.finalize(ctx)
 			except Exception as e:
 				print('[!] Got an exception during context finalizing: %s' % e)
 				continue
 
-			if is_tree_modified:
+			if tree_processor.is_tree_modified:
 				return True
 
 		return False
 
 	def finalize(self, ctx):
-		tree_changed = False
 		tree_proc = ctx.tree_proc
 		for modified_instr in ctx.modified_instrs():
 			item = modified_instr.item
 			new_item = modified_instr.new_item
 
 			if new_item is None:
-				rv = tree_proc.remove_item(item)
+				tree_proc.remove_item(item)
 			else:
-				rv = tree_proc.replace_item(item, new_item)
-			if rv: tree_changed = True
-
-		return tree_changed
+				tree_proc.replace_item(item, new_item)
 
 	def insert_pattern(self, pat, handler):
 		self.patterns.append((pat, handler))

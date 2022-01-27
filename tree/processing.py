@@ -45,18 +45,22 @@ class TreeProcessor:
 		self.is_tree_modified = False
 
 	def process_tree(self, tree_root, callback, need_expression_traversal=False):
-		iterate_from_start = True
-		while iterate_from_start:
-			iterate_from_start = False
+		if self.is_tree_modified:
+			return
+
+		self.is_tree_modified = True # just to enter into while loop
+		while self.is_tree_modified:
+			self.is_tree_modified = False
 			for subitem in iterate_all_subitems(tree_root):
 				if not need_expression_traversal and subitem.is_expr():
 					continue
 
 				is_tree_modified = callback(self, subitem)
+				if is_tree_modified:
+					self.is_tree_modified = True
 
 				# goto outer loop to iterate from start again
-				if is_tree_modified:
-					iterate_from_start = True
+				if self.is_tree_modified:
 					break
 
 	def get_parent_block(self, item):
@@ -89,47 +93,47 @@ class TreeProcessor:
 		gotos = self.collect_gotos(item)
 		if len(gotos) > 0:
 			print("[!] failed removing item with gotos in it")
-			return False
+			return
 
 		parent = self.get_parent_block(item)
 		if parent is None:
 			print("[*] Failed to remove item from tree, because no parent is found", item.opname)
-			return False
+			return
 
 		labels = self.collect_labels(item)
 		if len(labels) == 1 and labels[0] == item:
 			next_item = utils.get_following_instr(parent, item)
 			if next_item is None:
 				print("[!] failed2removing item with labels in it", next_item)
-				return False
+				return
 			else:
 				next_item.label_num = item.label_num
 				item.label_num = -1
 
 		elif len(labels) > 0:
 			print("[!] failed removing item with labels in it")
-			return False
+			return
 
 		rv = utils.remove_instruction_from_ast(item, parent.cinsn)
-		if rv:
-			return True
-		else:
+		if not rv:
 			print("[*] Failed to remove item from tree")
-			return False
+			return
+
+		self.is_tree_modified = True
 
 	def replace_item(self, item, new_item):
 		gotos = self.collect_gotos(item)
 		if len(gotos) > 0:
 			print("[!] failed replacing item with gotos in it")
-			return False
+			return
 
 		labels = self.collect_labels(item)
 		if len(labels) > 1:
 			print("[!] failed replacing item with labels in it", labels, item)
-			return False
+			return
 		elif len(labels) == 1 and labels[0] != item:
 			print("[!] failed replacing item with labels in it")
-			return False
+			return
 
 		if new_item.ea == idaapi.BADADDR and item.ea != idaapi.BADADDR:
 			new_item.ea = item.ea
@@ -140,7 +144,6 @@ class TreeProcessor:
 
 		try:
 			idaapi.qswap(item, new_item)
-			return True
+			self.is_tree_modified = True
 		except Exception as e:
 			print("[!] Got an exception during ctree instr replacing")
-			return False
