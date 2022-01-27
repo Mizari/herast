@@ -39,6 +39,37 @@ def iterate_all_subitems(item):
 		yield current_item
 		unprocessed_items += get_children(current_item)
 
+class TreeModificationContext:
+	def __init__(self, tree_proc, item):
+		self.tree_proc = tree_proc
+		self.item = item
+		self.labels = None
+		self.gotos = None
+		self.next_item = None
+		self.parent = None
+	
+	def get_gotos(self):
+		if self.gotos is None:
+			self.gotos = self.tree_proc.collect_gotos(self.item)
+		return self.gotos
+
+	def get_labels(self):
+		if self.labels is None:
+			self.labels = self.tree_proc.collect_labels(self.item)
+		return self.labels
+
+	def get_next_item(self):
+		if self.next_item is None:
+			parent = self.get_parent()
+			if parent is not None:
+				self.next_item = utils.get_following_instr(parent, self.item)
+		return self.next_item
+
+	def get_parent(self):
+		if self.parent is None:
+			self.parent = self.tree_proc.get_parent_block(self.item)
+		return self.parent
+
 class TreeProcessor:
 	def __init__(self, cfunc):
 		self.cfunc = cfunc
@@ -85,29 +116,37 @@ class TreeProcessor:
 
 		return labels
 
-	def remove_item(self, item):
-		gotos = self.collect_gotos(item)
+	def is_removal_possible(self, tmc):
+		item = tmc.item
+		gotos = tmc.get_gotos()
 		if len(gotos) > 0:
 			print("[!] failed removing item with gotos in it")
-			return
+			return False
 
-		parent = self.get_parent_block(item)
+		parent = tmc.get_parent()
 		if parent is None:
 			print("[*] Failed to remove item from tree, because no parent is found", item.opname)
-			return
+			return False
 
-		labels = self.collect_labels(item)
-		next_item = None
+		labels = tmc.get_labels()
 		if len(labels) == 1 and labels[0] == item:
-			next_item = utils.get_following_instr(parent, item)
+			next_item = tmc.get_next_item()
 			if next_item is None:
 				print("[!] failed2removing item with labels in it", next_item)
-				return
+				return False
 
 		elif len(labels) > 0:
 			print("[!] failed removing item with labels in it")
+			return False
+
+		return True
+
+	def remove_item(self, item):
+		tmc = TreeModificationContext(self, item)
+		if not self.is_removal_possible(tmc):
 			return
 
+		parent = tmc.get_parent()
 		saved_lbl = item.label_num
 		item.label_num = -1
 		rv = utils.remove_instruction_from_ast(item, parent.cinsn)
@@ -118,21 +157,32 @@ class TreeProcessor:
 
 		self.is_tree_modified = True
 
+		next_item = tmc.get_next_item()
 		if next_item is not None:
 			next_item.label_num = saved_lbl
-
-	def replace_item(self, item, new_item):
-		gotos = self.collect_gotos(item)
+	
+	def is_replacing_possible(self, tmc):
+		item = tmc.item
+		gotos = tmc.get_gotos()
 		if len(gotos) > 0:
 			print("[!] failed replacing item with gotos in it")
-			return
+			return False
 
-		labels = self.collect_labels(item)
+		labels = tmc.get_labels()
 		if len(labels) > 1:
 			print("[!] failed replacing item with labels in it", labels, item)
-			return
-		elif len(labels) == 1 and labels[0] != item:
+			return False
+
+		if len(labels) == 1 and labels[0] != item:
 			print("[!] failed replacing item with labels in it")
+			return False
+
+		return True
+
+	def replace_item(self, item, new_item):
+		tmc = TreeModificationContext(self, item)
+
+		if not self.is_replacing_possible(tmc):
 			return
 
 		if new_item.ea == idaapi.BADADDR and item.ea != idaapi.BADADDR:

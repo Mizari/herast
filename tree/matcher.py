@@ -39,11 +39,7 @@ class Matcher:
 				print('[!] Got an exception during pattern handling: %s' % e)
 				continue
 
-			try:
-				self.finalize(ctx)
-			except Exception as e:
-				print('[!] Got an exception during context finalizing: %s' % e)
-				continue
+			self.finalize(ctx)
 
 			if tree_processor.is_tree_modified:
 				return True
