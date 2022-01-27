@@ -101,24 +101,29 @@ class TreeProcessor:
 			return
 
 		labels = self.collect_labels(item)
+		next_item = None
 		if len(labels) == 1 and labels[0] == item:
 			next_item = utils.get_following_instr(parent, item)
 			if next_item is None:
 				print("[!] failed2removing item with labels in it", next_item)
 				return
-			else:
-				next_item.label_num = item.label_num
 
 		elif len(labels) > 0:
 			print("[!] failed removing item with labels in it")
 			return
 
+		saved_lbl = item.label_num
+		item.label_num = -1
 		rv = utils.remove_instruction_from_ast(item, parent.cinsn)
 		if not rv:
+			item.label_num = saved_lbl
 			print("[*] Failed to remove item from tree")
 			return
 
 		self.is_tree_modified = True
+
+		if next_item is not None:
+			next_item.label_num = saved_lbl
 
 	def replace_item(self, item, new_item):
 		gotos = self.collect_gotos(item)
