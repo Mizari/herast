@@ -108,7 +108,6 @@ class TreeProcessor:
 				return
 			else:
 				next_item.label_num = item.label_num
-				item.label_num = -1
 
 		elif len(labels) > 0:
 			print("[!] failed removing item with labels in it")
@@ -140,7 +139,6 @@ class TreeProcessor:
 
 		if new_item.label_num == -1 and item.label_num != -1:
 			new_item.label_num = item.label_num
-			item.label_num = -1
 
 		try:
 			idaapi.qswap(item, new_item)
