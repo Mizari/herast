@@ -57,30 +57,31 @@ class Matcher:
 
 	def finalize(self, ctx):
 		tree_changed = False
+		tree_proc = ctx.tree_proc
 		for modified_instr in ctx.modified_instrs():
 			item = modified_instr.item
 			new_item = modified_instr.new_item
 
 			if new_item is None:
-				rv = self.remove_item(ctx, item)
+				rv = self.remove_item(tree_proc, item)
 			else:
-				rv = self.replace_item(ctx, item, new_item)
+				rv = self.replace_item(tree_proc, item, new_item)
 			if rv: tree_changed = True
 
 		return tree_changed
 
-	def remove_item(self, ctx, removed_item):
-		gotos = self.gotos_collector.collect_items(ctx.tree_proc, removed_item)
+	def remove_item(self, tree_proc, removed_item):
+		gotos = self.gotos_collector.collect_items(tree_proc, removed_item)
 		if len(gotos) > 0:
 			print("[!] failed removing item with gotos in it")
 			return False
 
-		parent = ctx.get_parent_block(removed_item)
+		parent = tree_proc.get_parent_block(removed_item)
 		if parent is None:
 			print("[*] Failed to remove item from tree, because no parent is found", removed_item.opname)
 			return False
 
-		labels = self.labels_collector.collect_items(ctx.tree_proc, removed_item)
+		labels = self.labels_collector.collect_items(tree_proc, removed_item)
 		if len(labels) == 1 and labels[0] == removed_item:
 			next_item = utils.get_following_instr(parent, removed_item)
 			if next_item is None:
@@ -101,13 +102,13 @@ class Matcher:
 			print("[*] Failed to remove item from tree")
 			return False
 
-	def replace_item(self, ctx, item, new_item):
-		gotos = self.gotos_collector.collect_items(ctx.tree_proc, item)
+	def replace_item(self, tree_proc, item, new_item):
+		gotos = self.gotos_collector.collect_items(tree_proc, item)
 		if len(gotos) > 0:
 			print("[!] failed replacing item with gotos in it")
 			return False
 
-		labels = self.labels_collector.collect_items(ctx.tree_proc, item)
+		labels = self.labels_collector.collect_items(tree_proc, item)
 		if len(labels) > 1:
 			print("[!] failed replacing item with labels in it", labels, item)
 			return False
