@@ -1,9 +1,10 @@
 import idaapi
 
 class InstrModification:
-	def __init__(self, item, new_item):
+	def __init__(self, item, new_item, is_forced=False):
 		self.item = item
 		self.new_item = new_item
+		self.is_forced = is_forced
 
 class SavedVariable:
 	def __init__(self, idx):
@@ -39,8 +40,8 @@ class PatternContext:
 		self.expressions.clear()
 		self.instrs_to_modify.clear()
 
-	def modify_instr(self, item, new_item):
-		self.instrs_to_modify.append(InstrModification(item, new_item))
+	def modify_instr(self, item, new_item, is_forced=False):
+		self.instrs_to_modify.append(InstrModification(item, new_item, is_forced=is_forced))
 
 	def modified_instrs(self):
 		for itm in self.instrs_to_modify:

@@ -141,9 +141,9 @@ class TreeProcessor:
 
 		return True
 
-	def remove_item(self, item):
+	def remove_item(self, item, is_forced=False):
 		tmc = TreeModificationContext(self, item)
-		if not self.is_removal_possible(tmc):
+		if not is_forced and not self.is_removal_possible(tmc):
 			return
 
 		parent = tmc.get_parent()
@@ -179,10 +179,10 @@ class TreeProcessor:
 
 		return True
 
-	def replace_item(self, item, new_item):
+	def replace_item(self, item, new_item, is_forced=False):
 		tmc = TreeModificationContext(self, item)
 
-		if not self.is_replacing_possible(tmc):
+		if not is_forced and not self.is_replacing_possible(tmc):
 			return
 
 		if new_item.ea == idaapi.BADADDR and item.ea != idaapi.BADADDR:
