@@ -56,37 +56,37 @@ class UnloadCallbackAction(idaapi.action_handler_t):
 #     def update(self, ctx):
 #         return idaapi.AST_ENABLE_ALWAYS
 
+matcher = Matcher()
+for p in storage.ready_patterns:
+	if p.enabled:
+		for exported_pattern, exported_handler in p.module.__exported:
+			matcher.insert_pattern(exported_pattern, exported_handler)
 def herast_callback(*args):
 	event = args[0]
+	if event != idaapi.hxe_maturity:
+		return 0
 
-	if event == idaapi.hxe_maturity:
-		cfunc, level = args[1], args[2]
-		if level == idaapi.CMAT_FINAL:
-			try:
-				matcher = Matcher()
+	cfunc, level = args[1], args[2]
+	if level != idaapi.CMAT_FINAL:
+		return 0
 
-				global storage
-				for p in storage.ready_patterns:
-					if p.enabled:
-						for exported_pattern, exported_handler in p.module.__exported:
-							matcher.insert_pattern(exported_pattern, exported_handler)
+	try:
+		assert isinstance(cfunc.body, idaapi.cinsn_t), "Function body is not cinsn_t"
+		assert isinstance(cfunc.body.cblock, idaapi.cblock_t), "Function body must be a cblock_t"
+		tp = TreeProcessor(cfunc)
 
-				assert isinstance(cfunc.body, idaapi.cinsn_t), "Function body is not cinsn_t"
-				assert isinstance(cfunc.body.cblock, idaapi.cblock_t), "Function body must be a cblock_t"
-				tp = TreeProcessor(cfunc)
+		def processing_callback(tree_proc, item):
+			return matcher.check_patterns(tree_proc, item)
 
-				def processing_callback(tree_proc, item):
-					return matcher.check_patterns(tree_proc, item)
+		traversal_start = time.time()
 
-				traversal_start = time.time()
+		tp.process_tree(cfunc.body, processing_callback, need_expression_traversal=matcher.expressions_traversal_is_needed())
 
-				tp.process_tree(cfunc.body, processing_callback, need_expression_traversal=matcher.expressions_traversal_is_needed())
-
-				traversal_end = time.time()
-				print("[TIME] Tree traversal done within %f seconds" % (traversal_end - traversal_start))
-			except Exception as e:
-				print(e)
-				raise e
+		traversal_end = time.time()
+		print("[TIME] Tree traversal done within %f seconds" % (traversal_end - traversal_start))
+	except Exception as e:
+		print(e)
+		raise e
 
 	return 0
 herast_callback.__reload_helper = True
