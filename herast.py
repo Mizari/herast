@@ -61,6 +61,7 @@ for p in storage.ready_patterns:
 	if p.enabled:
 		for exported_pattern, exported_handler in p.module.__exported:
 			matcher.insert_pattern(exported_pattern, exported_handler)
+
 def herast_callback(*args):
 	event = args[0]
 	if event != idaapi.hxe_maturity:
