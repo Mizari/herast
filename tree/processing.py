@@ -71,22 +71,18 @@ class TreeProcessor:
 
 	def collect_gotos(self, haystack):
 		gotos = []
-		def process_item(tree_proc, potential_goto):
+		for potential_goto in iterate_all_subitems(haystack):
 			if potential_goto.op == idaapi.cit_goto:
 				gotos.append(potential_goto)
-			return False
 
-		self.process_tree(haystack, process_item, need_expression_traversal=True)
 		return gotos
 
 	def collect_labels(self, haystack):
 		labels = []
-		def process_item(tree_proc, potential_label):
+		for potential_label in iterate_all_subitems(haystack):
 			if potential_label.label_num != -1:
 				labels.append(potential_label)
-			return False
 
-		self.process_tree(haystack, process_item)
 		return labels
 
 	def remove_item(self, item):
