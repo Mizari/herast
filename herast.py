@@ -20,8 +20,6 @@ from loader import PatternStorageModel
 
 import time
 
-storage = PatternStorageModel()
-
 def unload_callback():
 	try:
 		return idaapi.remove_hexrays_callback(herast_callback)
@@ -56,6 +54,7 @@ class UnloadCallbackAction(idaapi.action_handler_t):
 #     def update(self, ctx):
 #         return idaapi.AST_ENABLE_ALWAYS
 
+storage = PatternStorageModel()
 matcher = Matcher()
 for p in storage.ready_patterns:
 	if p.enabled:
