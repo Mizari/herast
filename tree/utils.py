@@ -120,7 +120,12 @@ def make_block_insn(instructions, address, label_num=-1):
 def make_helper_instr(name, *args):
 	arglist = idaapi.carglist_t()
 	for arg in args:
-		arglist.push_back(arg)
+		if arg is None:
+			continue
+
+		narg = idaapi.carg_t()
+		narg.assign(arg)
+		arglist.push_back(narg)
 
 	helper = idaapi.call_helper(idaapi.get_unk_type(8), arglist, name)
 	new_item = idaapi.cinsn_t()
