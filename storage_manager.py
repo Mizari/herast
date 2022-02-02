@@ -220,3 +220,7 @@ class SchemesStorage:
 			return True
 		else:
 			return False
+
+def get_enabled_storages():
+	storage = StorageManager()
+	return [s for s in storage.schemes_storages if s.enabled]

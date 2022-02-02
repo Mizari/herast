@@ -16,7 +16,7 @@ idaapi.require('views.patterns_manager_view')
 from tree.processing import TreeProcessor
 from tree.matcher import Matcher
 from views.patterns_manager_view import ShowScriptManager
-from storage_manager import StorageManager
+import storage_manager
 
 import time
 
@@ -54,8 +54,6 @@ class UnloadCallbackAction(idaapi.action_handler_t):
 #     def update(self, ctx):
 #         return idaapi.AST_ENABLE_ALWAYS
 
-storage = StorageManager()
-
 def herast_callback(*args):
 	event = args[0]
 	if event != idaapi.hxe_maturity:
@@ -71,10 +69,9 @@ def herast_callback(*args):
 		tp = TreeProcessor(cfunc)
 
 		matcher = Matcher()
-		for p in storage.schemes_storages:
-			if p.enabled:
-				for exported_pattern, exported_handler in p.module.__exported:
-					matcher.insert_pattern(exported_pattern, exported_handler)
+		for s in storage_manager.get_enabled_storages():
+			for exported_pattern, exported_handler in s.module.__exported:
+				matcher.insert_pattern(exported_pattern, exported_handler)
 		def processing_callback(tree_proc, item):
 			return matcher.check_patterns(tree_proc, item)
 
@@ -112,7 +109,7 @@ def main():
 		print("Failed to initialize Hex-Rays SDK")
 		return
 
-	global storage
+	storage = storage_manager.StorageManager()
 	action = ShowScriptManager(storage)
 	idaapi.register_action(idaapi.action_desc_t(action.name, action.description, action, action.hotkey))  
 
