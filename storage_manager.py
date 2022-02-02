@@ -61,13 +61,13 @@ def singleton(cls):
 
 
 @singleton
-class PatternStorageModel(QtCore.QAbstractListModel):
+class StorageManager(QtCore.QAbstractListModel):
 	ARRAY_NAME = "$herast:PatternStorage"
 	DEFAULT_DIRECTORY = "ready_patterns"
 	
 	def __init__(self, directory_path=DEFAULT_DIRECTORY, *args):
 		super().__init__(*args)
-		self.ready_patterns = list()
+		self.schemes_storages = list()
 		self.directory = os.path.join(os.path.dirname(__file__), directory_path)
 		# print("[*] Patterns directory: '%s'" % self.directory)
 
@@ -75,16 +75,16 @@ class PatternStorageModel(QtCore.QAbstractListModel):
 	
 	# Qt overload
 	def rowCount(self, parent):
-		return len(self.ready_patterns)
+		return len(self.schemes_storages)
 
 	def data(self, index, role):
 		if not index.isValid():
 			return QtCore.QVariant()
 
-		if index.row() >= len(self.ready_patterns):
+		if index.row() >= len(self.schemes_storages):
 			return QtCore.QVariant()
 
-		pat = self.ready_patterns[index.row()]
+		pat = self.schemes_storages[index.row()]
 
 		if role == QtCore.Qt.DisplayRole:
 			return QtCore.QVariant(pat.filename)
@@ -129,7 +129,7 @@ class PatternStorageModel(QtCore.QAbstractListModel):
 				error = False
 				log = "Disabled!"
 			
-			self.ready_patterns.append(ReadyPattern(file_path, m, enabled, error, log))
+			self.schemes_storages.append(SchemesStorage(file_path, m, enabled, error, log))
 
 		if len(stored_enabled_array) != 0 and len(enabled_presented_on_fs) != len(stored_enabled_array):
 				print("[!] Some of patterns stored inside IDB missing on fs, they will be excluded from IDB.")
@@ -138,43 +138,43 @@ class PatternStorageModel(QtCore.QAbstractListModel):
 	def disable_pattern(self, indices):
 		for qindex in indices:
 			row = qindex.row()
-			self.ready_patterns[row].disable()
+			self.schemes_storages[row].disable()
 			self.dataChanged.emit(qindex, qindex)
 		self.sync_idb_array()
 
 	def enable_pattern(self, indices):
 		for qindex in indices:
 			row = qindex.row()
-			self.ready_patterns[row].enable()
+			self.schemes_storages[row].enable()
 			self.dataChanged.emit(qindex, qindex)
 		self.sync_idb_array()
 
 	def reload_pattern(self, indices):
 		for qindex in indices:
 			row = qindex.row()
-			if not self.ready_patterns[row].reload():
-				del self.ready_patterns[row]
+			if not self.schemes_storages[row].reload():
+				del self.schemes_storages[row]
 			self.dataChanged.emit(qindex, qindex)
 			self.sync_idb_array()
 
 	def disable_all_patterns(self):
-		for i, p in enumerate(self.ready_patterns):
+		for i, p in enumerate(self.schemes_storages):
 			p.disable()
 			qindex = self.index(i)
 			self.dataChanged.emit(qindex, qindex)
 		self.sync_idb_array()
 
 	def refresh_patterns(self):
-		self.ready_patterns = list()
+		self.schemes_storages = list()
 		self._load_patterns()
-		self.dataChanged.emit(self.index(0), self.index(len(self.ready_patterns)))
+		self.dataChanged.emit(self.index(0), self.index(len(self.schemes_storages)))
 
 	def sync_idb_array(self):
-		new_array_to_store = [p.filename for p in self.ready_patterns if p.enabled]
+		new_array_to_store = [p.filename for p in self.schemes_storages if p.enabled]
 		save_long_str_to_idb(self.ARRAY_NAME, json.dumps(new_array_to_store))
 
 
-class ReadyPattern:
+class SchemesStorage:
 	def __init__(self, path, module, enabled, error, log):
 		self.path = path
 		self.filename = os.path.basename(path)

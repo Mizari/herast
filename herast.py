@@ -10,13 +10,13 @@ idaapi.require('tree.matcher')
 idaapi.require('tree.patterns.instructions')
 idaapi.require('tree.patterns.expressions')
 idaapi.require('tree.pattern_context')
-idaapi.require('loader')
+idaapi.require('storage_manager')
 idaapi.require('views.patterns_manager_view')
 
 from tree.processing import TreeProcessor
 from tree.matcher import Matcher
 from views.patterns_manager_view import ShowScriptManager
-from loader import PatternStorageModel
+from storage_manager import StorageManager
 
 import time
 
@@ -54,7 +54,7 @@ class UnloadCallbackAction(idaapi.action_handler_t):
 #     def update(self, ctx):
 #         return idaapi.AST_ENABLE_ALWAYS
 
-storage = PatternStorageModel()
+storage = StorageManager()
 
 def herast_callback(*args):
 	event = args[0]
