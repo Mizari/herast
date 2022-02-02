@@ -55,11 +55,6 @@ class UnloadCallbackAction(idaapi.action_handler_t):
 #         return idaapi.AST_ENABLE_ALWAYS
 
 storage = PatternStorageModel()
-matcher = Matcher()
-for p in storage.ready_patterns:
-	if p.enabled:
-		for exported_pattern, exported_handler in p.module.__exported:
-			matcher.insert_pattern(exported_pattern, exported_handler)
 
 def herast_callback(*args):
 	event = args[0]
@@ -75,6 +70,11 @@ def herast_callback(*args):
 		assert isinstance(cfunc.body.cblock, idaapi.cblock_t), "Function body must be a cblock_t"
 		tp = TreeProcessor(cfunc)
 
+		matcher = Matcher()
+		for p in storage.ready_patterns:
+			if p.enabled:
+				for exported_pattern, exported_handler in p.module.__exported:
+					matcher.insert_pattern(exported_pattern, exported_handler)
 		def processing_callback(tree_proc, item):
 			return matcher.check_patterns(tree_proc, item)
 
