@@ -1,17 +1,12 @@
-import idaapi
-
-idaapi.require('tree.patterns.abstracts')
-idaapi.require('tree.patterns.expressions')
-idaapi.require('tree.patterns.instructions')
-idaapi.require('tree.utils')
+import struct
 
 from tree.patterns.abstracts import *
-from tree.patterns.expressions import CallExprPat, AsgExprPat, ObjPat, AsgExprPat, AsgxorExprPat
-from tree.patterns.instructions import ExInsPat, IfInsPat, BlockPat, ForInsPat
+from tree.patterns.expressions import AsgExprPat, AsgxorExprPat
+from tree.patterns.instructions import ExInsPat, BlockPat, ForInsPat
 
 from tree.utils import *
 
-pattern = SeqPat([
+pattern = SeqPat(
 				# ExInsPat(AsgExprPat(BindExpr('gobj', ObjPat()), SkipCasts(CallExprPat(ObjPat(name='j__malloc_base'), ignore_arguments=True)))),
 				# ExInsPat(AnyPat()),
 				ExInsPat(AsgExprPat(AnyPat(), BindExpr('num0', AnyPat()))),
@@ -25,14 +20,11 @@ pattern = SeqPat([
 				ForInsPat(
 					AnyPat(), AnyPat(), AnyPat(),
 					BlockPat(
-						SeqPat([
-							ExInsPat(BindExpr('xor', AsgxorExprPat(AnyPat(), AnyPat())))
-						])
+						ExInsPat(BindExpr('xor', AsgxorExprPat(AnyPat(), AnyPat())))
 					)
 				)
-		])
+		)
 
-import struct
 def handler(item, ctx):
 	print('%#x' % item.ea)
 	try:
