@@ -71,7 +71,7 @@ def herast_callback(*args):
 		tp = TreeProcessor(cfunc)
 
 		matcher = Matcher()
-		for p in storage.ready_patterns:
+		for p in storage.schemes_storages:
 			if p.enabled:
 				for exported_pattern, exported_handler in p.module.__exported:
 					matcher.insert_pattern(exported_pattern, exported_handler)
