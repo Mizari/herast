@@ -10,17 +10,17 @@ class Matcher:
 		self.patterns = list()
 
 	def check_patterns(self, tree_processor, item) -> bool:
-		ctx = PatternContext(tree_processor)
+		item_ctx = PatternContext(tree_processor)
 
 		for pattern, handler in self.patterns:
 			try:
-				ctx.cleanup()
+				item_ctx.cleanup()
 			except Exception as e:
 				print('[!] Got an exception during context cleanup: %s' % e)
 				continue
 
 			try:
-				if not pattern.check(item, ctx):
+				if not pattern.check(item, item_ctx):
 					continue
 			except Exception as e:
 				print('[!] Got an exception during pattern matching: %s' % e)
@@ -29,7 +29,7 @@ class Matcher:
 			try:
 				is_tree_modified = False
 				if handler is not None:
-					is_tree_modified = handler(item, ctx)
+					is_tree_modified = handler(item, item_ctx)
 				if not isinstance(is_tree_modified, bool):
 					raise Exception("Handler return invalid return type, should be bool")
 
@@ -39,14 +39,14 @@ class Matcher:
 				print('[!] Got an exception during pattern handling: %s' % e)
 				continue
 
-			self.finalize(ctx)
+			self.finalize_item_context(item_ctx)
 
 			if tree_processor.is_tree_modified:
 				return True
 
 		return False
 
-	def finalize(self, ctx):
+	def finalize_item_context(self, ctx):
 		tree_proc = ctx.tree_proc
 		for modified_instr in ctx.modified_instrs():
 			item = modified_instr.item
