@@ -2,17 +2,17 @@ import idaapi
 
 from tree.patterns.abstracts import BindExpr, VarBind
 from tree.pattern_context import PatternContext
-import tree.utils as utils
+from schemes.base_scheme import Scheme
 
 
 class Matcher:
 	def __init__(self):
-		self.patterns = list()
+		self.schemes = list()
 
-	def check_patterns(self, tree_processor, item) -> bool:
+	def check_schemes(self, tree_processor, item) -> bool:
 		item_ctx = PatternContext(tree_processor)
 
-		for pattern, handler in self.patterns:
+		for scheme in self.schemes:
 			try:
 				item_ctx.cleanup()
 			except Exception as e:
@@ -20,16 +20,14 @@ class Matcher:
 				continue
 
 			try:
-				if not pattern.check(item, item_ctx):
+				if not scheme.on_new_item(item, item_ctx):
 					continue
 			except Exception as e:
 				print('[!] Got an exception during pattern matching: %s' % e)
 				continue
 
 			try:
-				is_tree_modified = False
-				if handler is not None:
-					is_tree_modified = handler(item, item_ctx)
+				is_tree_modified = scheme.on_matched_item(item, item_ctx)
 				if not isinstance(is_tree_modified, bool):
 					raise Exception("Handler return invalid return type, should be bool")
 
@@ -57,13 +55,14 @@ class Matcher:
 			else:
 				tree_proc.replace_item(item, new_item)
 
-	def insert_pattern(self, pat, handler):
-		self.patterns.append((pat, handler))
+	def add_scheme(self, scheme):
+		self.schemes.append(scheme)
 
 	def expressions_traversal_is_needed(self):
 		abstract_expression_patterns = (VarBind, BindExpr)
-		for p, _, in self.patterns:
-			if p.op >= 0 and p.op < idaapi.cit_empty or isinstance(p, abstract_expression_patterns):
-				return True
+		for s in self.schemes:
+			for p in s.get_patterns():
+				if p.op >= 0 and p.op < idaapi.cit_empty or isinstance(p, abstract_expression_patterns):
+					return True
 
 		return False

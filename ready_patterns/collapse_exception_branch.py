@@ -1,10 +1,12 @@
 import idaapi
 
 from tree.patterns.abstracts import *
-from tree.patterns.expressions import CallExprPat, AsgExprPat, ObjPat
-from tree.patterns.instructions import ExInsPat, IfInsPat, BlockPat
+from tree.patterns.expressions import CallExprPat, AsgExprPat
+from tree.patterns.instructions import ExInsPat, IfInsPat
 
 from tree.utils import *
+
+from schemes.single_pattern_schemes import SPScheme
 
 def make_call_expr(fname=None):
 	return SkipCasts(CallExprPat(fname, ignore_arguments=True))
@@ -58,28 +60,29 @@ pattern = IfInsPat(
 	ExceptionBody(first_call_pattern, excstr_getter_pattern, last_call_pattern)
 )
 
-def handler(item, ctx):
-	helper_args = []
+class ExceptionCollapserScheme(SPScheme):
+	def on_matched_item(self, item, ctx: PatternContext):
+		helper_args = []
 
-	if_expr = ctx.get_expr("if_expr")
-	if if_expr is not None:
-		arg1 = idaapi.carg_t()
-		arg1.assign(if_expr)
-		helper_args.append(arg1)
+		if_expr = ctx.get_expr("if_expr")
+		if if_expr is not None:
+			arg1 = idaapi.carg_t()
+			arg1.assign(if_expr)
+			helper_args.append(arg1)
 
-	exception_str = ctx.get_expr("exception_str")
-	if exception_str is not None:
-		if exception_str.op == idaapi.cot_obj:
-			arg2 = idaapi.carg_t()
-			arg2.assign(exception_str)
-			helper_args.append(arg2)
+		exception_str = ctx.get_expr("exception_str")
+		if exception_str is not None:
+			if exception_str.op == idaapi.cot_obj:
+				arg2 = idaapi.carg_t()
+				arg2.assign(exception_str)
+				helper_args.append(arg2)
 
-	new_item = make_helper_instr("__throw_if", *helper_args)
+		new_item = make_helper_instr("__throw_if", *helper_args)
 
-	ctx.modify_instr(item, new_item)
+		ctx.modify_instr(item, new_item)
 
-	return False
+		return False
 
 __exported = [
-	(pattern, handler),
+	ExceptionCollapserScheme("exception_collapser", pattern)
 ]

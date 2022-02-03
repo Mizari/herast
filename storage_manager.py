@@ -4,6 +4,8 @@ import idc
 import importlib
 import importlib.util
 
+from typing import List
+
 import os
 import glob
 import traceback
@@ -67,12 +69,12 @@ class StorageManager(QtCore.QAbstractListModel):
 	
 	def __init__(self, directory_path=DEFAULT_DIRECTORY, *args):
 		super().__init__(*args)
-		self.schemes_storages = list()
+		self.schemes_storages: List(SchemesStorage) = list()
 		self.directory = os.path.join(os.path.dirname(__file__), directory_path)
 		# print("[*] Patterns directory: '%s'" % self.directory)
 
-		self._load_patterns()
-	
+		self._load_schemes()
+
 	# Qt overload
 	def rowCount(self, parent):
 		return len(self.schemes_storages)
@@ -103,7 +105,7 @@ class StorageManager(QtCore.QAbstractListModel):
 	#     pass
 
 	# Helper functions
-	def _load_patterns(self):
+	def _load_schemes(self):
 		stored_string = load_long_str_from_idb(self.ARRAY_NAME) or '[]'
 		stored_enabled_array = json.loads(stored_string)
 		enabled_presented_on_fs = list()
@@ -135,21 +137,21 @@ class StorageManager(QtCore.QAbstractListModel):
 				print("[!] Some of patterns stored inside IDB missing on fs, they will be excluded from IDB.")
 				save_long_str_to_idb(self.ARRAY_NAME, json.dumps(enabled_presented_on_fs))
 
-	def disable_pattern(self, indices):
+	def disable_storage(self, indices):
 		for qindex in indices:
 			row = qindex.row()
 			self.schemes_storages[row].disable()
 			self.dataChanged.emit(qindex, qindex)
 		self.sync_idb_array()
 
-	def enable_pattern(self, indices):
+	def enable_storage(self, indices):
 		for qindex in indices:
 			row = qindex.row()
 			self.schemes_storages[row].enable()
 			self.dataChanged.emit(qindex, qindex)
 		self.sync_idb_array()
 
-	def reload_pattern(self, indices):
+	def reload_storage(self, indices):
 		for qindex in indices:
 			row = qindex.row()
 			if not self.schemes_storages[row].reload():
@@ -157,16 +159,16 @@ class StorageManager(QtCore.QAbstractListModel):
 			self.dataChanged.emit(qindex, qindex)
 			self.sync_idb_array()
 
-	def disable_all_patterns(self):
+	def disable_all_storages(self):
 		for i, p in enumerate(self.schemes_storages):
 			p.disable()
 			qindex = self.index(i)
 			self.dataChanged.emit(qindex, qindex)
 		self.sync_idb_array()
 
-	def refresh_patterns(self):
+	def refresh_storages(self):
 		self.schemes_storages = list()
-		self._load_patterns()
+		self._load_schemes()
 		self.dataChanged.emit(self.index(0), self.index(len(self.schemes_storages)))
 
 	def sync_idb_array(self):

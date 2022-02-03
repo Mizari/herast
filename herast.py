@@ -11,12 +11,19 @@ idaapi.require('tree.patterns.instructions')
 idaapi.require('tree.patterns.expressions')
 idaapi.require('tree.pattern_context')
 idaapi.require('storage_manager')
-idaapi.require('views.patterns_manager_view')
+idaapi.require('tree.pattern_context')
+idaapi.require('schemes.base_scheme')
+idaapi.require('schemes.multi_pattern_schemes')
+idaapi.require('schemes.single_pattern_schemes')
+idaapi.require('scheme_manager')
+idaapi.require('views.storage_manager_view')
+
 
 from tree.processing import TreeProcessor
 from tree.matcher import Matcher
-from views.patterns_manager_view import ShowScriptManager
+from views.storage_manager_view import ShowScriptManager
 import storage_manager
+import scheme_manager
 
 import time
 
@@ -69,11 +76,11 @@ def herast_callback(*args):
 		tp = TreeProcessor(cfunc)
 
 		matcher = Matcher()
-		for s in storage_manager.get_enabled_storages():
-			for exported_pattern, exported_handler in s.module.__exported:
-				matcher.insert_pattern(exported_pattern, exported_handler)
+		for s in scheme_manager.get_enabled_schemes():
+			matcher.add_scheme(s)
+
 		def processing_callback(tree_proc, item):
-			return matcher.check_patterns(tree_proc, item)
+			return matcher.check_schemes(tree_proc, item)
 
 		traversal_start = time.time()
 
