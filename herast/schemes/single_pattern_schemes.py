@@ -1,5 +1,5 @@
-from schemes.base_scheme import Scheme
-from tree.pattern_context import PatternContext
+from herast.schemes.base_scheme import Scheme
+from herast.tree.pattern_context import PatternContext
 
 
 class SPScheme(Scheme):

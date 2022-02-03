@@ -1,5 +1,5 @@
-import storage_manager
-from schemes.base_scheme import Scheme
+import herast.storage_manager as storage_manager
+from herast.schemes.base_scheme import Scheme
 
 
 def get_enabled_schemes():

@@ -1,4 +1,4 @@
-from tree.pattern_context import PatternContext
+from herast.tree.pattern_context import PatternContext
 
 class Scheme:
 	def __init__(self, name):

@@ -1,12 +1,12 @@
 import idaapi
 
-from tree.patterns.abstracts import *
-from tree.patterns.expressions import CallExprPat, AsgExprPat
-from tree.patterns.instructions import ExInsPat, IfInsPat
+from herast.tree.patterns.abstracts import *
+from herast.tree.patterns.expressions import CallExprPat, AsgExprPat
+from herast.tree.patterns.instructions import ExInsPat, IfInsPat
 
-from tree.utils import *
+from herast.tree.utils import *
 
-from schemes.single_pattern_schemes import SPScheme
+from herast.schemes.single_pattern_schemes import SPScheme
 
 def make_call_expr(fname=None):
 	return SkipCasts(CallExprPat(fname, ignore_arguments=True))

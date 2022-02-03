@@ -1,31 +1,31 @@
+import time
 import idaapi
 import ida_hexrays
 
 # order of requires from imported to importers) is most likely important
-idaapi.require('tree.consts')
-idaapi.require('tree.utils')
-idaapi.require('tree.processing')
-idaapi.require('tree.patterns.abstracts')
-idaapi.require('tree.matcher')
-idaapi.require('tree.patterns.instructions')
-idaapi.require('tree.patterns.expressions')
-idaapi.require('tree.pattern_context')
-idaapi.require('storage_manager')
-idaapi.require('tree.pattern_context')
-idaapi.require('schemes.base_scheme')
-idaapi.require('schemes.multi_pattern_schemes')
-idaapi.require('schemes.single_pattern_schemes')
-idaapi.require('scheme_manager')
-idaapi.require('views.storage_manager_view')
+idaapi.require('herast.tree.consts')
+idaapi.require('herast.tree.utils')
+idaapi.require('herast.tree.processing')
+idaapi.require('herast.tree.patterns.abstracts')
+idaapi.require('herast.tree.matcher')
+idaapi.require('herast.tree.patterns.instructions')
+idaapi.require('herast.tree.patterns.expressions')
+idaapi.require('herast.tree.pattern_context')
+idaapi.require('herast.storage_manager')
+idaapi.require('herast.tree.pattern_context')
+idaapi.require('herast.schemes.base_scheme')
+idaapi.require('herast.schemes.multi_pattern_schemes')
+idaapi.require('herast.schemes.single_pattern_schemes')
+idaapi.require('herast.scheme_manager')
+idaapi.require('herast.views.storage_manager_view')
 
 
-from tree.processing import TreeProcessor
-from tree.matcher import Matcher
-from views.storage_manager_view import ShowScriptManager
-import storage_manager
-import scheme_manager
+from herast.tree.processing import TreeProcessor
+from herast.tree.matcher import Matcher
+from herast.views.storage_manager_view import ShowScriptManager
+import herast.storage_manager as storage_manager
+import herast.scheme_manager as scheme_manager
 
-import time
 
 def unload_callback():
 	try:
@@ -130,5 +130,7 @@ def main():
 
 
 
-if __name__ == '__main__':
+if __name__ == '__plugins__herast':
 	main()
+else:
+	print("not in main", __name__)

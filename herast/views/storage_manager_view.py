@@ -2,7 +2,7 @@ from PyQt5 import QtCore, QtWidgets, QtGui
 
 import idaapi
 
-from storage_manager import StorageManager
+from herast.storage_manager import StorageManager
 
 
 class StorageManagerForm(idaapi.PluginForm):

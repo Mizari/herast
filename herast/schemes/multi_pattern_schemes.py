@@ -1,4 +1,4 @@
-from schemes.base_scheme import Scheme
+from herast.schemes.base_scheme import Scheme
 
 
 class MPScheme(Scheme):
