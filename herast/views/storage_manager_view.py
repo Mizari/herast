@@ -163,9 +163,9 @@ class StorageManagerForm(idaapi.PluginForm):
 		# self.model = QtGui.QStandardItemModel()
 		# self.model.setHorizontalHeaderLabels(["Name"])
 		
-		patterns_list = QtWidgets.QTreeView()
-		patterns_list.setModel(self.model)
-		patterns_list.setItemDelegate(BoldDelegate())
+		storages_list = QtWidgets.QTreeView()
+		storages_list.setModel(self.model)
+		storages_list.setItemDelegate(BoldDelegate())
 		# self.tree_view.setSortingEnabled(True)
 
 
@@ -178,13 +178,13 @@ class StorageManagerForm(idaapi.PluginForm):
 		btn_expand_all = QtWidgets.QPushButton("Expand all")
 		btn_collapse_all = QtWidgets.QPushButton("Collapse all")
 
-		btn_expand_all.clicked.connect(patterns_list.expandAll)
-		btn_collapse_all.clicked.connect(patterns_list.collapseAll)
+		btn_expand_all.clicked.connect(storages_list.expandAll)
+		btn_collapse_all.clicked.connect(storages_list.collapseAll)
 
-		patterns_list.setMaximumWidth(patterns_list.size().width() // 3)
-		patterns_list.setSelectionMode(QtWidgets.QAbstractItemView.SingleSelection)
+		storages_list.setMaximumWidth(storages_list.size().width() // 3)
+		storages_list.setSelectionMode(QtWidgets.QAbstractItemView.SingleSelection)
 
-		patterns_list.horizontalScrollBar().setEnabled(True)
+		storages_list.horizontalScrollBar().setEnabled(True)
 
 		bottom_btns_grid_box = QtWidgets.QGridLayout()
 		bottom_btns_grid_box.addWidget(btn_refresh_all, 0, 0)
@@ -219,7 +219,7 @@ class StorageManagerForm(idaapi.PluginForm):
 
 		left_vertical_box = QtWidgets.QVBoxLayout()
 		left_vertical_box.setSpacing(0)
-		left_vertical_box.addWidget(patterns_list)
+		left_vertical_box.addWidget(storages_list)
 		left_vertical_box.addLayout(left_btns_grid_box)
 
 
@@ -248,12 +248,12 @@ class StorageManagerForm(idaapi.PluginForm):
 		# grid_box.addWidget(patterns_list, 0, 0)
 
 		def idi_nahuy(index):
-			patterns_list.header().setSectionResizeMode(0, QtWidgets.QHeaderView.Stretch)
-			patterns_list.header().setSectionResizeMode(0, QtWidgets.QHeaderView.ResizeToContents)
-			patterns_list.resizeColumnToContents(0)
+			storages_list.header().setSectionResizeMode(0, QtWidgets.QHeaderView.Stretch)
+			storages_list.header().setSectionResizeMode(0, QtWidgets.QHeaderView.ResizeToContents)
+			storages_list.resizeColumnToContents(0)
 
-		patterns_list.expanded.connect(idi_nahuy)
-		patterns_list.collapsed.connect(idi_nahuy)
+		storages_list.expanded.connect(idi_nahuy)
+		storages_list.collapsed.connect(idi_nahuy)
 
 		self.parent.setLayout(horizontal_box)
 
