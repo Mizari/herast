@@ -18,6 +18,8 @@ idaapi.require('herast.schemes.multi_pattern_schemes')
 idaapi.require('herast.schemes.single_pattern_schemes')
 idaapi.require('herast.scheme_manager')
 idaapi.require('herast.views.storage_manager_view')
+idaapi.require('herast.tree.callbacks')
+idaapi.require('herast.tree.actions')
 
 
 from herast.tree.processing import TreeProcessor
@@ -25,6 +27,9 @@ from herast.tree.matcher import Matcher
 from herast.views.storage_manager_view import ShowScriptManager
 import herast.storage_manager as storage_manager
 import herast.scheme_manager as scheme_manager
+
+from herast.tree.actions import action_manager, hx_callback_manager
+from herast.tree.selection_factory import PatternCreationHandler
 
 
 def unload_callback():
@@ -116,8 +121,7 @@ def main():
 		print("Failed to initialize Hex-Rays SDK")
 		return
 
-	storage = storage_manager.StorageManager()
-	action = ShowScriptManager(storage)
+	action = ShowScriptManager()
 	idaapi.register_action(idaapi.action_desc_t(action.name, action.description, action, action.hotkey))  
 
 	for cb in ida_hexrays.__cbhooks_t.instances:
@@ -127,6 +131,9 @@ def main():
 
 	print('Hooking for HexRays events')
 	idaapi.install_hexrays_callback(herast_callback)
+
+	action_manager.initialize()
+	hx_callback_manager.initialize()
 
 
 
