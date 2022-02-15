@@ -141,7 +141,5 @@ def main():
 	hx_callback_manager.initialize()
 
 
-if __name__ == '__plugins__herast':
-	main()
-else:
-	print("not in main", __name__)
+main()
+# if __name__ == '__plugins__herast':
