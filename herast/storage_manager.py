@@ -223,6 +223,13 @@ class SchemesStorage:
 
 schemes_storages = {}
 
+storages_folders = set()
+default_storage_dir = os.path.dirname(__file__) + "\\ready_patterns\\"
+if os.path.exists(default_storage_dir):
+	storages_folders.add(default_storage_dir)
+storages_files = set()
+
+
 def load_storage(filename):
 	module = load_storage_module_from_file(filename)
 	if module is None:
@@ -293,20 +300,19 @@ class SchemeStorageTreeItem:
 
 
 class StorageManager(QtCore.QAbstractItemModel):
-	DEFAULT_DIRECTORY = "ready_patterns"
-
 	def __init__(self):
 		super().__init__()
 		self.root = SchemeStorageTreeItem(["File"])
-		self.directory = os.path.dirname(__file__) + "\\ready_patterns\\"
-		assert os.path.exists(self.directory)
+		for storage_folder in storages_folders:
+			self.__add_folder(storage_folder)
 
-		self.__populate()
-
-	def __populate(self):
-		for full_path in glob.iglob(self.directory + '/**/**.py', recursive=True):
-			relative_path = os.path.relpath(full_path, start=self.directory)
-			load_storage(full_path)
+	def __add_folder(self, storage_folder):
+		for full_path in glob.iglob(storage_folder + '/**/**.py', recursive=True):
+			relative_path = os.path.relpath(full_path, start=storage_folder)
+			rv = load_storage(full_path)
+			if not rv:
+				print("failed to load", full_path)
+				continue
 
 			splited_path = relative_path.split(os.sep)
 			basename = splited_path.pop()
@@ -324,7 +330,6 @@ class StorageManager(QtCore.QAbstractItemModel):
 					parent_item = child
 
 			parent_item.children.append(SchemeStorageTreeItem([basename], SchemeStorageTreeItem.TYPE_FILE, parent=parent_item))
-
 
 	def index(self, row, column, parent_index):
 		if not self.hasIndex(row, column, parent_index):
