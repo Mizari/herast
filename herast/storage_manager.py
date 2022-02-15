@@ -317,10 +317,10 @@ class StorageManager(QtCore.QAbstractItemModel):
 
 	def __add_folder(self, storage_folder):
 		for full_path in glob.iglob(storage_folder + '/**/**.py', recursive=True):
-			relative_path = os.path.relpath(full_path, start=storage_folder)
 			if get_storage(full_path) is None:
 				continue
 
+			relative_path = os.path.relpath(full_path, start=storage_folder)
 			splited_path = relative_path.split(os.sep)
 			basename = splited_path.pop()
 			assert os.path.basename(full_path) == basename, "Extracted basename doesn't match with actual basename"
