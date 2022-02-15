@@ -189,7 +189,7 @@ class DeepExpr(AbstractPattern):
 				if self.pat.check(item, ctx):
 					self.found = True
 			return False
-		ctx.tree_proc.process_tree(expr, processing_callback, True)
+		ctx.tree_proc.process_all_items(expr, processing_callback)
 
 		return self.found
 
@@ -226,7 +226,7 @@ class ItemsCollector:
 		self.collected_items.clear()
 		def processing_callback(tree_proc, item):
 			return self.check_pattern(tree_proc, item)
-		tree_proc.process_tree(item, processing_callback, True)
+		tree_proc.process_all_items(item, processing_callback)
 		return self.collected_items
 
 class RemovePattern(AbstractPattern):
