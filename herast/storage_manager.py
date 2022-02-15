@@ -159,7 +159,7 @@ class StorageManager(QtCore.QAbstractListModel):
 
 
 class SchemesStorage:
-	def __init__(self, path, module, enabled, error, log):
+	def __init__(self, path, module, enabled, error=False, log="Enabled!"):
 		self.path = path
 		self.filename = os.path.basename(path)
 		self.module = module
@@ -241,8 +241,7 @@ def load_storage_file(filename):
 		return False
 
 	is_enabled = filename in get_enabled_idb_storages()
-
-	storage = SchemesStorage(filename, module, is_enabled, True, "Disabled!")
+	storage = SchemesStorage(filename, module, is_enabled)
 	schemes_storages[filename] = storage
 	return True
 
