@@ -188,8 +188,11 @@ class SchemesStorage:
 		if os.path.isfile(self.path) and os.access(self.path, os.R_OK):
 			with open(self.path, 'r') as f:
 				self.source = f.read()
-	
+
 	def enable(self):
+		if self.enabled:
+			return
+
 		if not self.error:
 			self.log = "Enabled!"
 			if self.module is None:
@@ -198,6 +201,9 @@ class SchemesStorage:
 				self.enabled = True
 
 	def disable(self):
+		if not self.enabled:
+			return
+
 		self.enabled = False
 		if not self.error:
 			self.log = "Disabled!"
