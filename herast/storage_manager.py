@@ -282,7 +282,8 @@ class StorageManager(QtCore.QAbstractItemModel):
 	def __init__(self):
 		super().__init__()
 		self.root = SchemeStorageTreeItem(["File"])
-		self.directory = os.path.join(os.path.dirname('D:\\Share\\git-stuff\\herast\\huy.txt'), self.DEFAULT_DIRECTORY)
+		self.directory = os.path.dirname(__file__) + "\\ready_patterns\\"
+		assert os.path.exists(self.directory)
 
 		self.__populate()
 
