@@ -2,7 +2,7 @@ import struct
 
 from herast.tree.patterns.abstracts import *
 from herast.tree.patterns.expressions import AsgExprPat, AsgxorExprPat
-from herst.tree.patterns.instructions import ExInsPat, BlockPat, ForInsPat
+from herast.tree.patterns.instructions import ExInsPat, BlockPat, ForInsPat
 
 from herast.schemes.single_pattern_schemes import SPScheme
 
