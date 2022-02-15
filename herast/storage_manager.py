@@ -229,8 +229,17 @@ if os.path.exists(default_storage_dir):
 	storages_folders.add(default_storage_dir)
 storages_files = set()
 
+def load_all_storages():
+	for folder in storages_folders:
+		load_storage_folder(folder)
+	for file in storages_files:
+		load_storage_file(file)
 
-def load_storage(filename):
+def load_storage_folder(folder_name):
+	for full_path in glob.iglob(folder_name + '/**/**.py', recursive=True):
+		load_storage_file(full_path)
+
+def load_storage_file(filename):
 	module = load_storage_module_from_file(filename)
 	if module is None:
 		return False
@@ -309,9 +318,7 @@ class StorageManager(QtCore.QAbstractItemModel):
 	def __add_folder(self, storage_folder):
 		for full_path in glob.iglob(storage_folder + '/**/**.py', recursive=True):
 			relative_path = os.path.relpath(full_path, start=storage_folder)
-			rv = load_storage(full_path)
-			if not rv:
-				print("failed to load", full_path)
+			if get_storage(full_path) is None:
 				continue
 
 			splited_path = relative_path.split(os.sep)

@@ -136,9 +136,9 @@ def main():
 	print('Hooking for HexRays events')
 	idaapi.install_hexrays_callback(herast_callback)
 
+	storage_manager.load_all_storages()
 	action_manager.initialize()
 	hx_callback_manager.initialize()
-
 
 
 if __name__ == '__plugins__herast':
