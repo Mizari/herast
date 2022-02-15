@@ -14,10 +14,12 @@ import json
 from PyQt5 import QtCore, QtGui
 
 
-def load_module_from_file(path):
+def load_storage_module_from_file(path):
 	spec = importlib.util.spec_from_file_location("module", path)
 	module = importlib.util.module_from_spec(spec)
 	spec.loader.exec_module(module)
+	if not hasattr(module, "__exported"):
+		return None
 	return module
 
 
@@ -49,10 +51,6 @@ def _color_with_opacity(tone, opacity=160):
 	return color
 
 """
-def exports_assert(module):
-	assert hasattr(module, "__exported")
-
-
 def singleton(cls):
 	instances = {}
 	def getinstance(*args, **kwargs):
@@ -174,6 +172,7 @@ class StorageManager(QtCore.QAbstractListModel):
 	def sync_idb_array(self):
 		new_array_to_store = [p.filename for p in self.schemes_storages if p.enabled]
 		save_long_str_to_idb(self.ARRAY_NAME, json.dumps(new_array_to_store))
+"""
 
 
 class SchemesStorage:
@@ -207,8 +206,7 @@ class SchemesStorage:
 		if os.path.isfile(self.path) and os.access(self.path, os.R_OK):
 			try:
 				del self.module
-				self.module = load_module_from_file(self.path)
-				exports_assert(self.module)
+				self.module = load_storage_module_from_file(self.path)
 				self.error = False
 			except Exception as e:
 				self.module = None
@@ -222,7 +220,20 @@ class SchemesStorage:
 			return True
 		else:
 			return False
-"""
+
+schemes_storages = {}
+
+def load_storage(filename):
+	module = load_storage_module_from_file(filename)
+	if module is None:
+		return False
+
+	storage = SchemesStorage(filename, module, True, True, "Disabled!")
+	schemes_storages[filename] = storage
+	return True
+
+def get_storage(filename):
+	return schemes_storages.get(filename, None)
 
 class SchemeStorageTreeItem:
 	FILENAME_COLUMN = 0
@@ -290,6 +301,7 @@ class StorageManager(QtCore.QAbstractItemModel):
 	def __populate(self):
 		for full_path in glob.iglob(self.directory + '/**/**.py', recursive=True):
 			relative_path = os.path.relpath(full_path, start=self.directory)
+			load_storage(full_path)
 
 			splited_path = relative_path.split(os.sep)
 			basename = splited_path.pop()
@@ -382,5 +394,4 @@ class StorageManager(QtCore.QAbstractItemModel):
 	# 	return QtCore.QAbstractItemModel.flags(index)
 
 def get_enabled_storages():
-	storage = StorageManager()
-	return [s for s in storage.schemes_storages if s.enabled]
+	return [s for s in schemes_storages.values() if s.enabled]
