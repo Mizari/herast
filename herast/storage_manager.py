@@ -228,7 +228,12 @@ def load_storage(filename):
 	if module is None:
 		return False
 
-	storage = SchemesStorage(filename, module, True, True, "Disabled!")
+	ARRAY_NAME = "$herast:PatternStorage"
+	stored_string = load_long_str_from_idb(ARRAY_NAME) or '[]'
+	stored_enabled_array = json.loads(stored_string)
+	is_enabled = filename in stored_enabled_array
+
+	storage = SchemesStorage(filename, module, is_enabled, True, "Disabled!")
 	schemes_storages[filename] = storage
 	return True
 
