@@ -1,11 +1,6 @@
 import idaapi
 import idc
 
-import importlib
-import importlib.util
-
-from typing import List
-
 import os
 import glob
 import traceback
@@ -13,16 +8,16 @@ import json
 
 from PyQt5 import QtCore, QtGui
 
-from .tree.utils import save_long_str_to_idb, load_long_str_from_idb
+from .tree.utils import save_long_str_to_idb
+from .tree.utils import load_long_str_from_idb
+from .tree.utils import load_python_module_from_file
+
 
 def load_storage_module_from_file(path):
-	spec = importlib.util.spec_from_file_location("module", path)
-	module = importlib.util.module_from_spec(spec)
-	spec.loader.exec_module(module)
+	module = load_python_module_from_file(path)
 	if not hasattr(module, "__exported"):
 		return None
 	return module
-
 
 def _color_with_opacity(tone, opacity=160):
 	color = QtGui.QColor(tone)

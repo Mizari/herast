@@ -1,7 +1,8 @@
-from importlib.util import resolve_name
 import idaapi
 import idc
 import idautils
+import importlib
+import importlib.util
 
 
 def _resolve_obj_address(obj):
@@ -154,3 +155,9 @@ def load_long_str_from_idb(array_name):
 	max_idx = idc.get_last_index(idc.AR_STR, id)
 	result = [idc.get_array_element(idc.AR_STR, id, idx) for idx in range(max_idx + 1)]
 	return b"".join(result).decode("utf-8")
+
+def load_python_module_from_file(path):
+	spec = importlib.util.spec_from_file_location("module", path)
+	module = importlib.util.module_from_spec(spec)
+	spec.loader.exec_module(module)
+	return module
