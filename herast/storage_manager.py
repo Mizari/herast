@@ -13,6 +13,7 @@ import json
 
 from PyQt5 import QtCore, QtGui
 
+from .tree.utils import save_long_str_to_idb, load_long_str_from_idb
 
 def load_storage_module_from_file(path):
 	spec = importlib.util.spec_from_file_location("module", path)
@@ -21,28 +22,6 @@ def load_storage_module_from_file(path):
 	if not hasattr(module, "__exported"):
 		return None
 	return module
-
-
-def save_long_str_to_idb(array_name, value):
-	""" Overwrites old array completely in process """
-	id = idc.get_array_id(array_name)
-	if id != -1:
-		idc.delete_array(id)
-	id = idc.create_array(array_name)
-	r = []
-	for idx in range(len(value) // 1024 + 1):
-		s = value[idx * 1024: (idx + 1) * 1024]
-		r.append(s)
-		idc.set_array_string(id, idx, s)
-
-
-def load_long_str_from_idb(array_name):
-	id = idc.get_array_id(array_name)
-	if id == -1:
-		return None
-	max_idx = idc.get_last_index(idc.AR_STR, id)
-	result = [idc.get_array_element(idc.AR_STR, id, idx) for idx in range(max_idx + 1)]
-	return b"".join(result).decode("utf-8")
 
 
 def _color_with_opacity(tone, opacity=160):

@@ -133,3 +133,24 @@ def make_helper_instr(name, *args):
 	new_item.cexpr = helper
 	new_item.thisown = False
 	return new_item
+
+def save_long_str_to_idb(array_name, value):
+	""" Overwrites old array completely in process """
+	id = idc.get_array_id(array_name)
+	if id != -1:
+		idc.delete_array(id)
+	id = idc.create_array(array_name)
+	r = []
+	for idx in range(len(value) // 1024 + 1):
+		s = value[idx * 1024: (idx + 1) * 1024]
+		r.append(s)
+		idc.set_array_string(id, idx, s)
+
+
+def load_long_str_from_idb(array_name):
+	id = idc.get_array_id(array_name)
+	if id == -1:
+		return None
+	max_idx = idc.get_last_index(idc.AR_STR, id)
+	result = [idc.get_array_element(idc.AR_STR, id, idx) for idx in range(max_idx + 1)]
+	return b"".join(result).decode("utf-8")
