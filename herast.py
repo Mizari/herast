@@ -25,6 +25,8 @@ idaapi.require('herast.scheme_manager')
 
 idaapi.require('herast.views.storage_manager_view')
 
+idaapi.require('herast_api')
+
 
 from herast.tree.processing import TreeProcessor
 from herast.tree.matcher import Matcher
