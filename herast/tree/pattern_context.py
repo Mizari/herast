@@ -1,5 +1,3 @@
-import idaapi
-
 class InstrModification:
 	def __init__(self, item, new_item, is_forced=False):
 		self.item = item

@@ -2,24 +2,28 @@ import time
 import idaapi
 import ida_hexrays
 
-# order of requires from imported to importers) is most likely important
+# order of requires (from imported to importers) is most likely important
 idaapi.require('herast.tree.consts')
 idaapi.require('herast.tree.utils')
+idaapi.require('herast.tree.pattern_context')
 idaapi.require('herast.tree.processing')
 idaapi.require('herast.tree.patterns.abstracts')
-idaapi.require('herast.tree.matcher')
 idaapi.require('herast.tree.patterns.instructions')
 idaapi.require('herast.tree.patterns.expressions')
-idaapi.require('herast.tree.pattern_context')
-idaapi.require('herast.storage_manager')
-idaapi.require('herast.tree.pattern_context')
+idaapi.require('herast.tree.matcher')
+idaapi.require('herast.tree.callbacks')
+idaapi.require('herast.tree.actions')
+idaapi.require('herast.tree.selection_factory')
+
 idaapi.require('herast.schemes.base_scheme')
 idaapi.require('herast.schemes.multi_pattern_schemes')
 idaapi.require('herast.schemes.single_pattern_schemes')
+
+idaapi.require('herast.storage_manager')
+
 idaapi.require('herast.scheme_manager')
+
 idaapi.require('herast.views.storage_manager_view')
-idaapi.require('herast.tree.callbacks')
-idaapi.require('herast.tree.actions')
 
 
 from herast.tree.processing import TreeProcessor
