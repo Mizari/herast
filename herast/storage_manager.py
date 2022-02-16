@@ -118,40 +118,6 @@ class StorageManager(QtCore.QAbstractListModel):
 				print("[!] Some of patterns stored inside IDB missing on fs, they will be excluded from IDB.")
 				save_long_str_to_idb(self.ARRAY_NAME, json.dumps(enabled_presented_on_fs))
 
-	def disable_storage(self, indices):
-		for qindex in indices:
-			row = qindex.row()
-			self.schemes_storages[row].disable()
-			self.dataChanged.emit(qindex, qindex)
-		self.sync_idb_array()
-
-	def enable_storage(self, indices):
-		for qindex in indices:
-			row = qindex.row()
-			self.schemes_storages[row].enable()
-			self.dataChanged.emit(qindex, qindex)
-		self.sync_idb_array()
-
-	def reload_storage(self, indices):
-		for qindex in indices:
-			row = qindex.row()
-			if not self.schemes_storages[row].reload():
-				del self.schemes_storages[row]
-			self.dataChanged.emit(qindex, qindex)
-			self.sync_idb_array()
-
-	def disable_all_storages(self):
-		for i, p in enumerate(self.schemes_storages):
-			p.disable()
-			qindex = self.index(i)
-			self.dataChanged.emit(qindex, qindex)
-		self.sync_idb_array()
-
-	def refresh_storages(self):
-		self.schemes_storages = list()
-		self._load_schemes()
-		self.dataChanged.emit(self.index(0), self.index(len(self.schemes_storages)))
-
 	def sync_idb_array(self):
 		new_array_to_store = [p.filename for p in self.schemes_storages if p.enabled]
 		save_long_str_to_idb(self.ARRAY_NAME, json.dumps(new_array_to_store))
@@ -259,10 +225,9 @@ class SchemeStorageTreeItem:
 	def __init__(self, data, type=TYPE_HEADER, parent=None):
 		self._data = data # columns of curent file
 		self.children = list() # files in directory
-
 		self.type = type
-
 		self.parent = parent 
+		self.fullpath = None
 
 	def parentItem(self):
 		return self.parent
@@ -328,7 +293,9 @@ class StorageManager(QtCore.QAbstractItemModel):
 					parent_item.children.insert(0, child) # keeps directories at the top of view
 					parent_item = child
 
-			parent_item.children.append(SchemeStorageTreeItem([basename], SchemeStorageTreeItem.TYPE_FILE, parent=parent_item))
+			file_item = SchemeStorageTreeItem([basename], SchemeStorageTreeItem.TYPE_FILE, parent=parent_item)
+			file_item.fullpath = full_path
+			parent_item.children.append(file_item)
 
 	def index(self, row, column, parent_index):
 		if not self.hasIndex(row, column, parent_index):
@@ -342,6 +309,9 @@ class StorageManager(QtCore.QAbstractItemModel):
 			return self.createIndex(row, column, child_item)
 
 		return QtCore.QModelIndex()
+	
+	def get_item(self, index):
+		return index.internalPointer()
 
 	# TODO: consider about adding hints via QtCore.Qt.ToolTipRole
 	def data(self, index, role=QtCore.Qt.DisplayRole):
@@ -351,7 +321,7 @@ class StorageManager(QtCore.QAbstractItemModel):
 		if role != QtCore.Qt.DisplayRole:
 			return QtCore.QVariant()
 
-		item = index.internalPointer()
+		item = self.get_item(index)
 
 		if role == QtCore.Qt.BackgroundRole:
 			if item.is_file():
@@ -395,6 +365,30 @@ class StorageManager(QtCore.QAbstractItemModel):
 			return self.root.data(section)
 
 		return QtCore.QVariant()
+	
+	def get_storage_by_index(self, idx):
+		item = self.get_item(idx)
+		if item.fullpath is None:
+			return None
+		return get_storage(item.fullpath)
+
+	def disable_storage(self, indices):
+		for qindex in indices:
+			storage = self.get_storage_by_index(qindex)
+			if storage is not None:
+				storage.disable()
+
+	def enable_storage(self, indices):
+		for qindex in indices:
+			storage = self.get_storage_by_index(qindex)
+			if storage is not None:
+				storage.enable()
+
+	def reload_storage(self, indices):
+		for qindex in indices:
+			storage = self.get_storage_by_index(qindex)
+			if storage is not None:
+				storage.reload()
 
 	# def flags(self, index):
 	# 	if not index.isValid():

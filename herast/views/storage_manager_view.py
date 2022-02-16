@@ -2,6 +2,7 @@ from PyQt5 import QtCore, QtWidgets, QtGui
 
 import idaapi
 
+import herast.storage_manager as storage_manager
 from herast.storage_manager import StorageManager
 
 
@@ -194,6 +195,10 @@ class StorageManagerForm(idaapi.PluginForm):
 		top_btns_grid_box.addWidget(btn_disable, 0, 0)
 		top_btns_grid_box.addWidget(btn_enable, 0, 1)
 		top_btns_grid_box.addWidget(btn_reload, 0, 2)
+
+		btn_disable.clicked.connect(lambda: storages_list.model().disable_storage(storages_list.selectedIndexes()))
+		btn_enable.clicked.connect(lambda: storages_list.model().enable_storage(storages_list.selectedIndexes()))
+		btn_reload.clicked.connect(lambda: storages_list.model().reload_storage(storages_list.selectedIndexes()))
 
 		pattern_text_area = QtWidgets.QTextEdit()
 		pattern_text_area.setReadOnly(True)
