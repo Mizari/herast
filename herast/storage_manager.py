@@ -34,15 +34,6 @@ def _color_with_opacity(tone, opacity=160):
 	return color
 
 """
-def singleton(cls):
-	instances = {}
-	def getinstance(*args, **kwargs):
-		if cls not in instances:
-			instances[cls] = cls(*args, **kwargs)
-		return instances[cls]
-	return getinstance
-
-
 @singleton
 class StorageManager(QtCore.QAbstractListModel):
 	ARRAY_NAME = "$herast:PatternStorage"
