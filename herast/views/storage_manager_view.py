@@ -1,9 +1,10 @@
 from PyQt5 import QtCore, QtWidgets, QtGui
 
 import idaapi
+import os
+import glob
 
 import herast.storage_manager as storage_manager
-from herast.storage_manager import StorageManager
 
 
 """
@@ -137,6 +138,193 @@ class StorageLogView(QtWidgets.QTextEdit):
 			self.setPlainText(self.storage.schemes_storages[selected[0].row()].log)
 """
 
+def _color_with_opacity(tone, opacity=160):
+	color = QtGui.QColor(tone)
+	color.setAlpha(opacity)
+	return color
+
+class SchemeStorageTreeItem:
+	FILENAME_COLUMN = 0
+	DESCRIPTION_COLUMN = 1
+
+	TYPE_HEADER = 0
+	TYPE_DIRECTORY = 1
+	TYPE_FILE = 2
+
+	def __init__(self, data, type=TYPE_HEADER, parent=None):
+		self._data = data # columns of curent file
+		self.children = list() # files in directory
+		self.type = type
+		self.parent = parent 
+		self.fullpath = None
+
+	def parentItem(self):
+		return self.parent
+
+	def child(self, row):
+		if row < 0 or row >= len(self.children):
+			return None
+
+		return self.children[row]
+
+	def columnCount(self):
+		if type(self._data) is list:
+			return len(self._data)
+
+		return 1
+
+	def childrenCount(self):
+		return len(self.children)
+
+	def row(self):
+		if self.parent:
+			return self.parent.children.index(self)
+		return 0
+
+	def data(self, column):
+		if column < 0 or column >= len(self._data):
+			return QtCore.QVariant()
+
+		return self._data[column]
+
+	def is_directory(self):
+		return self.type == self.TYPE_DIRECTORY
+
+	def is_file(self):
+		return not self.is_directory()
+
+
+class StorageManagerModel(QtCore.QAbstractItemModel):
+	def __init__(self):
+		super().__init__()
+		self.root = SchemeStorageTreeItem(["File"])
+		for storage_folder in storage_manager.storages_folders:
+			self.__add_folder(storage_folder)
+
+	def __add_folder(self, storage_folder):
+		for full_path in glob.iglob(storage_folder + '/**/**.py', recursive=True):
+			if storage_manager.get_storage(full_path) is None:
+				continue
+
+			relative_path = os.path.relpath(full_path, start=storage_folder)
+			splited_path = relative_path.split(os.sep)
+			basename = splited_path.pop()
+			assert os.path.basename(full_path) == basename, "Extracted basename doesn't match with actual basename"
+
+			parent_item = self.root
+			for part in splited_path:
+				for child in parent_item.children:
+					if part == child.data(SchemeStorageTreeItem.FILENAME_COLUMN):
+						parent_item = child
+						break
+				else:
+					child = SchemeStorageTreeItem([part], SchemeStorageTreeItem.TYPE_DIRECTORY, parent=parent_item)
+					parent_item.children.insert(0, child) # keeps directories at the top of view
+					parent_item = child
+
+			file_item = SchemeStorageTreeItem([basename], SchemeStorageTreeItem.TYPE_FILE, parent=parent_item)
+			file_item.fullpath = full_path
+			parent_item.children.append(file_item)
+
+	def index(self, row, column, parent_index):
+		if not self.hasIndex(row, column, parent_index):
+			return QtCore.QModelIndex()
+
+		parent_item = parent_index.internalPointer() if parent_index.isValid() else self.root
+
+		child_item = parent_item.child(row)
+
+		if child_item:
+			return self.createIndex(row, column, child_item)
+
+		return QtCore.QModelIndex()
+	
+	def get_item(self, index):
+		return index.internalPointer()
+
+	# TODO: consider about adding hints via QtCore.Qt.ToolTipRole
+	def data(self, index, role=QtCore.Qt.DisplayRole):
+		if not index.isValid():
+			return QtCore.QVariant()
+
+		if role != QtCore.Qt.DisplayRole:
+			return QtCore.QVariant()
+
+		item = self.get_item(index)
+
+		if role == QtCore.Qt.BackgroundRole:
+			if item.is_file():
+				return _color_with_opacity(QtCore.Qt.Green)
+			else:
+				return _color_with_opacity(QtCore.Qt.gray)
+
+		return item.data(index.column())
+
+	def parent(self, index):
+		if not index.isValid():
+			return QtCore.QModelIndex()
+
+		child_item = index.internalPointer()
+		parent_item = child_item.parentItem()
+		if parent_item == self.root:
+			return QtCore.QModelIndex()
+
+		return self.createIndex(parent_item.row(), 0, parent_item)
+
+	def rowCount(self, index):
+		if index.column() > 0:
+			return 0
+
+		parent_item = None
+		if not index.isValid():
+			parent_item = self.root
+		else:
+			parent_item = index.internalPointer()
+
+		return parent_item.childrenCount()
+
+	def columnCount(self, index):
+		if index.isValid():
+			return index.internalPointer().columnCount()
+
+		return self.root.columnCount()
+
+	def headerData(self, section, orientation, role):
+		if orientation == QtCore.Qt.Horizontal and role == QtCore.Qt.DisplayRole:
+			return self.root.data(section)
+
+		return QtCore.QVariant()
+	
+	def get_storage_by_index(self, idx):
+		item = self.get_item(idx)
+		if item.fullpath is None:
+			return None
+		return storage_manager.get_storage(item.fullpath)
+
+	def disable_storage(self, indices):
+		for qindex in indices:
+			storage = self.get_storage_by_index(qindex)
+			if storage is not None:
+				storage.disable()
+
+	def enable_storage(self, indices):
+		for qindex in indices:
+			storage = self.get_storage_by_index(qindex)
+			if storage is not None:
+				storage.enable()
+
+	def reload_storage(self, indices):
+		for qindex in indices:
+			storage = self.get_storage_by_index(qindex)
+			if storage is not None:
+				storage.reload()
+
+	# def flags(self, index):
+	# 	if not index.isValid():
+	# 		return QtCore.Qt.NoItemFlags
+
+	# 	return QtCore.QAbstractItemModel.flags(index)
+
 class BoldDelegate(QtWidgets.QStyledItemDelegate):
 	def paint(self, painter, option, index):
 		if not index.isValid():
@@ -160,7 +348,7 @@ class StorageManagerForm(idaapi.PluginForm):
 		self.parent.resize(400, 600)
 		self.parent.setWindowTitle('HUYPIZDA')
 
-		self.model = StorageManager()
+		self.model = StorageManagerModel()
 		# self.model = QtGui.QStandardItemModel()
 		# self.model.setHorizontalHeaderLabels(["Name"])
 		
