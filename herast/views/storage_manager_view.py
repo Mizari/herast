@@ -346,7 +346,7 @@ class StorageManagerForm(idaapi.PluginForm):
 
 	def init_ui(self):
 		self.parent.resize(400, 600)
-		self.parent.setWindowTitle('HUYPIZDA')
+		self.parent.setWindowTitle("HeRAST Schemes Storages View")
 
 		self.model = StorageManagerModel()
 		# self.model = QtGui.QStandardItemModel()
@@ -415,7 +415,6 @@ class StorageManagerForm(idaapi.PluginForm):
 		left_vertical_box.addWidget(storages_list)
 		left_vertical_box.addLayout(left_btns_grid_box)
 
-
 		horizontal_box = QtWidgets.QBoxLayout(QtWidgets.QBoxLayout.LeftToRight)
 		# horizontal_box.addWidget(patterns_list)
 		horizontal_box.addLayout(left_vertical_box)
@@ -440,13 +439,13 @@ class StorageManagerForm(idaapi.PluginForm):
 		# grid_box = QtWidgets.QGridLayout()
 		# grid_box.addWidget(patterns_list, 0, 0)
 
-		def idi_nahuy(index):
+		def foo(index):
 			storages_list.header().setSectionResizeMode(0, QtWidgets.QHeaderView.Stretch)
 			storages_list.header().setSectionResizeMode(0, QtWidgets.QHeaderView.ResizeToContents)
 			storages_list.resizeColumnToContents(0)
 
-		storages_list.expanded.connect(idi_nahuy)
-		storages_list.collapsed.connect(idi_nahuy)
+		storages_list.expanded.connect(foo)
+		storages_list.collapsed.connect(foo)
 
 		self.parent.setLayout(horizontal_box)
 
