@@ -92,7 +92,7 @@ class SchemesStorage:
 		else:
 			return False
 
-schemes_storages : Dict[SchemesStorage] = {}
+schemes_storages : Dict[str, SchemesStorage] = {}
 
 storages_folders = set()
 default_storage_dir = os.path.dirname(__file__) + "\\ready_patterns\\"
