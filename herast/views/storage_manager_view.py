@@ -289,57 +289,6 @@ class StorageManagerModel(QtCore.QAbstractItemModel):
 
 	# 	return QtCore.QAbstractItemModel.flags(index)
 
-class StorageSourceView(QtWidgets.QTextEdit):
-	def __init__(self, storage: StorageManagerModel, *args, **kwargs):
-		self.storage = storage
-		super(StorageSourceView, self).__init__(*args, **kwargs)
-		self.setTabStopDistance(QtGui.QFontMetricsF(self.font()).width(' ') * 4)
-		self.setReadOnly(True)
-
-	def switch_source_data(self, current, previous):
-		"""
-		if current.row() < len(self.storage.schemes_storages):
-			self.setPlainText(self.storage.schemes_storages[current.row()].source)
-		else:
-			self.setPlaintText('')
-		"""
-		self.reload_source_data(current)
-
-	def reload_source_data(self, selected):
-		storage = self.storage.get_storage_by_index(selected)
-		if storage is None: return
-
-		source_text = storage.get_source()
-		if source_text is None: return
-
-		self.setPlainText(source_text)
-
-
-class StorageStatusView(QtWidgets.QTextEdit):
-	def __init__(self, storage: StorageManagerModel, *args, **kwargs):
-		self.storage = storage
-		super(StorageStatusView, self).__init__(*args, **kwargs)
-		self.setReadOnly(True)
-		self.setMaximumHeight(100)
-
-	def switch_log_data(self, current, previous):
-		"""
-		if current.row() < len(self.storage.schemes_storages):
-			self.setPlainText(self.storage.schemes_storages[current.row()].log)
-		else:
-			self.setPlaintText('')
-		"""
-		self.reload_status_data(current)
-
-	def reload_status_data(self, selected):
-		storage = self.storage.get_storage_by_index(selected)
-		if storage is None: return
-
-		source_text = storage.get_status()
-		if source_text is None: return
-
-		self.setPlainText(source_text)
-
 
 class BoldDelegate(QtWidgets.QStyledItemDelegate):
 	def paint(self, painter, option, index):
@@ -402,19 +351,39 @@ class StorageManagerForm(idaapi.PluginForm):
 		btn_enable.clicked.connect(lambda: storages_list.model().enable_storage(storages_list.selectedIndexes()))
 		btn_reload.clicked.connect(lambda: storages_list.model().reload_storage(storages_list.selectedIndexes()))
 
-		storage_source_area = StorageSourceView(self.model)
-		loading_log_area = StorageStatusView(self.model)
+		storage_source_area = QtWidgets.QTextEdit()
+		storage_source_area.setTabStopDistance(QtGui.QFontMetricsF(storage_source_area.font()).width(' ') * 4)
+		storage_source_area.setReadOnly(True)
+
+		loading_log_area = QtWidgets.QTextEdit()
+		loading_log_area.setReadOnly(True)
+		loading_log_area.setMaximumHeight(100)
 
 		splitter = QtWidgets.QSplitter(QtCore.Qt.Vertical)
 		splitter.addWidget(storage_source_area)
 		splitter.addWidget(loading_log_area)
 
-		storages_list.selectionModel().currentChanged.connect(lambda cur, prev: storage_source_area.switch_source_data(cur, prev))
-		storages_list.selectionModel().currentChanged.connect(lambda cur, prev: loading_log_area.switch_log_data(cur, prev))
-		# storages_list.setCurrentIndex(storages_list.model().index(0))
+		def update_storage_data():
+			indexes = storages_list.selectedIndexes()
+			if len(indexes) == 0: return
 
-		storages_list.model().dataChanged.connect(lambda : storage_source_area.reload_source_data(storages_list.selectedIndexes()))
-		storages_list.model().dataChanged.connect(lambda : loading_log_area.reload_status_data(storages_list.selectedIndexes()))
+			idx = indexes[0]
+
+			storage = self.model.get_storage_by_index(idx)
+			if storage is None: return
+
+			source_text = storage.get_source()
+			if source_text is None:
+				source_text = "Failed to read source text"
+
+			status_text = storage.get_status()
+			status_text = storage.path
+			storage_source_area.setPlainText(source_text)
+			loading_log_area.setPlainText(status_text)
+
+		storages_list.selectionModel().currentChanged.connect(lambda cur, prev: update_storage_data())
+		storages_list.model().dataChanged.connect(lambda : update_storage_data())
+		# storages_list.setCurrentIndex(storages_list.model().index(0))
 
 		left_btns_grid_box = QtWidgets.QGridLayout()
 		left_btns_grid_box.addWidget(btn_expand_all, 0, 0)
