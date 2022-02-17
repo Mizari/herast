@@ -26,14 +26,23 @@ def save_enabled_idb_storages(stored_enabled_array):
 	save_long_str_to_idb(ARRAY_NAME, json.dumps(stored_enabled_array))
 
 class SchemesStorage:
-	def __init__(self, path, module, enabled, error=False, log="Enabled!"):
+	def __init__(self, path, module, enabled, error=False):
 		self.path = path
 		self.filename = os.path.basename(path)
 		self.module = module
 		self.enabled = enabled
 		self.error = error
-		self.log = log
+		self.status_text = None
 		self.source = None
+
+	def get_status(self):
+		if self.status_text is not None:
+			return self.status_text
+
+		if self.enabled:
+			return "Enabled!"
+		else:
+			return "Disabled!"
 
 	def get_source(self):
 		if self.source is None:
@@ -47,7 +56,6 @@ class SchemesStorage:
 			return
 
 		if not self.error:
-			self.log = "Enabled!"
 			if self.module is None:
 				assert self.reload()
 			if not self.error:
@@ -65,8 +73,6 @@ class SchemesStorage:
 			stored_enabled_array.remove(self.path)
 		save_enabled_idb_storages(stored_enabled_array)
 		self.enabled = False
-		if not self.error:
-			self.log = "Disabled!"
 
 	def reload(self):
 		if os.path.isfile(self.path) and os.access(self.path, os.R_OK):
@@ -78,7 +84,7 @@ class SchemesStorage:
 				self.module = None
 				self.error = True
 				self.enabled = False
-				self.log = traceback.format_exc()
+				self.status_text = traceback.format_exc()
 
 			return True
 		else:
