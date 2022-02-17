@@ -7,6 +7,8 @@ from .tree.utils import save_long_str_to_idb
 from .tree.utils import load_long_str_from_idb
 from .tree.utils import load_python_module_from_file
 
+from typing import Dict, Optional
+
 
 def load_storage_module_from_file(path):
 	module = load_python_module_from_file(path)
@@ -82,7 +84,7 @@ class SchemesStorage:
 		else:
 			return False
 
-schemes_storages = {}
+schemes_storages : Dict[SchemesStorage] = {}
 
 storages_folders = set()
 default_storage_dir = os.path.dirname(__file__) + "\\ready_patterns\\"
@@ -96,11 +98,11 @@ def load_all_storages():
 	for file in storages_files:
 		load_storage_file(file)
 
-def load_storage_folder(folder_name):
+def load_storage_folder(folder_name: str) -> None:
 	for full_path in glob.iglob(folder_name + '/**/**.py', recursive=True):
 		load_storage_file(full_path)
 
-def load_storage_file(filename):
+def load_storage_file(filename: str) -> bool:
 	module = load_storage_module_from_file(filename)
 	if module is None:
 		return False
@@ -110,7 +112,7 @@ def load_storage_file(filename):
 	schemes_storages[filename] = storage
 	return True
 
-def get_storage(filename):
+def get_storage(filename: str) -> Optional[SchemesStorage]:
 	return schemes_storages.get(filename, None)
 
 def get_enabled_storages():
