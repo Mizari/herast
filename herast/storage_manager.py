@@ -33,11 +33,14 @@ class SchemesStorage:
 		self.enabled = enabled
 		self.error = error
 		self.log = log
-		self.source = str()
+		self.source = None
 
-		if os.path.isfile(self.path) and os.access(self.path, os.R_OK):
-			with open(self.path, 'r') as f:
-				self.source = f.read()
+	def get_source(self):
+		if self.source is None:
+			if os.path.isfile(self.path) and os.access(self.path, os.R_OK):
+				with open(self.path, 'r') as f:
+					self.source = f.read()
+		return self.source
 
 	def enable(self):
 		if self.enabled:
@@ -76,9 +79,6 @@ class SchemesStorage:
 				self.error = True
 				self.enabled = False
 				self.log = traceback.format_exc()
-			
-			with open(self.path, 'r') as f:
-				self.source = f.read()
 
 			return True
 		else:
