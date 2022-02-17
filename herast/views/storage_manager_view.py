@@ -377,7 +377,6 @@ class StorageManagerForm(idaapi.PluginForm):
 				source_text = "Failed to read source text"
 
 			status_text = storage.get_status()
-			status_text = storage.path
 			storage_source_area.setPlainText(source_text)
 			loading_log_area.setPlainText(status_text)
 
