@@ -45,10 +45,12 @@ class SchemesStorage:
 			return "Disabled!"
 
 	def get_source(self):
-		if self.source is None:
-			if os.path.isfile(self.path) and os.access(self.path, os.R_OK):
-				with open(self.path, 'r') as f:
-					self.source = f.read()
+		if self.source is not None:
+			return self.source
+
+		if os.path.isfile(self.path) and os.access(self.path, os.R_OK):
+			with open(self.path, 'r') as f:
+				self.source = f.read()
 		return self.source
 
 	def enable(self):
