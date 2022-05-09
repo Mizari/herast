@@ -4,6 +4,9 @@ class Scheme:
 	def __init__(self, name):
 		self.name = name
 
+	def get_patterns(self):
+		return []
+
 	def on_new_item(self, item, ctx: PatternContext):
 		return
 
