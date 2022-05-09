@@ -1,3 +1,5 @@
+from herast.tree.processing import TreeProcessor
+
 class InstrModification:
 	def __init__(self, item, new_item, is_forced=False):
 		self.item = item
@@ -9,7 +11,7 @@ class SavedVariable:
 		self.idx = idx
 
 class PatternContext:
-	def __init__(self, tree_proc):
+	def __init__(self, tree_proc: TreeProcessor):
 		self.tree_proc = tree_proc
 		self.expressions = dict()
 		self.variables = dict()
