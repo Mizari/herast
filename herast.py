@@ -81,27 +81,19 @@ def herast_callback(*args):
 	if level != idaapi.CMAT_FINAL:
 		return 0
 
-	try:
-		assert isinstance(cfunc.body, idaapi.cinsn_t), "Function body is not cinsn_t"
-		assert isinstance(cfunc.body.cblock, idaapi.cblock_t), "Function body must be a cblock_t"
-		tp = TreeProcessor(cfunc)
+	assert isinstance(cfunc.body, idaapi.cinsn_t), "Function body is not cinsn_t"
+	assert isinstance(cfunc.body.cblock, idaapi.cblock_t), "Function body must be a cblock_t"
 
+	try:
 		matcher = Matcher()
 		for s in scheme_manager.get_enabled_schemes():
 			matcher.add_scheme(s)
 
-		def processing_callback(tree_proc, item):
-			return matcher.check_schemes(tree_proc, item)
-
 		traversal_start = time.time()
-
-		if matcher.expressions_traversal_is_needed():
-			tp.process_all_items(cfunc.body, processing_callback)
-		else:
-			tp.process_all_instrs(cfunc.body, processing_callback)
-
+		matcher.match_cfunc(cfunc)
 		traversal_end = time.time()
 		print("[TIME] Tree traversal done within %f seconds" % (traversal_end - traversal_start))
+
 	except Exception as e:
 		print(e)
 		raise e

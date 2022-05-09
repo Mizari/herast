@@ -2,11 +2,22 @@ import idaapi
 
 from herast.tree.patterns.abstracts import BindExpr, VarBind
 from herast.tree.pattern_context import PatternContext
+from herast.tree.processing import TreeProcessor
 
 
 class Matcher:
 	def __init__(self):
 		self.schemes = list()
+
+	def match_cfunc(self, cfunc):
+		def processing_callback(tree_proc, item):
+			return self.check_schemes(tree_proc, item)
+
+		tp = TreeProcessor(cfunc)
+		if self.expressions_traversal_is_needed():
+			tp.process_all_items(cfunc.body, processing_callback)
+		else:
+			tp.process_all_instrs(cfunc.body, processing_callback)
 
 	def check_schemes(self, tree_processor, item) -> bool:
 		item_ctx = PatternContext(tree_processor)
