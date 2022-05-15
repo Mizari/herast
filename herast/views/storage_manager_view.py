@@ -352,7 +352,8 @@ class StorageManagerForm(idaapi.PluginForm):
 		btn_reload.clicked.connect(lambda: storages_list.model().reload_storage(storages_list.selectedIndexes()))
 
 		storage_source_area = QtWidgets.QTextEdit()
-		storage_source_area.setTabStopDistance(QtGui.QFontMetricsF(storage_source_area.font()).width(' ') * 4)
+		# storage_source_area.setTabStopDistance(QtGui.QFontMetricsF(storage_source_area.font()).width(' ') * 4)
+		storage_source_area.setTabStopWidth(4)
 		storage_source_area.setReadOnly(True)
 
 		loading_log_area = QtWidgets.QTextEdit()
@@ -363,11 +364,12 @@ class StorageManagerForm(idaapi.PluginForm):
 		splitter.addWidget(storage_source_area)
 		splitter.addWidget(loading_log_area)
 
-		def update_storage_data():
-			indexes = storages_list.selectedIndexes()
-			if len(indexes) == 0: return
-
-			idx = indexes[0]
+		def update_storage_data(idx=None):
+			if idx is None:
+				idxs = storages_list.selectedIndexes()
+				if len(idxs) == 0:
+					return
+				idx = idxs[0]
 
 			storage = self.model.get_storage_by_index(idx)
 			if storage is None: return
@@ -380,9 +382,9 @@ class StorageManagerForm(idaapi.PluginForm):
 			storage_source_area.setPlainText(source_text)
 			loading_log_area.setPlainText(status_text)
 
-		storages_list.selectionModel().currentChanged.connect(lambda cur, prev: update_storage_data())
+		storages_list.selectionModel().currentChanged.connect(lambda cur, prev: update_storage_data(cur))
 		storages_list.model().dataChanged.connect(lambda : update_storage_data())
-		# storages_list.setCurrentIndex(storages_list.model().index(0))
+		storages_list.setCurrentIndex(storages_list.model().index(0, 0, QtCore.QModelIndex()))
 
 		left_btns_grid_box = QtWidgets.QGridLayout()
 		left_btns_grid_box.addWidget(btn_expand_all, 0, 0)
