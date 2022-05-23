@@ -4,5 +4,6 @@ Rewritten for IDAPython3 (IDA_VERSION >= 7.4) version of [@groke](https://github
 
 
 # Installation
-- Place herast/ directory and heras_api.py to $IDA_DIR/python/3/
-- Place herast.py to $IDA_DIR/plugins directory
+- Place `herast/` to `$IDA_DIR/python/3/` directory
+- Place `herast_api.py` to `$IDA_DIR/python/3/` directory
+- Place `herast.py` to `$IDA_DIR/plugins` directory
