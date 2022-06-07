@@ -77,7 +77,7 @@ class ExceptionCollapserScheme(SPScheme):
 				arg2.assign(exception_str)
 				helper_args.append(arg2)
 
-		new_item = make_helper_instr("__throw_if", *helper_args)
+		new_item = make_call_helper_instr("__throw_if", *helper_args)
 
 		ctx.modify_instr(item, new_item)
 

@@ -118,22 +118,34 @@ def make_block_insn(instructions, address, label_num=-1):
 
 	return insn
 
-def make_helper_instr(name, *args):
+def make_expr_instr(expr):
+	new_item = idaapi.cinsn_t()
+	new_item.op = idaapi.cit_expr
+	new_item.cexpr = expr
+	new_item.thisown = False
+	return new_item
+
+def make_call_helper_expr(name, *args, retval=None):
+	if retval is None:
+		retval = idaapi.get_unk_type(8)
+
 	arglist = idaapi.carglist_t()
 	for arg in args:
 		if arg is None:
+			print("[!] Warning: argument is None, skipping")
 			continue
 
-		narg = idaapi.carg_t()
-		narg.assign(arg)
-		arglist.push_back(narg)
+		if isinstance(arg, idaapi.carg_t):
+			arglist.push_back(arg)
+		else:
+			narg = idaapi.carg_t()
+			narg.assign(arg)
+			arglist.push_back(narg)
 
-	helper = idaapi.call_helper(idaapi.get_unk_type(8), arglist, name)
-	new_item = idaapi.cinsn_t()
-	new_item.op = idaapi.cit_expr
-	new_item.cexpr = helper
-	new_item.thisown = False
-	return new_item
+	return idaapi.call_helper(retval, arglist, name)
+
+def make_call_helper_instr(name, *args):
+	return make_expr_instr(make_call_helper_expr(name, *args))
 
 def save_long_str_to_idb(array_name, value):
 	""" Overwrites old array completely in process """
