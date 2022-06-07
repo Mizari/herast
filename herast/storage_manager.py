@@ -12,6 +12,9 @@ from typing import Dict, Optional
 
 def load_storage_module_from_file(path):
 	module = load_python_module_from_file(path)
+	if module is None:
+		return None
+
 	if not hasattr(module, "__exported"):
 		return None
 	return module

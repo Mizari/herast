@@ -157,9 +157,13 @@ def load_long_str_from_idb(array_name):
 	return b"".join(result).decode("utf-8")
 
 def load_python_module_from_file(path):
-	spec = importlib.util.spec_from_file_location("module", path)
-	module = importlib.util.module_from_spec(spec)
-	spec.loader.exec_module(module)
+	try:
+		spec = importlib.util.spec_from_file_location("module", path)
+		module = importlib.util.module_from_spec(spec)
+		spec.loader.exec_module(module)
+	except:
+		print("[!] Exception happened during loading module from file %s" % path)
+		return None
 	return module
 
 def singleton(cls):
