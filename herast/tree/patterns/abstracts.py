@@ -149,10 +149,11 @@ class BindExpr(AbstractPattern):
 	def __init__(self, name, pat=None):
 		self.pat = pat or AnyPat()
 		self.name = name
-	
+
 	def check(self, expr, ctx):
 		if self.pat.check(expr, ctx):
-			ctx.save_expr(self.name, expr)
+			if not ctx.has_expr(self.name):
+				ctx.save_expr(self.name, expr)
 			return True
 		return False
 
