@@ -40,11 +40,22 @@ class ExInsPat(AbstractPattern):
 class IfInsPat(AbstractPattern):
 	op = idaapi.cit_if
 
-	def __init__(self, condition=None, then_branch=None, else_branch=None, respect_block=False):
-		self.condition   = condition   or AnyPat()
-		self.then_branch = then_branch or AnyPat()
-		self.else_branch = else_branch or AnyPat()
-		self.respect_block = respect_block
+	def __init__(self, condition=None, then_branch=None, else_branch=None, should_wrap_in_block=True):
+		def wrap_pattern(pat):
+			if pat is None:
+				return AnyPat()
+
+			if not should_wrap_in_block:
+				return pat
+
+			if pat.op == idaapi.cit_block:
+				return pat
+
+			return BlockPat(pat)
+
+		self.condition   = wrap_pattern(condition)
+		self.then_branch = wrap_pattern(then_branch)
+		self.else_branch = wrap_pattern(else_branch)
 
 	@AbstractPattern.initial_check
 	def check(self, instruction, ctx) -> bool:
@@ -53,25 +64,10 @@ class IfInsPat(AbstractPattern):
 		rv = self.condition.check(cif.expr, ctx)
 		if not rv: return False
 
-		ithen = self.get_block(cif.ithen, self.then_branch.op)
-		rv = self.then_branch.check(ithen, ctx)
+		rv = self.then_branch.check(cif.ithen, ctx)
 		if not rv: return False
 
-		ielse = self.get_block(cif.ielse, self.else_branch.op)
-		return self.else_branch.check(ielse, ctx)
-
-	# this allows for easier patterns writing (reduces complexity by skipping BlockPat)
-	def get_block(self, item, pattern_op):
-		if item is None:
-			return item
-
-		if self.respect_block:
-			return item
-
-		if item.op != idaapi.cit_block or pattern_op == idaapi.cit_block:
-			return item
-
-		return item.cblock[0]
+		return self.else_branch.check(cif.ielse, ctx)
 
 	@property
 	def children(self):
