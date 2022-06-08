@@ -1,21 +1,23 @@
 import idaapi
-from .abstracts import AnyPat, AbstractPattern, SeqPat
+from .abstracts import AnyPat, AbstractPattern
 
 
 class BlockPat(AbstractPattern):
 	op = idaapi.cit_block
 
-	def __init__(self, seq=None, skip_missing=False):
-		self.sequence = seq or AnyPat()
-
-		# backwards compatibility, will be removed later
-		if isinstance(seq, SeqPat):
-			seq.skip_missing = skip_missing
+	def __init__(self, *patterns):
+		self.sequence = patterns
 
 	@AbstractPattern.initial_check
 	def check(self, instruction, ctx) -> bool:
 		block = instruction.cblock
-		return self.sequence.check(block[0], ctx)
+		if len(block) != len(self.sequence):
+			return False
+
+		for i, pat in enumerate(self.sequence):
+			if not pat.check(block[i], ctx):
+				return False
+		return True
 
 	@property
 	def children(self):
