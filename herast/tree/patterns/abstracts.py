@@ -151,6 +151,9 @@ class BindExpr(AbstractPattern):
 		self.name = name
 
 	def check(self, expr, ctx):
+		if not expr.is_expr():
+			return False
+
 		if self.pat.check(expr, ctx):
 			current_expr = ctx.get_expr(self.name)
 			if current_expr is None:
