@@ -152,9 +152,12 @@ class BindExpr(AbstractPattern):
 
 	def check(self, expr, ctx):
 		if self.pat.check(expr, ctx):
-			if not ctx.has_expr(self.name):
+			current_expr = ctx.get_expr(self.name)
+			if current_expr is None:
 				ctx.save_expr(self.name, expr)
-			return True
+				return True
+			else:
+				return expr.equal_effect(current_expr)
 		return False
 
 
