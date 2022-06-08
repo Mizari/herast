@@ -173,9 +173,9 @@ class VarBind(AbstractPattern):
 	@AbstractPattern.initial_check
 	def check(self, expr, ctx: PatternContext):
 		if ctx.has_var(self.name):
-			return ctx.get_var(self.name).idx == expr.v.idx
+			return ctx.get_var(self.name).v.idx == expr.v.idx
 		else:
-			ctx.save_var(self.name, expr.v)
+			ctx.save_var(self.name, expr)
 			return True
 
 
