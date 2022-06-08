@@ -172,14 +172,11 @@ class VarBind(AbstractPattern):
 
 	@AbstractPattern.initial_check
 	def check(self, expr, ctx):
-		if expr.op == idaapi.cot_var:
-			if ctx.has_var(self.name):
-				return ctx.get_var(self.name).idx == expr.v.idx
-			else:
-				ctx.save_var(self.name, expr.v.idx)
-				return True
-
-		return False
+		if ctx.has_var(self.name):
+			return ctx.get_var(self.name).idx == expr.v.idx
+		else:
+			ctx.save_var(self.name, expr.v.idx)
+			return True
 
 
 class DeepExpr(AbstractPattern):
