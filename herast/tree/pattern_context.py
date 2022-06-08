@@ -7,8 +7,8 @@ class InstrModification:
 		self.is_forced = is_forced
 
 class SavedVariable:
-	def __init__(self, idx):
-		self.idx = idx
+	def __init__(self, lvar_expr):
+		self.lvar_expr = lvar_expr
 
 class PatternContext:
 	def __init__(self, tree_proc: TreeProcessor):
@@ -20,8 +20,8 @@ class PatternContext:
 	def get_var(self, name):
 		return self.variables.get(name, None)
 
-	def save_var(self, name, local_variable_index):
-		self.variables[name] = SavedVariable(local_variable_index)
+	def save_var(self, name, lvar_expr):
+		self.variables[name] = SavedVariable(lvar_expr)
 
 	def has_var(self, name):
 		return self.variables.get(name, None) is not None

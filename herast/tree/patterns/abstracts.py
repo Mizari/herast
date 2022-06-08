@@ -175,7 +175,7 @@ class VarBind(AbstractPattern):
 		if ctx.has_var(self.name):
 			return ctx.get_var(self.name).idx == expr.v.idx
 		else:
-			ctx.save_var(self.name, expr.v.idx)
+			ctx.save_var(self.name, expr.v)
 			return True
 
 
