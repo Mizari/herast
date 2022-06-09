@@ -10,7 +10,10 @@ class CallExprPat(AbstractPattern):
 
 	def __init__(self, calling_function, *arguments, ignore_arguments=False, skip_missing=False):
 		if isinstance(calling_function, str):
-			calling_function = ObjPat(calling_function)
+			calling_function = ObjPat(name=calling_function)
+
+		if isinstance(calling_function, int):
+			calling_function = ObjPat(ea=calling_function)
 
 		if calling_function is None:
 			calling_function = AnyPat()
