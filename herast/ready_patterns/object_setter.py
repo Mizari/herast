@@ -8,6 +8,20 @@ from herast.tree.utils import *
 
 from herast.schemes.single_pattern_schemes import SPScheme
 
+"""
+This example demonstrates how to mass-set objects according to how
+they are assigned values in decompiled functions by function calls.
+e.g.: 
+	dword_1337 = Foo(arg1, arg2)
+
+FUNC_ADDR variable is needed
+In order to better control name/type generation update PATTERN
+"""
+
+# this pattern turns
+# dword_123456 = Foo(123, 3, "qwe")
+# into
+# object_7b_3 = Foo(123, 3, "qwe")
 FUNC_ADDR = idaapi.BADADDR
 PATTERN = ExInsPat(
 	AsgExprPat(
