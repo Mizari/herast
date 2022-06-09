@@ -67,11 +67,14 @@ class ObjPat(AbstractPattern):
 
 	@AbstractPattern.initial_check
 	def check(self, expression, ctx) -> bool:
-		if self.ea is None:
+		if self.ea is None and self.name is None:
 			return True
-		
-		if self.ea == expression.obj_ea:
+
+		if self.ea is not None and self.ea == expression.obj_ea:
 			return True
+
+		if self.name is None:
+			return False
 
 		ea_name = idaapi.get_name(expression.obj_ea)
 		if self.name == ea_name:
