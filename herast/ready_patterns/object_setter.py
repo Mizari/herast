@@ -28,7 +28,7 @@ def make_pattern(function_address):
 	return ExInsPat(
 		AsgExprPat(
 			ObjPat(),
-			SkipCasts(CallExprPat(function_address, AnyPat(), AnyPat(), AnyPat())),
+			SkipCasts(CallExprPat(function_address, ignore_arguments=True)),
 		)
 	)
 
@@ -43,6 +43,10 @@ def get_object_name(item):
 	item = item.cexpr.y
 	if item.op == idaapi.cot_cast:
 		item = item.x
+
+	if len(item.a) != 3:
+		print("Error: unexpected amount of arguments")
+		return None
 
 	arg0 = item.a[0]
 	if arg0.op != idaapi.cot_num:
