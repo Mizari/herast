@@ -18,17 +18,19 @@ FUNC_ADDR variable is needed
 In order to better control name/type generation update PATTERN
 """
 
-# this pattern turns
+FUNC_ADDR = idaapi.BADADDR
+
+# this pattern in scheme turns
 # dword_123456 = Foo(123, 3, "qwe")
 # into
 # object_7b_3 = Foo(123, 3, "qwe")
-FUNC_ADDR = idaapi.BADADDR
-PATTERN = ExInsPat(
-	AsgExprPat(
-		ObjPat(),
-		SkipCasts(CallExprPat(FUNC_ADDR, AnyPat(), AnyPat(), AnyPat())),
+def make_pattern(function_address):
+	return ExInsPat(
+		AsgExprPat(
+			ObjPat(),
+			SkipCasts(CallExprPat(function_address, AnyPat(), AnyPat(), AnyPat())),
+		)
 	)
-)
 
 def get_object_address(item):
 	return item.cexpr.x.obj_ea
@@ -84,8 +86,9 @@ class ObjectsCollection:
 
 
 class ObjectSetterScheme(SPScheme):
-	def __init__(self, objects_collection: ObjectsCollection):
-		super().__init__("object_setter", PATTERN)
+	def __init__(self, function_address, objects_collection: ObjectsCollection):
+		pattern = make_pattern(function_address)
+		super().__init__("object_setter", pattern)
 		self.objects_collection = objects_collection
 
 	def on_matched_item(self, item, ctx: PatternContext):
@@ -114,7 +117,7 @@ def collect_objects(function_address):
 		return
 
 	objects_collection = ObjectsCollection()
-	scheme = ObjectSetterScheme(objects_collection)
+	scheme = ObjectSetterScheme(function_address, objects_collection)
 	matcher = Matcher()
 	matcher.add_scheme(scheme)
 
