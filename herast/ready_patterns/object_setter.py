@@ -111,7 +111,7 @@ def get_func_calls_to(fea):
 	return list(rv)
 
 
-def collect_objects(function_address):
+def collect_objects(function_address, default_type=None):
 	if function_address == idaapi.BADADDR:
 		print("Error: function address is invalid")
 		return
@@ -134,8 +134,11 @@ def collect_objects(function_address):
 		print("Setting object: {:x} {} {}".format(oaddr, oname, otype))
 		if oname is not None:
 			idaapi.set_name(oaddr, oname)
+
 		if otype is not None:
 			idc.SetType(oaddr, otype)
+		elif default_type is not None:
+			idc.SetType(oaddr, default_type)
 
 
 if __name__ == "__main__":
