@@ -143,7 +143,3 @@ def collect_objects(function_address, default_type=None):
 			idc.SetType(oaddr, otype)
 		elif default_type is not None:
 			idc.SetType(oaddr, default_type)
-
-
-if __name__ == "__main__":
-	collect_objects(FUNC_ADDR)
