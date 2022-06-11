@@ -143,24 +143,21 @@ class SkipCasts(AbstractPattern):
 	def children(self):
 		return self.pat
 
-class BindExpr(AbstractPattern):
+class BindItem(AbstractPattern):
 	op = -1
 
 	def __init__(self, name, pat=None):
 		self.pat = pat or AnyPat()
 		self.name = name
 
-	def check(self, expr, ctx: PatternContext):
-		if not expr.is_expr():
-			return False
-
-		if self.pat.check(expr, ctx):
+	def check(self, item, ctx: PatternContext):
+		if self.pat.check(item, ctx):
 			current_expr = ctx.get_expr(self.name)
 			if current_expr is None:
-				ctx.save_expr(self.name, expr)
+				ctx.save_expr(self.name, item)
 				return True
 			else:
-				return expr.equal_effect(current_expr)
+				return item.equal_effect(current_expr)
 		return False
 
 

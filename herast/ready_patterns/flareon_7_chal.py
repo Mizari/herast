@@ -9,10 +9,10 @@ from herast.schemes.single_pattern_schemes import SPScheme
 pattern = SeqPat(
 				# ExInsPat(AsgExprPat(BindExpr('gobj', ObjPat()), SkipCasts(CallExprPat(ObjPat(name='j__malloc_base'), ignore_arguments=True)))),
 				# ExInsPat(AnyPat()),
-				ExInsPat(AsgExprPat(AnyPat(), BindExpr('num0', AnyPat()))),
-				ExInsPat(AsgExprPat(AnyPat(), BindExpr('num1', AnyPat()))),
-				ExInsPat(AsgExprPat(AnyPat(), BindExpr('num2', AnyPat()))),
-				ExInsPat(AsgExprPat(AnyPat(), BindExpr('num3', AnyPat()))),
+				ExInsPat(AsgExprPat(AnyPat(), BindItem('num0', AnyPat()))),
+				ExInsPat(AsgExprPat(AnyPat(), BindItem('num1', AnyPat()))),
+				ExInsPat(AsgExprPat(AnyPat(), BindItem('num2', AnyPat()))),
+				ExInsPat(AsgExprPat(AnyPat(), BindItem('num3', AnyPat()))),
 				# ExInsPat(AsgExprPat(AnyPat(), BindExpr('num4', AnyPat()))),
 				# ExInsPat(AsgExprPat(AnyPat(), BindExpr('num5', AnyPat()))),
 				# ExInsPat(AsgExprPat(AnyPat(), BindExpr('num6', AnyPat()))),
@@ -20,7 +20,7 @@ pattern = SeqPat(
 				ForInsPat(
 					AnyPat(), AnyPat(), AnyPat(),
 					BlockPat(
-						ExInsPat(BindExpr('xor', AsgxorExprPat(AnyPat(), AnyPat())))
+						ExInsPat(BindItem('xor', AsgxorExprPat(AnyPat(), AnyPat())))
 					)
 				)
 		)

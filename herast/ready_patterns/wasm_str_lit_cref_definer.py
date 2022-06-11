@@ -15,7 +15,7 @@ class DrefingScheme(SPScheme):
 		return False
 
 
-pattern = ExInsPat(DeepExpr(BindExpr('xref_me', ObjPat())))
+pattern = ExInsPat(DeepExpr(BindItem('xref_me', ObjPat())))
 __exported = [
 	DrefingScheme("drefing", pattern)
 ]

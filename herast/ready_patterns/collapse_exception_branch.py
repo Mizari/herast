@@ -21,7 +21,7 @@ first_call_pattern = ExInsPat(
 excstr_getter_pattern = ExInsPat(
 	AsgExprPat(
 		AnyPat(),
-		CallExprPat(AnyPat(), AnyPat(), SkipCasts(BindExpr("exception_str", AnyPat())))
+		CallExprPat(AnyPat(), AnyPat(), SkipCasts(BindItem("exception_str", AnyPat())))
 	)
 )
 last_call_pattern = ExInsPat(make_call_expr('__cxa_throw'))
@@ -56,7 +56,7 @@ class ExceptionBody(AbstractPattern):
 		return True
 
 pattern = IfInsPat(
-	BindExpr("if_expr"),
+	BindItem("if_expr"),
 	ExceptionBody(first_call_pattern, excstr_getter_pattern, last_call_pattern)
 )
 

@@ -1,4 +1,4 @@
-from herast.tree.patterns.abstracts import VarBind, BindExpr, PatternContext
+from herast.tree.patterns.abstracts import VarBind, BindItem, PatternContext
 from herast.tree.patterns.expressions import AsgExprPat
 from herast.tree.patterns.instructions import ExInsPat, IfInsPat
 
@@ -8,8 +8,8 @@ from herast.schemes.single_pattern_schemes import SPScheme
 
 pattern = IfInsPat(
 	VarBind("error_var"),
-	ExInsPat(BindExpr("logic_expr")),
-	ExInsPat(AsgExprPat(VarBind("error_var"), BindExpr("logic_expr")))
+	ExInsPat(BindItem("logic_expr")),
+	ExInsPat(AsgExprPat(VarBind("error_var"), BindItem("logic_expr")))
 )
 
 """
