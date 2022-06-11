@@ -179,15 +179,18 @@ class VarBind(AbstractPattern):
 class DeepExpr(AbstractPattern):
 	op = -1
 
-	def __init__(self, pat):
+	def __init__(self, pat, bind_name=None):
 		self.pat = pat
 		self.found = False
+		self.bind_name = bind_name
 
 	def check(self, expr, ctx: PatternContext):
 		self.found = False
 		def processing_callback(tree_proc, item):
 			if not self.found:
 				if self.pat.check(item, ctx):
+					if self.bind_name is not None:
+						ctx.save_expr(self.bind_name, item)
 					self.found = True
 			return False
 		ctx.tree_proc.process_all_items(expr, processing_callback)
