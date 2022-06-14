@@ -95,7 +95,8 @@ class OrPat(AbstractPattern):
 	op = -1
 
 	def __init__(self, *pats):
-		self._assert(len(pats) > 1, "Passing one or less patterns to OrPat is useless")
+		if len(pats) <= 1:
+			print("[*] WARNING: OrPat expects at least two patterns")
 		self.pats = tuple(pats)
 	
 	def check(self, item, ctx: PatternContext):
