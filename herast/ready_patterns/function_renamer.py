@@ -9,6 +9,10 @@ from herast.tree.utils import *
 from herast.schemes.single_pattern_schemes import SPScheme
 
 
+"""
+This script renames functions according to pattern found in them
+"""
+
 def make_pattern(debug_flag):
 	return IfInsPat(
 		ObjPat(ea=debug_flag),
