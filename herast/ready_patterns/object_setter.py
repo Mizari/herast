@@ -1,5 +1,6 @@
+from collections import defaultdict
 import idaapi
-from herast.tree.patterns.abstracts import PatternContext, SkipCasts, AnyPat
+from herast.tree.patterns.abstracts import OrPat, PatternContext, SkipCasts, AnyPat
 from herast.tree.patterns.expressions import AsgExprPat, CallExprPat, ObjPat
 from herast.tree.patterns.instructions import ExInsPat
 from herast.tree.matcher import Matcher
@@ -152,3 +153,81 @@ def collect_objects(function_address, default_type=None):
 			idc.SetType(oaddr, otype)
 		elif default_type is not None:
 			idc.SetType(oaddr, default_type)
+
+class AssignmentCounter:
+	def __init__(self):
+		self.count = defaultdict(int)
+
+	def clear(self):
+		self.count.clear()
+
+	def add_assignment(self, func_ea):
+		self.count[func_ea] += 1
+
+	def trim_assignments(self, threshold):
+		self.count = {k: v for k, v in self.count.items() if v >= threshold}
+
+	def show_stats(self):
+		print("got {} assignments".format(len(self.count)))
+		for func_ea, count in self.count.items():
+			print("{:x} {} {}".format(func_ea, idaapi.get_func_name(func_ea), count))
+
+class AssignmentCounterScheme(SPScheme):
+	def __init__(self, counter: AssignmentCounter, candidates):
+		if len(candidates) == 1:
+			cand = next(iter(candidates))
+			obj_pat = ObjPat(ea=cand)
+		else:
+			objects = [ObjPat(ea=cand) for cand in candidates]
+			obj_pat = OrPat(*objects)
+
+		pattern = AsgExprPat(AnyPat(), SkipCasts(CallExprPat(obj_pat)))
+		super().__init__("assignment_counter", pattern)
+		self.counter = counter
+	
+	def on_tree_iteration_start(self, ctx: PatternContext):
+		print("starting")
+		self.counter.clear()
+
+	def on_matched_item(self, item, ctx: PatternContext):
+		call_expr = item.y
+		if call_expr.op == idaapi.cot_cast:
+			call_expr = call_expr.x
+
+		func_ea = call_expr.x.obj_ea
+		print("adding", hex(func_ea), "in", hex(ctx.tree_proc.cfunc.entry_ea), item.opname, hex(item.ea))
+		self.counter.add_assignment(func_ea)
+		return False
+
+
+def count_assignments(functions=None, assignments_amount_threshold=15):
+	cfuncs_eas = set()
+	candidates = set()
+	if functions is None:
+		functions = idautils.Functions()
+	for func_ea in functions:
+		calls = get_func_calls_to(func_ea)
+		if len(calls) < assignments_amount_threshold:
+			continue
+
+		candidates.add(func_ea)
+		cfuncs_eas.update(calls)
+
+	print("found {} candidates".format(len(candidates)))
+	print("need to decompile {} cfuncs".format(len(cfuncs_eas)))
+
+	cfuncs = {}
+	cfuncs = {ea: get_cfunc(ea) for ea in cfuncs_eas}
+	counter = AssignmentCounter()
+	scheme = AssignmentCounterScheme(counter, candidates)
+	matcher = Matcher()
+	matcher.add_scheme(scheme)
+
+	for cfunc in cfuncs.values():
+		if cfunc is None:
+			continue
+
+		matcher.match_cfunc(cfunc)
+
+	counter.trim_assignments(assignments_amount_threshold)
+	counter.show_stats()
