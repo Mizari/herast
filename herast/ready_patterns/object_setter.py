@@ -114,6 +114,17 @@ def get_func_calls_to(fea):
 	rv = filter(lambda x: x != idaapi.BADADDR, rv)
 	return list(rv)
 
+def get_cfunc(func_ea):
+	try:
+		cfunc = idaapi.decompile(func_ea)
+	except:
+		print("Error: failed to decompile function {x}".format(hex(func_ea)))
+		return None
+
+	if cfunc is None:
+		print("Error: failed to decompile function {x}".format(hex(func_ea)))
+	return cfunc
+
 
 def collect_objects(function_address, default_type=None):
 	if function_address == idaapi.BADADDR:
@@ -125,11 +136,9 @@ def collect_objects(function_address, default_type=None):
 	matcher = Matcher()
 	matcher.add_scheme(scheme)
 
-	all_calls = {x for x in get_func_calls_to(function_address)}
-	for func_ea in all_calls:
-		cfunc = idaapi.decompile(func_ea)
+	for func_ea in get_func_calls_to(function_address):
+		cfunc = get_cfunc(func_ea)
 		if cfunc is None:
-			print("Failed to decompile function at 0x%x" % func_ea)
 			continue
 		matcher.match_cfunc(cfunc)
 
