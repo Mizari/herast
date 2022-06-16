@@ -7,8 +7,8 @@ from herast.schemes.base_scheme import Scheme
 
 
 class Matcher:
-	def __init__(self):
-		self.schemes : list[Scheme] = list()
+	def __init__(self, *schemes):
+		self.schemes : list[Scheme] = list(schemes)
 
 	def match_cfunc(self, cfunc):
 		def processing_callback(tree_proc, item):
