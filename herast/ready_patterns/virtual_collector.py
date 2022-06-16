@@ -24,7 +24,7 @@ class VirtualCollector(SPScheme):
 	def on_matched_item(self, item, ctx: PatternContext):
 		func_ea = get_func_start(item.ea)
 		struct_type = item.x.x.type.get_pointed_object()
-		offset = item.x.x.m
+		offset = item.x.m
 		value = item.y
 		self.collection.append((func_ea, struct_type, offset, value))
 		return False
