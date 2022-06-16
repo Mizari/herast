@@ -48,6 +48,6 @@ def collect_virtual_properties(functions=idautils.Functions(), struct_type=None,
 	for ea, cfunc in cfuncs.items():
 		matcher.match_cfunc(cfunc)
 
-	print("Collected {x} virtual properties".format(len(scheme.collection)))
+	print("Collected {} virtual properties".format(len(scheme.collection)))
 	for func_ea, struct_type, offset, value in scheme.collection:
 		print("{} {} {} {}".format(hex(func_ea), struct_type, offset, value.opname))
