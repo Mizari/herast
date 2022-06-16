@@ -19,8 +19,6 @@ FUNC_ADDR variable is needed
 In order to better control name/type generation update PATTERN
 """
 
-FUNC_ADDR = idaapi.BADADDR
-
 # this pattern in scheme turns
 # dword_123456 = Foo(123, 3, "qwe")
 # into
