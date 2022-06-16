@@ -1,13 +1,8 @@
 from collections import defaultdict
 import idaapi
-from herast.tree.patterns.abstracts import OrPat, PatternContext, SkipCasts, AnyPat
-from herast.tree.patterns.expressions import AsgExprPat, CallExprPat, ObjPat
-from herast.tree.patterns.instructions import ExInsPat
-from herast.tree.matcher import Matcher
-
-from herast.tree.utils import *
-
-from herast.schemes.single_pattern_schemes import SPScheme
+import idautils
+import herapi
+import idc
 
 """
 This example demonstrates how to mass-set objects according to how
@@ -24,10 +19,10 @@ In order to better control name/type generation update PATTERN
 # into
 # object_7b_3 = Foo(123, 3, "qwe")
 def make_pattern(function_address):
-	return ExInsPat(
-		AsgExprPat(
-			ObjPat(),
-			SkipCasts(CallExprPat(function_address, ignore_arguments=True)),
+	return herapi.ExInsPat(
+		herapi.AsgExprPat(
+			herapi.ObjPat(),
+			herapi.SkipCasts(herapi.CallExprPat(function_address, ignore_arguments=True)),
 		)
 	)
 
@@ -88,13 +83,13 @@ class ObjectsCollection:
 			yield oaddr, oname, otype
 
 
-class ObjectSetterScheme(SPScheme):
+class ObjectSetterScheme(herapi.SPScheme):
 	def __init__(self, function_address, objects_collection: ObjectsCollection):
 		pattern = make_pattern(function_address)
 		super().__init__("object_setter", pattern)
 		self.objects_collection = objects_collection
 
-	def on_matched_item(self, item, ctx: PatternContext):
+	def on_matched_item(self, item, ctx: herapi.PatternContext):
 		object_address = get_object_address(item)
 		object_name    = get_object_name(item)
 		object_type    = get_object_type(item)
@@ -102,27 +97,10 @@ class ObjectSetterScheme(SPScheme):
 		return False
 
 
-def get_func_start(addr):
-	func = idaapi.get_func(addr)
-	if func is None:
-		return idaapi.BADADDR
-	return func.start_ea
-
 def get_func_calls_to(fea):
-	rv = filter(None, [get_func_start(x.frm) for x in idautils.XrefsTo(fea)])
+	rv = filter(None, [herapi.get_func_start(x.frm) for x in idautils.XrefsTo(fea)])
 	rv = filter(lambda x: x != idaapi.BADADDR, rv)
 	return list(rv)
-
-def get_cfunc(func_ea):
-	try:
-		cfunc = idaapi.decompile(func_ea)
-	except:
-		print("Error: failed to decompile function {x}".format(hex(func_ea)))
-		return None
-
-	if cfunc is None:
-		print("Error: failed to decompile function {x}".format(hex(func_ea)))
-	return cfunc
 
 
 def collect_objects(function_address, default_type=None):
@@ -132,11 +110,11 @@ def collect_objects(function_address, default_type=None):
 
 	objects_collection = ObjectsCollection()
 	scheme = ObjectSetterScheme(function_address, objects_collection)
-	matcher = Matcher()
+	matcher = herapi.Matcher()
 	matcher.add_scheme(scheme)
 
 	for func_ea in get_func_calls_to(function_address):
-		cfunc = get_cfunc(func_ea)
+		cfunc = herapi.get_cfunc(func_ea)
 		if cfunc is None:
 			continue
 		matcher.match_cfunc(cfunc)
@@ -170,24 +148,24 @@ class AssignmentCounter:
 		for func_ea, count in self.count.items():
 			print("{:x} {} {}".format(func_ea, idaapi.get_func_name(func_ea), count))
 
-class AssignmentCounterScheme(SPScheme):
+class AssignmentCounterScheme(herapi.SPScheme):
 	def __init__(self, counter: AssignmentCounter, candidates):
 		if len(candidates) == 1:
 			cand = next(iter(candidates))
-			obj_pat = ObjPat(ea=cand)
+			obj_pat = herapi.ObjPat(ea=cand)
 		else:
-			objects = [ObjPat(ea=cand) for cand in candidates]
-			obj_pat = OrPat(*objects)
+			objects = [herapi.ObjPat(ea=cand) for cand in candidates]
+			obj_pat = herapi.OrPat(*objects)
 
-		pattern = AsgExprPat(AnyPat(), SkipCasts(CallExprPat(obj_pat)))
+		pattern = herapi.AsgExprPat(herapi.AnyPat(), herapi.SkipCasts(herapi.CallExprPat(obj_pat)))
 		super().__init__("assignment_counter", pattern)
 		self.counter = counter
-	
-	def on_tree_iteration_start(self, ctx: PatternContext):
+
+	def on_tree_iteration_start(self, ctx: herapi.PatternContext):
 		print("starting")
 		self.counter.clear()
 
-	def on_matched_item(self, item, ctx: PatternContext):
+	def on_matched_item(self, item, ctx: herapi.PatternContext):
 		call_expr = item.y
 		if call_expr.op == idaapi.cot_cast:
 			call_expr = call_expr.x
@@ -212,10 +190,10 @@ def count_assignments(functions=idautils.Functions, assignments_amount_threshold
 	print("found {} candidates".format(len(candidates)))
 	print("need to decompile {} cfuncs".format(len(cfuncs_eas)))
 
-	cfuncs = {ea: get_cfunc(ea) for ea in cfuncs_eas}
+	cfuncs = {ea: herapi.get_cfunc(ea) for ea in cfuncs_eas}
 	counter = AssignmentCounter()
 	scheme = AssignmentCounterScheme(counter, candidates)
-	matcher = Matcher(scheme)
+	matcher = herapi.Matcher(scheme)
 
 	for cfunc in cfuncs.values():
 		if cfunc is None:
