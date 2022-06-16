@@ -198,11 +198,9 @@ class AssignmentCounterScheme(SPScheme):
 		return False
 
 
-def count_assignments(functions=None, assignments_amount_threshold=15):
+def count_assignments(functions=idautils.Functions, assignments_amount_threshold=15):
 	cfuncs_eas = set()
 	candidates = set()
-	if functions is None:
-		functions = idautils.Functions()
 	for func_ea in functions:
 		calls = get_func_calls_to(func_ea)
 		if len(calls) < assignments_amount_threshold:
@@ -214,12 +212,10 @@ def count_assignments(functions=None, assignments_amount_threshold=15):
 	print("found {} candidates".format(len(candidates)))
 	print("need to decompile {} cfuncs".format(len(cfuncs_eas)))
 
-	cfuncs = {}
 	cfuncs = {ea: get_cfunc(ea) for ea in cfuncs_eas}
 	counter = AssignmentCounter()
 	scheme = AssignmentCounterScheme(counter, candidates)
-	matcher = Matcher()
-	matcher.add_scheme(scheme)
+	matcher = Matcher(scheme)
 
 	for cfunc in cfuncs.values():
 		if cfunc is None:
