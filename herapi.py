@@ -25,9 +25,9 @@ def get_cfunc(func_ea):
 	try:
 		cfunc = idaapi.decompile(func_ea)
 	except:
-		print("Error: failed to decompile function {x}".format(hex(func_ea)))
+		print("Error: failed to decompile function {}".format(hex(func_ea)))
 		return None
 
 	if cfunc is None:
-		print("Error: failed to decompile function {x}".format(hex(func_ea)))
+		print("Error: failed to decompile function {}".format(hex(func_ea)))
 	return cfunc
