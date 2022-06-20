@@ -162,7 +162,6 @@ class AssignmentCounterScheme(herapi.SPScheme):
 		self.counter = counter
 
 	def on_tree_iteration_start(self, ctx: herapi.PatternContext):
-		print("starting")
 		self.counter.clear()
 
 	def on_matched_item(self, item, ctx: herapi.PatternContext):
@@ -171,7 +170,6 @@ class AssignmentCounterScheme(herapi.SPScheme):
 			call_expr = call_expr.x
 
 		func_ea = call_expr.x.obj_ea
-		print("adding", hex(func_ea), "in", hex(ctx.tree_proc.cfunc.entry_ea), item.opname, hex(item.ea))
 		self.counter.add_assignment(func_ea)
 		return False
 
