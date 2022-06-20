@@ -13,6 +13,9 @@ class PatternContext:
 		self.variables = dict()
 		self.instrs_to_modify = []
 
+	def get_func_ea(self):
+		return self.tree_proc.cfunc.entry_ea
+
 	def get_var(self, name):
 		return self.variables.get(name, None)
 
