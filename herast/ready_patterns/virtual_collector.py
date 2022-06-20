@@ -22,6 +22,8 @@ def collect_virtual_properties(functions=idautils.Functions(), struct_type=None,
 
 	cfuncs = {ea: herapi.get_cfunc(ea) for ea in functions}
 	for ea, cfunc in cfuncs.items():
+		if cfunc is None:
+			continue
 		matcher.match_cfunc(cfunc)
 
 	for func_ea, struct_type, offset, value in scheme.collection:
