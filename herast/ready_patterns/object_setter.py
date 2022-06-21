@@ -8,23 +8,13 @@ import idc
 This example demonstrates how to mass-set objects according to how
 they are assigned values in decompiled functions by function calls.
 e.g.: 
-	dword_1337 = Foo(arg1, arg2)
+	dword_123456 = Foo(123, 3, "qwe")
+into
+	object_7b_3 = Foo(123, 3, "qwe")
 
 FUNC_ADDR variable is needed
 In order to better control name/type generation update PATTERN
 """
-
-# this pattern in scheme turns
-# dword_123456 = Foo(123, 3, "qwe")
-# into
-# object_7b_3 = Foo(123, 3, "qwe")
-def make_pattern(function_address):
-	return herapi.ExInsPat(
-		herapi.AsgExprPat(
-			herapi.ObjPat(),
-			herapi.SkipCasts(herapi.CallExprPat(function_address, ignore_arguments=True)),
-		)
-	)
 
 def get_object_address(item):
 	return item.cexpr.x.obj_ea
@@ -85,7 +75,12 @@ class ObjectsCollection:
 
 class ObjectSetterScheme(herapi.SPScheme):
 	def __init__(self, function_address, objects_collection: ObjectsCollection):
-		pattern = make_pattern(function_address)
+		pattern = herapi.ExInsPat(
+			herapi.AsgExprPat(
+				herapi.ObjPat(),
+				herapi.SkipCasts(herapi.CallExprPat(function_address, ignore_arguments=True)),
+			)
+		)
 		super().__init__("object_setter", pattern)
 		self.objects_collection = objects_collection
 
