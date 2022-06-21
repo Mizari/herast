@@ -34,8 +34,8 @@ class CallExprPat(AbstractPattern):
 		if len(self.arguments) != len(expression.a) and not self.skip_missing:
 			return False
 
-		max_l = min(len(self.arguments), len(expression.a))
-		for arg_id in range(max_l):
+		min_l = min(len(self.arguments), len(expression.a))
+		for arg_id in range(min_l):
 			if not self.arguments[arg_id].check(expression.a[arg_id], ctx):
 				return False
 
