@@ -1,12 +1,6 @@
 import idaapi
-from herast.tree.patterns.abstracts import DeepExpr, PatternContext, BindItem
-from herast.tree.patterns.expressions import CallExprPat, ObjPat
-from herast.tree.patterns.instructions import ExInsPat, IfInsPat
-from herast.tree.matcher import Matcher
-
-from herast.tree.utils import *
-
-from herast.schemes.single_pattern_schemes import SPScheme
+import idautils
+import herapi
 
 
 """
@@ -14,9 +8,9 @@ This script renames functions according to pattern found in them
 """
 
 def make_pattern(debug_flag):
-	return IfInsPat(
-		ObjPat(ea=debug_flag),
-		DeepExpr(CallExprPat("printf", ignore_arguments=True), bind_name="debug_print"),
+	return herapi.IfInsPat(
+		herapi.ObjPat(ea=debug_flag),
+		herapi.DeepExpr(herapi.CallExprPat("printf", ignore_arguments=True), bind_name="debug_print"),
 		should_wrap_in_block=False, # if to not wrap in block, because we want to search inside block's instructions
 	)
 
@@ -52,13 +46,13 @@ class FunctionsRenamings:
 		for func_addr, names in self.conflicts.items():
 			print("Conflicting renamings:", hex(func_addr), names)
 
-class FunctionRenamer(SPScheme):
+class FunctionRenamer(herapi.SPScheme):
 	def __init__(self, renamings_collection, debug_flag):
 		self.renamings_collection = renamings_collection
 		pattern = make_pattern(debug_flag)
 		super().__init__("function_renamer", pattern)
 
-	def on_matched_item(self, item, ctx: PatternContext):
+	def on_matched_item(self, item, ctx: herapi.PatternContext):
 		func_ea = get_func_start(item.ea)
 		debug_print = ctx.get_expr("debug_print")
 		s = debug_print.a[1]
@@ -80,7 +74,7 @@ def get_func_start(addr):
 def do_renames(debug_flag: int):
 	col = FunctionsRenamings()
 	scheme = FunctionRenamer(col, debug_flag)
-	matcher = Matcher()
+	matcher = herapi.Matcher()
 	matcher.add_scheme(scheme)
 
 	func_addrs = (get_func_start(xr.frm) for xr in idautils.XrefsTo(debug_flag))
