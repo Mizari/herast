@@ -84,6 +84,17 @@ class ObjPat(AbstractPattern):
 		return demangled_ea_name == self.name
 
 
+class RefPat(AbstractPattern):
+	op = idaapi.cot_ref
+
+	def __init__(self, referenced_object):
+		self.referenced_object = referenced_object
+
+	@AbstractPattern.initial_check
+	def check(self, expression, ctx) -> bool:
+		return self.referenced_object.check(expression.obj, ctx)
+
+
 class MemrefExprPat(AbstractPattern):
 	op = idaapi.cot_memref
 
