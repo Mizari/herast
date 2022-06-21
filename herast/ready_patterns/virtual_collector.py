@@ -1,6 +1,10 @@
 import herapi
 import idautils
 
+"""
+This example show how to automate objects collecting of this form:
+	some_struct_pointer->some_field = some_value;
+"""
 
 class VirtualCollector(herapi.SPScheme):
 	def __init__(self, struct_type=None, offset=None):
