@@ -97,7 +97,7 @@ class RefPat(AbstractPattern):
 
 	@AbstractPattern.initial_check
 	def check(self, expression, ctx) -> bool:
-		return self.referenced_object.check(expression.obj, ctx)
+		return self.referenced_object.check(expression.x, ctx)
 
 
 class MemrefExprPat(AbstractPattern):
