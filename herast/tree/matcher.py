@@ -44,7 +44,7 @@ class Matcher:
 		if isinstance(func, int):
 			cfunc = get_cfunc(func)
 			if cfunc is None:
-				return False
+				return
 			return self.match_cfunc(cfunc)
 
 		raise Exception("Invalid function type")
