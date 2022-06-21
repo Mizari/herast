@@ -1,4 +1,5 @@
 import idaapi
+import idautils
 
 from herast.tree.patterns.abstracts import BindItem, VarBind
 from herast.tree.pattern_context import PatternContext
@@ -6,9 +7,55 @@ from herast.tree.processing import TreeProcessor
 from herast.schemes.base_scheme import Scheme
 
 
+def get_func_calls_to(fea):
+	rv = filter(None, [get_func_start(x.frm) for x in idautils.XrefsTo(fea)])
+	rv = filter(lambda x: x != idaapi.BADADDR, rv)
+	return list(rv)
+
+def get_func_start(addr):
+	func = idaapi.get_func(addr)
+	if func is None:
+		return idaapi.BADADDR
+	return func.start_ea
+
+def get_cfunc(func_ea):
+	try:
+		cfunc = idaapi.decompile(func_ea)
+	except idaapi.DecompilationFailure:
+		print("Error: failed to decompile function {}".format(hex(func_ea)))
+		return None
+
+	if cfunc is None:
+		print("Error: failed to decompile function {}".format(hex(func_ea)))
+	return cfunc
+
+
 class Matcher:
 	def __init__(self, *schemes):
 		self.schemes : list[Scheme] = list(schemes)
+
+	def match(self, func):
+		if func is None:
+			return
+
+		if isinstance(func, idaapi.cfunc_t):
+			return self.match_cfunc(func)
+
+		if isinstance(func, int):
+			cfunc = get_cfunc(func)
+			if cfunc is None:
+				return False
+			return self.match_cfunc(cfunc)
+
+		raise Exception("Invalid function type")
+
+	def match_objects_xrefs(self, *objects):
+		cfuncs_eas = set()
+		for func_ea in objects:
+			calls = get_func_calls_to(func_ea)
+			cfuncs_eas.update(calls)
+
+		print("need to decompile {} cfuncs".format(len(cfuncs_eas)))
 
 	def match_cfunc(self, cfunc):
 		def processing_callback(tree_proc, item):
