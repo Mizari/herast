@@ -74,8 +74,7 @@ def get_func_start(addr):
 def do_renames(debug_flag: int):
 	col = FunctionsRenamings()
 	scheme = FunctionRenamer(col, debug_flag)
-	matcher = herapi.Matcher()
-	matcher.add_scheme(scheme)
+	matcher = herapi.Matcher(scheme)
 
 	func_addrs = (get_func_start(xr.frm) for xr in idautils.XrefsTo(debug_flag))
 	func_addrs = filter(lambda x: x != idaapi.BADADDR, func_addrs)
