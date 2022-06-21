@@ -72,9 +72,9 @@ class ObjectsCollection:
 			object_type = existing_object_type
 
 		if existing_object_name != object_name:
-			print("Warning: object address {} is already used by object {}".format(object_address, existing_object_name))
+			print(f"Warning: object address {object_address} is already used by object {existing_object_name}")
 		if existing_object_type != object_type:
-			print("Warning: object address {} is already used by object {}".format(object_address, existing_object_type))
+			print(f"Warning: object address {object_address} is already used by object {existing_object_type}")
 
 		self.objects[object_address] = (object_name, object_type)
 
