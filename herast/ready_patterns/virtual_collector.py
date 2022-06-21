@@ -1,5 +1,4 @@
 import herapi
-import idautils
 
 """
 This example show how to automate objects collecting of this form:
@@ -20,15 +19,11 @@ class VirtualCollector(herapi.SPScheme):
 		self.collection.append((func_ea, struct_type, offset, value))
 		return False
 
-def collect_virtual_properties(functions=idautils.Functions(), struct_type=None, offset=None):
+def collect_virtual_properties(*functions, struct_type=None, offset=None):
 	scheme = VirtualCollector(struct_type, offset)
 	matcher = herapi.Matcher(scheme)
-
-	cfuncs = {ea: herapi.get_cfunc(ea) for ea in functions}
-	for ea, cfunc in cfuncs.items():
-		if cfunc is None:
-			continue
-		matcher.match_cfunc(cfunc)
+	for f in functions:
+		matcher.match(f)
 
 	for func_ea, struct_type, offset, value in scheme.collection:
 		yield func_ea, struct_type, offset, value

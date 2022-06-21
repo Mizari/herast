@@ -97,12 +97,6 @@ class ObjectSetterScheme(herapi.SPScheme):
 		return False
 
 
-def get_func_calls_to(fea):
-	rv = filter(None, [herapi.get_func_start(x.frm) for x in idautils.XrefsTo(fea)])
-	rv = filter(lambda x: x != idaapi.BADADDR, rv)
-	return list(rv)
-
-
 def collect_objects(function_address, default_type=None):
 	if function_address == idaapi.BADADDR:
 		print("Error: function address is invalid")
@@ -112,12 +106,7 @@ def collect_objects(function_address, default_type=None):
 	scheme = ObjectSetterScheme(function_address, objects_collection)
 	matcher = herapi.Matcher()
 	matcher.add_scheme(scheme)
-
-	for func_ea in get_func_calls_to(function_address):
-		cfunc = herapi.get_cfunc(func_ea)
-		if cfunc is None:
-			continue
-		matcher.match_cfunc(cfunc)
+	matcher.match_objects_xrefs(function_address)
 
 	print("Found {} objects".format(len(objects_collection.objects)))
 	for oaddr, oname, otype in objects_collection.get_objects():
@@ -173,31 +162,24 @@ class AssignmentCounterScheme(herapi.SPScheme):
 		self.counter.add_assignment(func_ea)
 		return False
 
+def get_func_start(addr):
+	func = idaapi.get_func(addr)
+	if func is None:
+		return idaapi.BADADDR
+	return func.start_ea
 
-def count_assignments(functions=idautils.Functions, assignments_amount_threshold=15):
-	cfuncs_eas = set()
-	candidates = set()
-	for func_ea in functions:
-		calls = get_func_calls_to(func_ea)
-		if len(calls) < assignments_amount_threshold:
-			continue
+def get_func_calls_to(fea):
+	rv = filter(None, [get_func_start(x.frm) for x in idautils.XrefsTo(fea)])
+	rv = filter(lambda x: x != idaapi.BADADDR, rv)
+	return list(rv)
 
-		candidates.add(func_ea)
-		cfuncs_eas.update(calls)
+def count_assignments(*functions, assignments_amount_threshold=15):
+	functions = [f for f in functions if len(get_func_calls_to(f)) > assignments_amount_threshold]
 
-	print("found {} candidates".format(len(candidates)))
-	print("need to decompile {} cfuncs".format(len(cfuncs_eas)))
-
-	cfuncs = {ea: herapi.get_cfunc(ea) for ea in cfuncs_eas}
 	counter = AssignmentCounter()
-	scheme = AssignmentCounterScheme(counter, candidates)
+	scheme = AssignmentCounterScheme(counter, functions)
 	matcher = herapi.Matcher(scheme)
-
-	for cfunc in cfuncs.values():
-		if cfunc is None:
-			continue
-
-		matcher.match_cfunc(cfunc)
+	matcher.match_objects_xrefs(*functions)
 
 	counter.trim_assignments(assignments_amount_threshold)
 	counter.show_stats()

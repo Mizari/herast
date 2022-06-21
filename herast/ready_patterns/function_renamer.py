@@ -1,5 +1,4 @@
 import idaapi
-import idautils
 import herapi
 
 
@@ -53,7 +52,7 @@ class FunctionRenamer(herapi.SPScheme):
 		super().__init__("function_renamer", pattern)
 
 	def on_matched_item(self, item, ctx: herapi.PatternContext):
-		func_ea = get_func_start(item.ea)
+		func_ea = ctx.get_func_ea()
 		debug_print = ctx.get_expr("debug_print")
 		s = debug_print.a[1]
 		name = s.print1(None)
@@ -64,30 +63,11 @@ class FunctionRenamer(herapi.SPScheme):
 		return False
 
 
-def get_func_start(addr):
-	func = idaapi.get_func(addr)
-	if func is None:
-		return idaapi.BADADDR
-	return func.start_ea
-
-
 def do_renames(debug_flag: int):
 	col = FunctionsRenamings()
 	scheme = FunctionRenamer(col, debug_flag)
 	matcher = herapi.Matcher(scheme)
-
-	func_addrs = (get_func_start(xr.frm) for xr in idautils.XrefsTo(debug_flag))
-	func_addrs = filter(lambda x: x != idaapi.BADADDR, func_addrs)
-	func_addrs = set(func_addrs)
-
-	for func_addr in func_addrs:
-		try:
-			cfunc = idaapi.decompile(func_addr)
-		except:
-			continue
-		if cfunc is None:
-			continue
-		matcher.match_cfunc(cfunc)
+	matcher.match_objects_xrefs(debug_flag)
 
 	col.apply_renamings()
 	col.print_conflicts()

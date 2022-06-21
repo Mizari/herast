@@ -1,5 +1,4 @@
 import idc
-import idautils
 import idaapi
 import herapi
 
@@ -43,24 +42,7 @@ class CallsParser(herapi.SPScheme):
 		idaapi.set_name(rename_address, new_name)
 		return False
 
-def get_func_calls_to(fea):
-	rv = filter(None, [herapi.get_func_start(x.frm) for x in idautils.XrefsTo(fea)])
-	rv = filter(lambda x: x != idaapi.BADADDR, rv)
-	return list(rv)
-
 def find_calls(*functions):
 	scheme = CallsParser(*functions)
 	matcher = herapi.Matcher(scheme)
-
-	cfuncs_eas = set()
-	for func_ea in functions:
-		calls = get_func_calls_to(func_ea)
-		cfuncs_eas.update(calls)
-
-	print("need to decompile {} cfuncs".format(len(cfuncs_eas)))
-	cfuncs = {ea: herapi.get_cfunc(ea) for ea in cfuncs_eas}
-	for cfunc in cfuncs.values():
-		if cfunc is None:
-			continue
-
-		matcher.match_cfunc(cfunc)
+	matcher.match_objects_xrefs(*functions)
