@@ -56,6 +56,10 @@ class Matcher:
 			cfuncs_eas.update(calls)
 
 		print("need to decompile {} cfuncs".format(len(cfuncs_eas)))
+		for cfunc in cfuncs_eas:
+			if cfunc is None:
+				continue
+			self.match_cfunc(cfunc)
 
 	def match_cfunc(self, cfunc):
 		def processing_callback(tree_proc, item):
