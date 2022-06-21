@@ -56,7 +56,8 @@ class Matcher:
 			cfuncs_eas.update(calls)
 
 		print("need to decompile {} cfuncs".format(len(cfuncs_eas)))
-		for cfunc in cfuncs_eas:
+		for func_ea in cfuncs_eas:
+			cfunc = get_cfunc(func_ea)
 			if cfunc is None:
 				continue
 			self.match_cfunc(cfunc)
