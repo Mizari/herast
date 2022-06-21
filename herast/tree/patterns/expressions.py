@@ -28,11 +28,16 @@ class CallExprPat(AbstractPattern):
 		if not self.calling_function.check(expression.x, ctx):
 			return False
 
-		if not self.ignore_arguments:
-			if len(self.arguments) != len(expression.a) and not self.skip_missing:
-				return False
+		if self.ignore_arguments:
+			return True
 
-			return all((pat.check(arg, ctx) for pat, arg in zip(self.arguments, expression.a)))
+		if len(self.arguments) != len(expression.a) and not self.skip_missing:
+			return False
+
+		max_l = min(len(self.arguments), len(expression.a))
+		for arg_id in range(max_l):
+			if not self.arguments[arg_id].check(expression.a[arg_id], ctx):
+				return False
 
 		return True
 
