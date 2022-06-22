@@ -14,10 +14,23 @@ def make_pattern(debug_flag):
 	)
 
 
-class FunctionsRenamings:
-	def __init__(self) -> None:
+class FunctionRenamer(herapi.SPScheme):
+	def __init__(self, debug_flag):
+		pattern = make_pattern(debug_flag)
+		super().__init__("function_renamer", pattern)
 		self.renamings = {}
 		self.conflicts = {}
+
+	def on_matched_item(self, item, ctx: herapi.PatternContext):
+		func_ea = ctx.get_func_ea()
+		debug_print = ctx.get_expr("debug_print")
+		s = debug_print.a[1]
+		name = s.print1(None)
+		name = idaapi.tag_remove(name)
+		name = idaapi.str2user(name)
+		name = name[2:-2]
+		self.add_renaming(func_ea, name)
+		return False
 
 	def add_renaming(self, func_addr, new_name):
 		current_name = idaapi.get_func_name(func_addr) 
@@ -45,29 +58,10 @@ class FunctionsRenamings:
 		for func_addr, names in self.conflicts.items():
 			print("Conflicting renamings:", hex(func_addr), names)
 
-class FunctionRenamer(herapi.SPScheme):
-	def __init__(self, renamings_collection, debug_flag):
-		self.renamings_collection = renamings_collection
-		pattern = make_pattern(debug_flag)
-		super().__init__("function_renamer", pattern)
-
-	def on_matched_item(self, item, ctx: herapi.PatternContext):
-		func_ea = ctx.get_func_ea()
-		debug_print = ctx.get_expr("debug_print")
-		s = debug_print.a[1]
-		name = s.print1(None)
-		name = idaapi.tag_remove(name)
-		name = idaapi.str2user(name)
-		name = name[2:-2]
-		self.renamings_collection.add_renaming(func_ea, name)
-		return False
-
 
 def do_renames(debug_flag: int):
-	col = FunctionsRenamings()
-	scheme = FunctionRenamer(col, debug_flag)
+	scheme = FunctionRenamer(debug_flag)
 	matcher = herapi.Matcher(scheme)
 	matcher.match_objects_xrefs(debug_flag)
-
-	col.apply_renamings()
-	col.print_conflicts()
+	scheme.apply_renamings()
+	scheme.print_conflicts()
