@@ -61,6 +61,19 @@ class HelperExprPat(AbstractPattern):
 		return ()
 
 
+class NumPat(AbstractPattern):
+	op = idaapi.cot_num
+	def __init__(self, num=None):
+		self.num = num
+
+	@AbstractPattern.initial_check
+	def check(self, expr, ctx):
+		if self.num is None:
+			return True
+
+		return self.num == expr.n._value
+
+
 class ObjPat(AbstractPattern):
 	op = idaapi.cot_obj
 
