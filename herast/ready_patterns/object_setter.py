@@ -157,19 +157,11 @@ class AssignmentCounterScheme(herapi.SPScheme):
 		self.counter.add_assignment(func_ea)
 		return False
 
-def get_func_start(addr):
-	func = idaapi.get_func(addr)
-	if func is None:
-		return idaapi.BADADDR
-	return func.start_ea
-
-def get_func_calls_to(fea):
-	rv = filter(None, [get_func_start(x.frm) for x in idautils.XrefsTo(fea)])
-	rv = filter(lambda x: x != idaapi.BADADDR, rv)
-	return list(rv)
+def count_xrefs_to(ea):
+	return len([x for x in idautils.XrefsTo(ea)])
 
 def count_assignments(*functions, assignments_amount_threshold=15):
-	functions = [f for f in functions if len(get_func_calls_to(f)) > assignments_amount_threshold]
+	functions = [f for f in functions if count_xrefs_to(f) > assignments_amount_threshold]
 
 	counter = AssignmentCounter()
 	scheme = AssignmentCounterScheme(counter, functions)
