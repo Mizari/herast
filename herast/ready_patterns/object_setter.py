@@ -53,6 +53,18 @@ class ObjectSetterScheme(herapi.SPScheme):
 
 		self.objects[object_address] = (object_name, object_type)
 
+	def apply_new_info(self, default_type=None):
+		print("Found {} objects".format(len(self.objects)))
+		for oaddr, oname, otype in self.get_objects():
+			print("Setting object: {:x} {} {}".format(oaddr, oname, otype))
+			if oname is not None:
+				idaapi.set_name(oaddr, oname)
+
+			if otype is not None:
+				idc.SetType(oaddr, otype)
+			elif default_type is not None:
+				idc.SetType(oaddr, default_type)
+
 	def get_objects(self):
 		for oaddr, (oname, otype) in self.objects.items():
 			yield oaddr, oname, otype
@@ -74,17 +86,7 @@ def collect_objects(function_address, default_type=None):
 	matcher = herapi.Matcher()
 	matcher.add_scheme(scheme)
 	matcher.match_objects_xrefs(function_address)
-
-	print("Found {} objects".format(len(scheme.objects)))
-	for oaddr, oname, otype in scheme.get_objects():
-		print("Setting object: {:x} {} {}".format(oaddr, oname, otype))
-		if oname is not None:
-			idaapi.set_name(oaddr, oname)
-
-		if otype is not None:
-			idc.SetType(oaddr, otype)
-		elif default_type is not None:
-			idc.SetType(oaddr, default_type)
+	scheme.apply_new_info(default_type)
 
 
 class AssignmentCounterScheme(herapi.SPScheme):
