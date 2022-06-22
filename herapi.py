@@ -12,3 +12,9 @@ def get_storages():
 
 def get_storage(storage_path):
 	return storage_manager.get_storage(storage_path)
+
+def skip_casts(expr):
+	import idaapi
+	if expr.op == idaapi.cot_cast:
+		return expr.x
+	return expr
