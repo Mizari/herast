@@ -46,8 +46,15 @@ def get_object_name(item):
 	return "object_" + hex(arg0)[2:] + '_' + str(arg1)
 
 
-class ObjectsCollection:
-	def __init__(self):
+class ObjectSetterScheme(herapi.SPScheme):
+	def __init__(self, function_address):
+		pattern = herapi.ExInsPat(
+			herapi.AsgExprPat(
+				herapi.ObjPat(),
+				herapi.SkipCasts(herapi.CallExprPat(function_address, ignore_arguments=True)),
+			)
+		)
+		super().__init__("object_setter", pattern)
 		self.objects = {}
 
 	def add_object(self, object_address, object_name, object_type):
@@ -72,23 +79,11 @@ class ObjectsCollection:
 		for oaddr, (oname, otype) in self.objects.items():
 			yield oaddr, oname, otype
 
-
-class ObjectSetterScheme(herapi.SPScheme):
-	def __init__(self, function_address, objects_collection: ObjectsCollection):
-		pattern = herapi.ExInsPat(
-			herapi.AsgExprPat(
-				herapi.ObjPat(),
-				herapi.SkipCasts(herapi.CallExprPat(function_address, ignore_arguments=True)),
-			)
-		)
-		super().__init__("object_setter", pattern)
-		self.objects_collection = objects_collection
-
 	def on_matched_item(self, item, ctx: herapi.PatternContext):
 		object_address = get_object_address(item)
 		object_name    = get_object_name(item)
 		object_type    = get_object_type(item)
-		self.objects_collection.add_object(object_address, object_name, object_type)
+		self.add_object(object_address, object_name, object_type)
 		return False
 
 
@@ -97,14 +92,13 @@ def collect_objects(function_address, default_type=None):
 		print("Error: function address is invalid")
 		return
 
-	objects_collection = ObjectsCollection()
-	scheme = ObjectSetterScheme(function_address, objects_collection)
+	scheme = ObjectSetterScheme(function_address)
 	matcher = herapi.Matcher()
 	matcher.add_scheme(scheme)
 	matcher.match_objects_xrefs(function_address)
 
-	print("Found {} objects".format(len(objects_collection.objects)))
-	for oaddr, oname, otype in objects_collection.get_objects():
+	print("Found {} objects".format(len(scheme.objects)))
+	for oaddr, oname, otype in scheme.get_objects():
 		print("Setting object: {:x} {} {}".format(oaddr, oname, otype))
 		if oname is not None:
 			idaapi.set_name(oaddr, oname)
