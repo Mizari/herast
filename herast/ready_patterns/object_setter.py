@@ -4,25 +4,15 @@ import idautils
 import herapi
 import idc
 
+
 """
 This example demonstrates how to mass-set objects according to how
-they are assigned values in decompiled functions by function calls.
+they are assigned values by function calls.
 e.g.: 
 	dword_123456 = Foo(123, 3, "qwe")
 into
 	object_7b_3 = Foo(123, 3, "qwe")
-
-FUNC_ADDR variable is needed
-In order to better control name/type generation update PATTERN
 """
-
-def get_object_name(asg_expr):
-	asg_y = herapi.skip_casts(asg_expr.y)
-	arg0 = asg_y.a[0].n._value
-	arg1 = asg_y.a[1].n._value
-	return "object_" + hex(arg0)[2:] + '_' + str(arg1)
-
-
 class ObjectSetterScheme(herapi.SPScheme):
 	def __init__(self, function_address):
 		pattern = herapi.AsgExprPat(
@@ -63,8 +53,11 @@ class ObjectSetterScheme(herapi.SPScheme):
 				idc.SetType(oaddr, default_type)
 
 	def on_matched_item(self, item, ctx: herapi.PatternContext):
+		asg_y = herapi.skip_casts(item.y)
+		arg0 = asg_y.a[0].n._value
+		arg1 = asg_y.a[1].n._value
+		object_name = "object_" + hex(arg0)[2:] + '_' + str(arg1)
 		object_address = item.x.obj_ea
-		object_name    = get_object_name(item)
 		object_type    = None
 		self.add_object(object_address, object_name, object_type)
 		return False
