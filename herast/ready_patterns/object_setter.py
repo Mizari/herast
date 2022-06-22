@@ -16,13 +16,10 @@ FUNC_ADDR variable is needed
 In order to better control name/type generation update PATTERN
 """
 
-def get_object_name(item):
-	item = item.y
-	if item.op == idaapi.cot_cast:
-		item = item.x
-
-	arg0 = item.a[0].n._value
-	arg1 = item.a[1].n._value
+def get_object_name(asg_expr):
+	asg_y = herapi.skip_casts(asg_expr.y)
+	arg0 = asg_y.a[0].n._value
+	arg1 = asg_y.a[1].n._value
 	return "object_" + hex(arg0)[2:] + '_' + str(arg1)
 
 
@@ -35,27 +32,27 @@ class ObjectSetterScheme(herapi.SPScheme):
 		super().__init__("object_setter", pattern)
 		self.objects = {}
 
-	def add_object(self, object_address, object_name, object_type):
-		if self.objects.get(object_address, None) is None:
-			self.objects[object_address] = (object_name, object_type)
+	def add_object(self, object_ea, object_name, object_type):
+		if self.objects.get(object_ea) is None:
+			self.objects[object_ea] = (object_name, object_type)
 			return
 
-		existing_object_name, existing_object_type = self.objects[object_address]
+		existing_object_name, existing_object_type = self.objects[object_ea]
 		if object_name is None:
 			object_name = existing_object_name
 		if object_type is None:
 			object_type = existing_object_type
 
 		if existing_object_name != object_name:
-			print(f"Warning: object address {object_address} is already used by object {existing_object_name}")
+			print(f"Warning: object address {object_ea} is already used by object {existing_object_name}")
 		if existing_object_type != object_type:
-			print(f"Warning: object address {object_address} is already used by object {existing_object_type}")
+			print(f"Warning: object address {object_ea} is already used by object {existing_object_type}")
 
-		self.objects[object_address] = (object_name, object_type)
+		self.objects[object_ea] = (object_name, object_type)
 
 	def apply_new_info(self, default_type=None):
 		print("Found {} objects".format(len(self.objects)))
-		for oaddr, oname, otype in self.get_objects():
+		for oaddr, (oname, otype) in self.objects:
 			print("Setting object: {:x} {} {}".format(oaddr, oname, otype))
 			if oname is not None:
 				idaapi.set_name(oaddr, oname)
@@ -64,10 +61,6 @@ class ObjectSetterScheme(herapi.SPScheme):
 				idc.SetType(oaddr, otype)
 			elif default_type is not None:
 				idc.SetType(oaddr, default_type)
-
-	def get_objects(self):
-		for oaddr, (oname, otype) in self.objects.items():
-			yield oaddr, oname, otype
 
 	def on_matched_item(self, item, ctx: herapi.PatternContext):
 		object_address = item.x.obj_ea
