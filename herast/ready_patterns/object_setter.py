@@ -74,9 +74,9 @@ def collect_objects(function_address, default_type=None):
 
 
 class AssignmentCounterScheme(herapi.SPScheme):
-	def __init__(self, candidates):
+	def __init__(self, *candidates):
 		if len(candidates) == 1:
-			cand = next(iter(candidates))
+			cand = candidates[0]
 			obj_pat = herapi.ObjPat(ea=cand)
 		else:
 			objects = [herapi.ObjPat(ea=cand) for cand in candidates]
@@ -112,7 +112,7 @@ def count_xrefs_to(ea):
 def count_assignments(*functions, assignments_amount_threshold=15):
 	functions = [f for f in functions if count_xrefs_to(f) > assignments_amount_threshold]
 
-	scheme = AssignmentCounterScheme(functions)
+	scheme = AssignmentCounterScheme(*functions)
 	matcher = herapi.Matcher(scheme)
 	matcher.match_objects_xrefs(*functions)
 
