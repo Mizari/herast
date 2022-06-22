@@ -114,8 +114,18 @@ def collect_objects(function_address, default_type=None):
 		elif default_type is not None:
 			idc.SetType(oaddr, default_type)
 
-class AssignmentCounter:
-	def __init__(self):
+
+class AssignmentCounterScheme(herapi.SPScheme):
+	def __init__(self, candidates):
+		if len(candidates) == 1:
+			cand = next(iter(candidates))
+			obj_pat = herapi.ObjPat(ea=cand)
+		else:
+			objects = [herapi.ObjPat(ea=cand) for cand in candidates]
+			obj_pat = herapi.OrPat(*objects)
+
+		pattern = herapi.AsgExprPat(herapi.AnyPat(), herapi.SkipCasts(herapi.CallExprPat(obj_pat)))
+		super().__init__("assignment_counter", pattern)
 		self.count = defaultdict(int)
 
 	def add_assignment(self, func_ea):
@@ -129,26 +139,13 @@ class AssignmentCounter:
 		for func_ea, count in self.count.items():
 			print("{:x} {} {}".format(func_ea, idaapi.get_func_name(func_ea), count))
 
-class AssignmentCounterScheme(herapi.SPScheme):
-	def __init__(self, counter: AssignmentCounter, candidates):
-		if len(candidates) == 1:
-			cand = next(iter(candidates))
-			obj_pat = herapi.ObjPat(ea=cand)
-		else:
-			objects = [herapi.ObjPat(ea=cand) for cand in candidates]
-			obj_pat = herapi.OrPat(*objects)
-
-		pattern = herapi.AsgExprPat(herapi.AnyPat(), herapi.SkipCasts(herapi.CallExprPat(obj_pat)))
-		super().__init__("assignment_counter", pattern)
-		self.counter = counter
-
 	def on_matched_item(self, item, ctx: herapi.PatternContext):
 		call_expr = item.y
 		if call_expr.op == idaapi.cot_cast:
 			call_expr = call_expr.x
 
 		func_ea = call_expr.x.obj_ea
-		self.counter.add_assignment(func_ea)
+		self.add_assignment(func_ea)
 		return False
 
 def count_xrefs_to(ea):
@@ -157,10 +154,9 @@ def count_xrefs_to(ea):
 def count_assignments(*functions, assignments_amount_threshold=15):
 	functions = [f for f in functions if count_xrefs_to(f) > assignments_amount_threshold]
 
-	counter = AssignmentCounter()
-	scheme = AssignmentCounterScheme(counter, functions)
+	scheme = AssignmentCounterScheme(functions)
 	matcher = herapi.Matcher(scheme)
 	matcher.match_objects_xrefs(*functions)
 
-	counter.trim_assignments(assignments_amount_threshold)
-	counter.show_stats()
+	scheme.trim_assignments(assignments_amount_threshold)
+	scheme.show_stats()
