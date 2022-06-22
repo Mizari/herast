@@ -18,7 +18,7 @@ In order to better control name/type generation update PATTERN
 
 def get_object_name(item):
 	addr = item.ea
-	item = item.cexpr.y
+	item = item.y
 	if item.op == idaapi.cot_cast:
 		item = item.x
 
@@ -42,11 +42,9 @@ def get_object_name(item):
 
 class ObjectSetterScheme(herapi.SPScheme):
 	def __init__(self, function_address):
-		pattern = herapi.ExInsPat(
-			herapi.AsgExprPat(
+		pattern = herapi.AsgExprPat(
 				herapi.ObjPat(),
 				herapi.SkipCasts(herapi.CallExprPat(function_address, ignore_arguments=True)),
-			)
 		)
 		super().__init__("object_setter", pattern)
 		self.objects = {}
@@ -74,7 +72,7 @@ class ObjectSetterScheme(herapi.SPScheme):
 			yield oaddr, oname, otype
 
 	def on_matched_item(self, item, ctx: herapi.PatternContext):
-		object_address = item.cexpr.x.obj_ea
+		object_address = item.x.obj_ea
 		object_name    = get_object_name(item)
 		object_type    = None
 		self.add_object(object_address, object_name, object_type)
