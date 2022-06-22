@@ -15,12 +15,20 @@ into
 """
 class ObjectSetterScheme(herapi.SPScheme):
 	def __init__(self, function_address):
-		pattern = herapi.AsgExprPat(
-				herapi.ObjPat(),
-				herapi.SkipCasts(herapi.CallExprPat(function_address, herapi.NumPat(), herapi.NumPat(), herapi.AnyPat())),
-		)
-		super().__init__("object_setter", pattern)
 		self.objects = {}
+		call_pattern = herapi.SkipCasts(herapi.CallExprPat(function_address, herapi.NumPat(), herapi.NumPat(), herapi.AnyPat()))
+		pattern = herapi.AsgExprPat(herapi.ObjPat(), call_pattern)
+		super().__init__("object_setter", pattern)
+
+	def on_matched_item(self, item, ctx: herapi.PatternContext):
+		asg_y = herapi.skip_casts(item.y)
+		arg0 = asg_y.a[0].n._value
+		arg1 = asg_y.a[1].n._value
+		object_name = "object_" + hex(arg0)[2:] + '_' + str(arg1)
+		object_address = item.x.obj_ea
+		object_type    = None
+		self.add_object(object_address, object_name, object_type)
+		return False
 
 	def add_object(self, object_ea, object_name, object_type):
 		if self.objects.get(object_ea) is None:
@@ -51,16 +59,6 @@ class ObjectSetterScheme(herapi.SPScheme):
 				idc.SetType(oaddr, otype)
 			elif default_type is not None:
 				idc.SetType(oaddr, default_type)
-
-	def on_matched_item(self, item, ctx: herapi.PatternContext):
-		asg_y = herapi.skip_casts(item.y)
-		arg0 = asg_y.a[0].n._value
-		arg1 = asg_y.a[1].n._value
-		object_name = "object_" + hex(arg0)[2:] + '_' + str(arg1)
-		object_address = item.x.obj_ea
-		object_type    = None
-		self.add_object(object_address, object_name, object_type)
-		return False
 
 
 def collect_objects(function_address, default_type=None):
