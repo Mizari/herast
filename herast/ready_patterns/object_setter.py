@@ -16,12 +16,6 @@ FUNC_ADDR variable is needed
 In order to better control name/type generation update PATTERN
 """
 
-def get_object_address(item):
-	return item.cexpr.x.obj_ea
-
-def get_object_type(item):
-	return None
-
 def get_object_name(item):
 	addr = item.ea
 	item = item.cexpr.y
@@ -80,9 +74,9 @@ class ObjectSetterScheme(herapi.SPScheme):
 			yield oaddr, oname, otype
 
 	def on_matched_item(self, item, ctx: herapi.PatternContext):
-		object_address = get_object_address(item)
+		object_address = item.cexpr.x.obj_ea
 		object_name    = get_object_name(item)
-		object_type    = get_object_type(item)
+		object_type    = None
 		self.add_object(object_address, object_name, object_type)
 		return False
 
