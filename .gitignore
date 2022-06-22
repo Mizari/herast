@@ -139,3 +139,4 @@ cython_debug/
 
 
 # Ready-patterns, as it may contain private data
+herast/ready_patterns/*.py
