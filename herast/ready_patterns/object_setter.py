@@ -17,26 +17,12 @@ In order to better control name/type generation update PATTERN
 """
 
 def get_object_name(item):
-	addr = item.ea
 	item = item.y
 	if item.op == idaapi.cot_cast:
 		item = item.x
 
-	if len(item.a) != 3:
-		print("Error: unexpected amount of arguments")
-		return None
-
-	arg0 = item.a[0]
-	if arg0.op != idaapi.cot_num:
-		print("Error: object name is not an integer", hex(addr))
-		return None
-
-	arg1 = item.a[1]
-	if arg1.op != idaapi.cot_num:
-		return None
-
-	arg0 = arg0.n._value
-	arg1 = arg1.n._value
+	arg0 = item.a[0].n._value
+	arg1 = item.a[1].n._value
 	return "object_" + hex(arg0)[2:] + '_' + str(arg1)
 
 
@@ -44,7 +30,7 @@ class ObjectSetterScheme(herapi.SPScheme):
 	def __init__(self, function_address):
 		pattern = herapi.AsgExprPat(
 				herapi.ObjPat(),
-				herapi.SkipCasts(herapi.CallExprPat(function_address, ignore_arguments=True)),
+				herapi.SkipCasts(herapi.CallExprPat(function_address, herapi.NumPat(), herapi.NumPat(), herapi.AnyPat())),
 		)
 		super().__init__("object_setter", pattern)
 		self.objects = {}
