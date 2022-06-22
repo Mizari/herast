@@ -118,9 +118,6 @@ class AssignmentCounter:
 	def __init__(self):
 		self.count = defaultdict(int)
 
-	def clear(self):
-		self.count.clear()
-
 	def add_assignment(self, func_ea):
 		self.count[func_ea] += 1
 
@@ -144,9 +141,6 @@ class AssignmentCounterScheme(herapi.SPScheme):
 		pattern = herapi.AsgExprPat(herapi.AnyPat(), herapi.SkipCasts(herapi.CallExprPat(obj_pat)))
 		super().__init__("assignment_counter", pattern)
 		self.counter = counter
-
-	def on_tree_iteration_start(self, ctx: herapi.PatternContext):
-		self.counter.clear()
 
 	def on_matched_item(self, item, ctx: herapi.PatternContext):
 		call_expr = item.y
