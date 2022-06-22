@@ -6,6 +6,7 @@ from collections import defaultdict
 
 class AssignmentCounterScheme(herapi.SPScheme):
 	def __init__(self, *candidates):
+		self.count = defaultdict(int)
 		if len(candidates) == 1:
 			cand = candidates[0]
 			obj_pat = herapi.ObjPat(ea=cand)
@@ -15,7 +16,11 @@ class AssignmentCounterScheme(herapi.SPScheme):
 
 		pattern = herapi.AsgExprPat(herapi.AnyPat(), herapi.SkipCasts(herapi.CallExprPat(obj_pat)))
 		super().__init__("assignment_counter", pattern)
-		self.count = defaultdict(int)
+
+	def on_matched_item(self, item, ctx: herapi.PatternContext):
+		func_ea = herapi.skip_casts(item.y).x.obj_ea
+		self.add_assignment(func_ea)
+		return False
 
 	def add_assignment(self, func_ea):
 		self.count[func_ea] += 1
@@ -28,14 +33,6 @@ class AssignmentCounterScheme(herapi.SPScheme):
 		for func_ea, count in self.count.items():
 			print("{:x} {} {}".format(func_ea, idaapi.get_func_name(func_ea), count))
 
-	def on_matched_item(self, item, ctx: herapi.PatternContext):
-		call_expr = item.y
-		if call_expr.op == idaapi.cot_cast:
-			call_expr = call_expr.x
-
-		func_ea = call_expr.x.obj_ea
-		self.add_assignment(func_ea)
-		return False
 
 def count_xrefs_to(ea):
 	return len([x for x in idautils.XrefsTo(ea)])
