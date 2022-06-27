@@ -3,6 +3,9 @@ import idaapi
 import ida_hexrays
 
 # order of requires (from imported to importers) is most likely important
+idaapi.require('herast.storages_settings')
+idaapi.require('herast.idb_settings')
+idaapi.require('herast.herast_settings')
 idaapi.require('herast.tree.consts')
 idaapi.require('herast.tree.utils')
 idaapi.require('herast.tree.pattern_context')
