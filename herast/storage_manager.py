@@ -27,7 +27,7 @@ def load_storage_file(filename: str) -> bool:
 		print("[!] WARNING: failed to load", filename, "storage")
 		return False
 
-	storage.enabled = filename in idb_settings.get_enabled_idb_storages()
+	storage.enabled = filename in idb_settings.get_enabled_idb()
 	schemes_storages[filename] = storage
 	return True
 

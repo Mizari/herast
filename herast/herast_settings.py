@@ -32,6 +32,9 @@ def get_herast_folders():
 def get_herast_files():
 	return list(herast_settings.files)
 
+def get_herast_enabled():
+	return list(herast_settings.enabled)
+
 def add_herast_file(file_path):
 	if file_path in herast_settings.files:
 		return

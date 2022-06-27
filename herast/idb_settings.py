@@ -39,7 +39,10 @@ idb_settings = IdbSettings.create()
 def get_idb_folders():
 	return list(idb_settings.folders)
 
-def get_enabled_idb_storages():
+def get_idb_files():
+	return list(idb_settings.files)
+
+def get_enabled_idb():
 	return list(idb_settings.enabled)
 
 def save_enabled_idb_storages(stored_enabled_array):
