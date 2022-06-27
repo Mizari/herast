@@ -6,6 +6,24 @@ class StoragesSettings:
 		self.files = files
 		self.enabled = enabled
 
+	def add_file(self, file_path):
+		if file_path in self.files:
+			return
+		self.files.append(file_path)
+		self.save()
+
+	def add_folder(self, folder_path):
+		if folder_path in self.folders:
+			return
+		self.folders.append(folder_path)
+		self.save()
+
+	def add_enabled(self, enabled_path):
+		if enabled_path in self.enabled:
+			return
+		self.enabled.append(enabled_path)
+		self.save()
+
 	@classmethod
 	def load_json_str(cls):
 		raise NotImplementedError()
