@@ -26,6 +26,14 @@ class SchemesStorage:
 		self.status_text = None
 		self.source = None
 
+	@classmethod
+	def from_file(cls, file_path):
+		module = load_storage_module_from_file(file_path)
+		if module is None:
+			return None
+
+		return cls(file_path, module, False)
+
 	def get_status(self):
 		if self.status_text is not None:
 			return self.status_text

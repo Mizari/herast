@@ -1,22 +1,11 @@
 import glob
 
-from .tree.utils import load_python_module_from_file
 from herast.schemes_storage import SchemesStorage
 
 from typing import Dict, Optional
 
 import herast.idb_settings as idb_settings
 import herast.herast_settings as herast_settings
-
-
-def load_storage_module_from_file(path):
-	module = load_python_module_from_file(path)
-	if module is None:
-		return None
-
-	if not hasattr(module, "__exported"):
-		return None
-	return module
 
 
 schemes_storages : Dict[str, SchemesStorage] = {}
@@ -33,12 +22,12 @@ def load_storage_folder(folder_name: str) -> None:
 		load_storage_file(full_path)
 
 def load_storage_file(filename: str) -> bool:
-	module = load_storage_module_from_file(filename)
-	if module is None:
+	storage = SchemesStorage.from_file(filename)
+	if storage is None:
+		print("[!] WARNING: failed to load", filename, "storage")
 		return False
 
-	is_enabled = filename in idb_settings.get_enabled_idb_storages()
-	storage = SchemesStorage(filename, module, is_enabled)
+	storage.enabled = filename in idb_settings.get_enabled_idb_storages()
 	schemes_storages[filename] = storage
 	return True
 
