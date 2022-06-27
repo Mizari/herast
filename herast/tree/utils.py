@@ -152,8 +152,8 @@ def load_python_module_from_file(path):
 		spec = importlib.util.spec_from_file_location("module", path)
 		module = importlib.util.module_from_spec(spec)
 		spec.loader.exec_module(module)
-	except:
-		print("[!] Exception happened during loading module from file %s" % path)
+	except Exception as e:
+		print("[!] Exception happened during loading module from file %s: %s" % (path, e))
 		return None
 	return module
 
