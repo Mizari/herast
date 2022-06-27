@@ -58,5 +58,10 @@ class StoragesSettings:
 			return None
 
 	def save(self):
-		json_str = json.dumps(folders=self.folders, files=self.files, enabled=self.enabled)
+		json_dict = {
+			"folders": self.folders,
+			"files":   self.files,
+			"enabled": self.enabled,
+		}
+		json_str = json.dumps(json_dict)
 		self.save_json_str(json_str)
