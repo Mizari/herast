@@ -31,6 +31,11 @@ def load_storage_file(filename: str) -> bool:
 	schemes_storages[filename] = storage
 	return True
 
+def get_storages_folders():
+	global_folders = herast_settings.get_storages_folders()
+	idb_folders = idb_settings.get_idb_folders()
+	return global_folders + idb_folders
+
 def get_storage(filename: str) -> Optional[SchemesStorage]:
 	return schemes_storages.get(filename, None)
 

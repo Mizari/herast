@@ -36,6 +36,9 @@ class IdbSettings(StoragesSettings):
 
 idb_settings = IdbSettings.create()
 
+def get_idb_folders():
+	return list(idb_settings.folders)
+
 def get_enabled_idb_storages():
 	return list(idb_settings.enabled)
 

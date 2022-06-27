@@ -83,7 +83,7 @@ class StorageManagerModel(QtCore.QAbstractItemModel):
 	def __init__(self):
 		super().__init__()
 		self.root = SchemeStorageTreeItem(["File"])
-		for storage_folder in storage_manager.storages_folders:
+		for storage_folder in storage_manager.get_storages_folders():
 			self.__add_folder(storage_folder)
 
 	def __add_folder(self, storage_folder):
