@@ -1,10 +1,4 @@
-from herast.tree.patterns.abstracts import VarBind, BindItem, PatternContext
-from herast.tree.patterns.expressions import AsgExprPat
-from herast.tree.patterns.instructions import ExInsPat, IfInsPat
-
-from herast.tree.utils import *
-
-from herast.schemes.single_pattern_schemes import SPScheme
+from herapi import *
 
 pattern = IfInsPat(
 	VarBind("error_var"),

@@ -1,39 +1,35 @@
 import idaapi
+import herapi
 
-from herast.tree.patterns.abstracts import *
-from herast.tree.patterns.expressions import CallExprPat, AsgExprPat
-from herast.tree.patterns.instructions import ExInsPat, IfInsPat
-
-from herast.tree.utils import *
 
 from herast.schemes.single_pattern_schemes import SPScheme
 
 def make_call_expr(fname=None):
-	return SkipCasts(CallExprPat(fname, ignore_arguments=True))
+	return herapi.SkipCasts(herapi.CallExprPat(fname, ignore_arguments=True))
 
-first_call_pattern = ExInsPat(
-							AsgExprPat(
-								AnyPat(),
+first_call_pattern = herapi.ExInsPat(
+							herapi.AsgExprPat(
+								herapi.AnyPat(),
 								make_call_expr("__cxa_allocate_exception")
 							)
 						)
 
-excstr_getter_pattern = ExInsPat(
-	AsgExprPat(
-		AnyPat(),
-		CallExprPat(AnyPat(), AnyPat(), SkipCasts(BindItem("exception_str", AnyPat())))
+excstr_getter_pattern = herapi.ExInsPat(
+	herapi.AsgExprPat(
+		herapi.AnyPat(),
+		herapi.CallExprPat(herapi.AnyPat(), herapi.AnyPat(), herapi.SkipCasts(herapi.BindItem("exception_str", herapi.AnyPat())))
 	)
 )
-last_call_pattern = ExInsPat(make_call_expr('__cxa_throw'))
+last_call_pattern = herapi.ExInsPat(make_call_expr('__cxa_throw'))
 
-class ExceptionBody(AbstractPattern):
+class ExceptionBody(herapi.AbstractPattern):
 	op = idaapi.cit_block
 	def __init__(self, first_call, excstr_getter, last_call):
 		self.first_call = first_call
 		self.last_call = last_call
 		self.excstr_getter = excstr_getter
 
-	@AbstractPattern.initial_check
+	@herapi.AbstractPattern.initial_check
 	def check(self, item, ctx):
 		block = item.cblock
 
@@ -55,13 +51,13 @@ class ExceptionBody(AbstractPattern):
 
 		return True
 
-pattern = IfInsPat(
-	BindItem("if_expr"),
+pattern = herapi.IfInsPat(
+	herapi.BindItem("if_expr"),
 	ExceptionBody(first_call_pattern, excstr_getter_pattern, last_call_pattern)
 )
 
 class ExceptionCollapserScheme(SPScheme):
-	def on_matched_item(self, item, ctx: PatternContext):
+	def on_matched_item(self, item, ctx: herapi.PatternContext) -> bool:
 		helper_args = []
 
 		if_expr = ctx.get_expr("if_expr")
@@ -77,7 +73,7 @@ class ExceptionCollapserScheme(SPScheme):
 				arg2.assign(exception_str)
 				helper_args.append(arg2)
 
-		new_item = make_call_helper_instr("__throw_if", *helper_args)
+		new_item = herapi.make_call_helper_instr("__throw_if", *helper_args)
 
 		ctx.modify_instr(item, new_item)
 

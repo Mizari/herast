@@ -1,10 +1,6 @@
 import struct
+from herapi import SeqPat, ExInsPat, AsgExprPat, AnyPat, BindItem, ForInsPat, BlockPat, AsgxorExprPat, SPScheme, PatternContext
 
-from herast.tree.patterns.abstracts import *
-from herast.tree.patterns.expressions import AsgExprPat, AsgxorExprPat
-from herast.tree.patterns.instructions import ExInsPat, BlockPat, ForInsPat
-
-from herast.schemes.single_pattern_schemes import SPScheme
 
 pattern = SeqPat(
 				# ExInsPat(AsgExprPat(BindExpr('gobj', ObjPat()), SkipCasts(CallExprPat(ObjPat(name='j__malloc_base'), ignore_arguments=True)))),

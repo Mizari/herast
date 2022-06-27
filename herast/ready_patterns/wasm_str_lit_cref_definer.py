@@ -1,10 +1,5 @@
 import idaapi
-
-from herast.tree.patterns.abstracts import *
-from herast.tree.patterns.expressions import ObjPat
-from herast.tree.patterns.instructions import ExInsPat
-
-from herast.schemes.single_pattern_schemes import SPScheme
+from herapi import *
 
 
 class DrefingScheme(SPScheme):

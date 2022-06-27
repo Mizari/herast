@@ -89,7 +89,7 @@ def herast_callback(*args):
 
 	try:
 		matcher = Matcher()
-		for s in scheme_manager.get_enabled_schemes():
+		for s in scheme_manager.get_passive_schemes():
 			matcher.add_scheme(s)
 
 		traversal_start = time.time()

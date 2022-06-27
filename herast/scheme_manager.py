@@ -2,10 +2,13 @@ import herast.storage_manager as storage_manager
 from herast.schemes.base_scheme import Scheme
 
 
-def get_enabled_schemes():
-	enabled_schemes = []
-	for storage in storage_manager.get_enabled_storages():
-		for scheme in storage.module.__exported:
-			assert isinstance(scheme, Scheme)
-			enabled_schemes.append(scheme)
-	return enabled_schemes
+passive_schemes = {}
+
+def add_passive_scheme(scheme):
+	if not isinstance(scheme, Scheme):
+		return
+
+	passive_schemes[scheme.name] = scheme
+
+def get_passive_schemes():
+	return [s for s in passive_schemes.values()]
