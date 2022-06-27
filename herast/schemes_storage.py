@@ -5,17 +5,6 @@ import herast.idb_settings as idb_settings
 from .tree.utils import load_python_module_from_file
 
 
-def load_storage_module_from_file(path):
-	module = load_python_module_from_file(path)
-	if module is None:
-		return None
-
-	if not hasattr(module, "__exported"):
-		return None
-	return module
-
-
-
 class SchemesStorage:
 	def __init__(self, path, module, enabled, error=False):
 		self.path = path
@@ -28,7 +17,7 @@ class SchemesStorage:
 
 	@classmethod
 	def from_file(cls, file_path):
-		module = load_storage_module_from_file(file_path)
+		module = load_python_module_from_file(file_path)
 		if module is None:
 			return None
 
@@ -79,7 +68,7 @@ class SchemesStorage:
 		if os.path.isfile(self.path) and os.access(self.path, os.R_OK):
 			try:
 				del self.module
-				self.module = load_storage_module_from_file(self.path)
+				self.module = load_python_module_from_file(self.path)
 				self.error = False
 			except Exception as e:
 				self.module = None

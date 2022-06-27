@@ -79,6 +79,4 @@ class ExceptionCollapserScheme(SPScheme):
 
 		return False
 
-__exported = [
-	ExceptionCollapserScheme("exception_collapser", pattern)
-]
+herapi.add_passive_scheme(ExceptionCollapserScheme("exception_collapser", pattern))

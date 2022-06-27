@@ -32,4 +32,4 @@ class ReplacingScheme(SPScheme):
 
 scheme = ReplacingScheme("propagate_error", pattern)
 
-__exported = [scheme]
+add_passive_scheme(scheme)
