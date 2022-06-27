@@ -77,11 +77,32 @@ class NumPat(AbstractPattern):
 class ObjPat(AbstractPattern):
 	op = idaapi.cot_obj
 
-	def __init__(self, name=None, ea=None):
-		self.ea = ea
-		self.name = name
-		if ea is None and name is not None:
-			self.ea = resolve_name_address(name)
+	def __init__(self, obj_info=None):
+		self.ea = None
+		self.name = None
+
+		if isinstance(obj_info, int):
+			self.ea = obj_info
+			if not idaapi.is_loaded(self.ea):
+				print("[!] WARNING: object with address", hex(self.ea), "is not loaded. Will still try to match it")
+			else:
+				self.name = idaapi.get_name(self.ea)
+				if self.name == '': self.name = None
+
+		elif isinstance(obj_info, str):
+			self.name = obj_info
+			ea = resolve_name_address(self.name)
+			if ea == idaapi.BADADDR:
+				print("[!] WARNING: object with name", self.name, "does not exist. Will still try to match it")
+			else:
+				self.ea = ea
+
+		elif obj_info is None:
+			# simply match idaapi.cot_obj
+			pass
+
+		else:
+			raise TypeError("Object info should be int|str|None")
 
 	@AbstractPattern.initial_check
 	def check(self, expression, ctx) -> bool:

@@ -9,9 +9,9 @@ class AssignmentCounterScheme(herapi.SPScheme):
 		self.count = defaultdict(int)
 		if len(candidates) == 1:
 			cand = candidates[0]
-			obj_pat = herapi.ObjPat(ea=cand)
+			obj_pat = herapi.ObjPat(cand)
 		else:
-			objects = [herapi.ObjPat(ea=cand) for cand in candidates]
+			objects = [herapi.ObjPat(cand) for cand in candidates]
 			obj_pat = herapi.OrPat(*objects)
 
 		pattern = herapi.AsgExprPat(herapi.AnyPat(), herapi.SkipCasts(herapi.CallExprPat(obj_pat)))

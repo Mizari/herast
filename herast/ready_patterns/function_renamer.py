@@ -8,7 +8,7 @@ This script renames functions according to pattern found in them
 
 def make_pattern(debug_flag):
 	return herapi.IfInsPat(
-		herapi.ObjPat(ea=debug_flag),
+		herapi.ObjPat(debug_flag),
 		herapi.DeepExpr(herapi.CallExprPat("printf", ignore_arguments=True), bind_name="debug_print"),
 		should_wrap_in_block=False, # if to not wrap in block, because we want to search inside block's instructions
 	)
