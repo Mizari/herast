@@ -4,6 +4,7 @@ import herast.storage_manager as storage_manager
 from herast.tree.patterns.abstracts import *
 from herast.tree.patterns.expressions import *
 from herast.tree.patterns.instructions import *
+from herast.tree.utils import make_call_helper_instr
 from herast.tree.matcher import Matcher
 from herast.schemes.single_pattern_schemes import SPScheme, ItemRemovalScheme
 from herast.herast_settings import get_herast_enabled, get_herast_files, get_herast_folders, add_herast_enabled, add_herast_file, add_herast_folder
