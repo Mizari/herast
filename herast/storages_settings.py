@@ -31,9 +31,9 @@ class StoragesSettings:
 			if any(not isinstance(i, str) for i in x): return False
 			return True
 
-		files = json_dict.get("files")
-		folders = json_dict.get("folders")
-		enabled = json_dict.get("enabled")
+		files = json_dict.get("files", [])
+		folders = json_dict.get("folders", [])
+		enabled = json_dict.get("enabled", [])
 		if check(files) and check(folders) and check(enabled):
 			return cls(files=files, folders=folders, enabled=enabled)
 		else:
