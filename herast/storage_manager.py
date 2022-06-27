@@ -7,6 +7,7 @@ from .tree.utils import load_python_module_from_file
 from typing import Dict, Optional
 
 import herast.idb_settings as idb_settings
+import herast.herast_settings as herast_settings
 
 
 def load_storage_module_from_file(path):
@@ -87,16 +88,11 @@ class SchemesStorage:
 
 schemes_storages : Dict[str, SchemesStorage] = {}
 
-storages_folders = set()
-default_storage_dir = os.path.dirname(__file__) + "\\ready_patterns\\"
-if os.path.exists(default_storage_dir):
-	storages_folders.add(default_storage_dir)
-storages_files = set()
 
 def load_all_storages():
-	for folder in storages_folders:
+	for folder in herast_settings.storages_folders:
 		load_storage_folder(folder)
-	for file in storages_files:
+	for file in herast_settings.storages_files:
 		load_storage_file(file)
 
 def load_storage_folder(folder_name: str) -> None:
