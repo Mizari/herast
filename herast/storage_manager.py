@@ -12,9 +12,9 @@ schemes_storages : Dict[str, SchemesStorage] = {}
 
 
 def load_all_storages():
-	for folder in herast_settings.get_storages_folders():
+	for folder in herast_settings.get_herast_folders():
 		load_storage_folder(folder)
-	for file in herast_settings.get_storages_files():
+	for file in herast_settings.get_herast_files():
 		load_storage_file(file)
 
 def load_storage_folder(folder_name: str) -> None:
@@ -32,7 +32,7 @@ def load_storage_file(filename: str) -> bool:
 	return True
 
 def get_storages_folders():
-	global_folders = herast_settings.get_storages_folders()
+	global_folders = herast_settings.get_herast_folders()
 	idb_folders = idb_settings.get_idb_folders()
 	return global_folders + idb_folders
 

@@ -26,10 +26,10 @@ class HerastSettings(StoragesSettings):
 herast_settings = HerastSettings.create()
 
 
-def get_storages_folders():
+def get_herast_folders():
 	return list(herast_settings.folders)
 
-def get_storages_files():
+def get_herast_files():
 	return list(herast_settings.files)
 
 def add_herast_file(file_path):
