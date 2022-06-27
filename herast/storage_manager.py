@@ -1,13 +1,12 @@
 import os
 import glob
 import traceback
-import json
 
-from .tree.utils import save_long_str_to_idb
-from .tree.utils import load_long_str_from_idb
 from .tree.utils import load_python_module_from_file
 
 from typing import Dict, Optional
+
+import herast.idb_settings as idb_settings
 
 
 def load_storage_module_from_file(path):
@@ -18,15 +17,6 @@ def load_storage_module_from_file(path):
 	if not hasattr(module, "__exported"):
 		return None
 	return module
-
-ARRAY_NAME = "$herast:PatternStorage"
-def get_enabled_idb_storages():
-	stored_string = load_long_str_from_idb(ARRAY_NAME) or '[]'
-	stored_enabled_array = json.loads(stored_string)
-	return stored_enabled_array
-
-def save_enabled_idb_storages(stored_enabled_array):
-	save_long_str_to_idb(ARRAY_NAME, json.dumps(stored_enabled_array))
 
 class SchemesStorage:
 	def __init__(self, path, module, enabled, error=False):
@@ -64,19 +54,19 @@ class SchemesStorage:
 			if self.module is None:
 				assert self.reload()
 			if not self.error:
-				stored_enabled_array = get_enabled_idb_storages()
+				stored_enabled_array = idb_settings.get_enabled_idb_storages()
 				stored_enabled_array.append(self.path)
-				save_enabled_idb_storages(stored_enabled_array)
+				idb_settings.save_enabled_idb_storages(stored_enabled_array)
 				self.enabled = True
 
 	def disable(self):
 		if not self.enabled:
 			return
 
-		stored_enabled_array = get_enabled_idb_storages()
+		stored_enabled_array = idb_settings.get_enabled_idb_storages()
 		if self.path in stored_enabled_array:
 			stored_enabled_array.remove(self.path)
-		save_enabled_idb_storages(stored_enabled_array)
+		idb_settings.save_enabled_idb_storages(stored_enabled_array)
 		self.enabled = False
 
 	def reload(self):
@@ -118,7 +108,7 @@ def load_storage_file(filename: str) -> bool:
 	if module is None:
 		return False
 
-	is_enabled = filename in get_enabled_idb_storages()
+	is_enabled = filename in idb_settings.get_enabled_idb_storages()
 	storage = SchemesStorage(filename, module, is_enabled)
 	schemes_storages[filename] = storage
 	return True
