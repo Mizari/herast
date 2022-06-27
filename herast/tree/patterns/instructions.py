@@ -1,5 +1,6 @@
 import idaapi
 from .abstracts import AnyPat, AbstractPattern
+from herast.tree.pattern_context import PatternContext
 
 
 class BlockPat(AbstractPattern):
@@ -9,7 +10,7 @@ class BlockPat(AbstractPattern):
 		self.sequence = patterns
 
 	@AbstractPattern.initial_check
-	def check(self, instruction, ctx) -> bool:
+	def check(self, instruction, ctx: PatternContext) -> bool:
 		block = instruction.cblock
 		if len(block) != len(self.sequence):
 			return False
@@ -31,7 +32,7 @@ class ExInsPat(AbstractPattern):
 		self.expr = expr or AnyPat()
 
 	@AbstractPattern.initial_check
-	def check(self, instruction, ctx) -> bool:
+	def check(self, instruction, ctx: PatternContext) -> bool:
 		return self.expr.check(instruction.cexpr, ctx)
 
 	@property
@@ -60,7 +61,7 @@ class IfInsPat(AbstractPattern):
 		self.else_branch = wrap_pattern(else_branch)
 
 	@AbstractPattern.initial_check
-	def check(self, instruction, ctx) -> bool:
+	def check(self, instruction, ctx: PatternContext) -> bool:
 		cif = instruction.cif
 
 		rv = self.condition.check(cif.expr, ctx)
@@ -87,7 +88,7 @@ class ForInsPat(AbstractPattern):
 
 
 	@AbstractPattern.initial_check
-	def check(self, instruction, ctx) -> bool:
+	def check(self, instruction, ctx: PatternContext) -> bool:
 		cfor = instruction.cfor
 
 		return self.init.check(cfor.init, ctx) and \
@@ -107,7 +108,7 @@ class RetInsPat(AbstractPattern):
 		self.expr = expr or AnyPat()
 
 	@AbstractPattern.initial_check
-	def check(self, instruction, ctx) -> bool:
+	def check(self, instruction, ctx: PatternContext) -> bool:
 		creturn = instruction.creturn
 
 		return self.expr.check(creturn.expr, ctx)
@@ -125,7 +126,7 @@ class WhileInsPat(AbstractPattern):
 		self.body = body or AnyPat()
 
 	@AbstractPattern.initial_check
-	def check(self, instruction, ctx) -> bool:
+	def check(self, instruction, ctx: PatternContext) -> bool:
 		cwhile = instruction.cwhile
 
 		return self.expr.check(cwhile.expr, ctx) and \
@@ -144,7 +145,7 @@ class DoInsPat(AbstractPattern):
 		self.body = body or AnyPat()
 
 	@AbstractPattern.initial_check
-	def check(self, instruction, ctx) -> bool:
+	def check(self, instruction, ctx: PatternContext) -> bool:
 		cdo = instruction.cdo
 
 		return self.body.check(cdo.body, ctx) and \
@@ -161,5 +162,5 @@ class GotoPat(AbstractPattern):
 		return
 
 	@AbstractPattern.initial_check
-	def check(self, item, ctx):
+	def check(self, item, ctx: PatternContext) -> bool:
 		return True

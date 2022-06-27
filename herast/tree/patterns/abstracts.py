@@ -1,4 +1,3 @@
-from re import A
 import idaapi
 
 import herast.tree.consts as consts
@@ -16,7 +15,7 @@ class AbstractPattern:
 	def _raise(self, msg):
 		raise "%s: %s" % (self.__class__.__name__, msg)
 
-	def check(self, item, ctx: PatternContext, *args, **kwargs):
+	def check(self, item, ctx: PatternContext, *args, **kwargs) -> bool:
 		raise NotImplementedError("This is an abstract class")
 
 	@classmethod
@@ -44,7 +43,7 @@ class AnyPat(AbstractPattern):
 	def __init__(self, may_be_none=True):
 		self.may_be_none = may_be_none
 
-	def check(self, item, ctx: PatternContext):
+	def check(self, item, ctx: PatternContext) -> bool:
 		return item is not None or self.may_be_none
 
 	@property
@@ -70,7 +69,7 @@ class SeqPat(AbstractPattern):
 		self.seq = tuple(pats)
 		self.length = len(pats)
 
-	def check(self, instruction, ctx: PatternContext):
+	def check(self, instruction, ctx: PatternContext) -> bool:
 		parent = ctx.get_parent_block(instruction)
 		if parent is None:
 			return False
@@ -99,8 +98,8 @@ class OrPat(AbstractPattern):
 		if len(pats) <= 1:
 			print("[*] WARNING: OrPat expects at least two patterns")
 		self.pats = tuple(pats)
-	
-	def check(self, item, ctx: PatternContext):
+
+	def check(self, item, ctx: PatternContext) -> bool:
 		for p in self.pats:
 			if p.check(item, ctx):
 				return True
@@ -117,8 +116,8 @@ class AndPat(AbstractPattern):
 	def __init__(self, *pats):
 		self._assert(len(pats) > 1, "Passing one or less patterns to AndPat is useless")
 		self.pats = tuple(pats)
-	
-	def check(self, item, ctx: PatternContext):
+
+	def check(self, item, ctx: PatternContext) -> bool:
 		for p in self.pats:
 			if not p.check(item, ctx):
 				return False
@@ -135,7 +134,7 @@ class SkipCasts(AbstractPattern):
 	def __init__(self, pat):
 		self.pat = pat
 
-	def check(self, item, ctx: PatternContext):
+	def check(self, item, ctx: PatternContext) -> bool:
 		while item.op == idaapi.cot_cast:
 			item = item.x
 		
@@ -152,7 +151,7 @@ class BindItem(AbstractPattern):
 		self.pat = pat or AnyPat()
 		self.name = name
 
-	def check(self, item, ctx: PatternContext):
+	def check(self, item, ctx: PatternContext) -> bool:
 		if self.pat.check(item, ctx):
 			current_expr = ctx.get_expr(self.name)
 			if current_expr is None:
@@ -170,7 +169,7 @@ class VarBind(AbstractPattern):
 		self.name = name
 
 	@AbstractPattern.initial_check
-	def check(self, expr, ctx: PatternContext):
+	def check(self, expr, ctx: PatternContext) -> bool:
 		if ctx.has_var(self.name):
 			return ctx.get_var(self.name).v.idx == expr.v.idx
 		else:
@@ -186,7 +185,7 @@ class DeepExpr(AbstractPattern):
 		self.found = False
 		self.bind_name = bind_name
 
-	def check(self, expr, ctx: PatternContext):
+	def check(self, expr, ctx: PatternContext) -> bool:
 		self.found = False
 		def processing_callback(tree_proc, item):
 			if not self.found:
@@ -205,7 +204,7 @@ class LabeledInstruction(AbstractPattern):
 	def __init__(self):
 		return
 
-	def check(self, item, ctx: PatternContext):
+	def check(self, item, ctx: PatternContext) -> bool:
 		lbl = item.label_num
 		if lbl == -1:
 			return False
@@ -240,7 +239,7 @@ class RemovePattern(AbstractPattern):
 	def __init__(self, pat):
 		self.pat = pat
 
-	def check(self, item, ctx: PatternContext):
+	def check(self, item, ctx: PatternContext) -> bool:
 		if not self.pat.check(item, ctx):
 			return False
 
@@ -257,7 +256,7 @@ class DebugPattern(AbstractPattern):
 	def __init__(self, return_value=False):
 		self.return_value = return_value
 
-	def check(self, item, ctx: PatternContext):
+	def check(self, item, ctx: PatternContext) -> bool:
 		print('Debug calltrace, address of item: %#x (%s)' % (item.ea, consts.op2str[item.op]))
 		print('---------------------------------')
 		for i in traceback.format_stack()[:self.call_depth]:
@@ -274,7 +273,7 @@ class DebugWrapper(AbstractPattern):
 		self.pat = pat
 		self.msg = msg
 
-	def check(self, item, ctx: PatternContext):
+	def check(self, item, ctx: PatternContext) -> bool:
 		rv = self.pat.check(item, ctx)
 		if self.msg is None:
 			print("Debug pattern rv:", rv)
@@ -289,7 +288,7 @@ class StructFieldAccess(AbstractPattern):
 		self.struct_type = struct_type
 		self.member_offset = member_offset
 
-	def check(self, item, ctx: PatternContext):
+	def check(self, item, ctx: PatternContext) -> bool:
 		if item.op != idaapi.cot_memptr or item.op != idaapi.cot_memref:
 			return False
 

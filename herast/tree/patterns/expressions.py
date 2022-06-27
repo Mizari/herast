@@ -1,8 +1,9 @@
 import idaapi
 
-from herast.tree.patterns.abstracts import AnyPat, AbstractPattern, SeqPat
+from herast.tree.patterns.abstracts import AnyPat, AbstractPattern
 from herast.tree.consts import binary_expressions_ops, unary_expressions_ops, op2str
 from herast.tree.utils import resolve_name_address
+from herast.tree.pattern_context import PatternContext
 
 
 class CallExprPat(AbstractPattern):
@@ -24,7 +25,7 @@ class CallExprPat(AbstractPattern):
 		self.skip_missing = skip_missing
 
 	@AbstractPattern.initial_check
-	def check(self, expression, ctx) -> bool:
+	def check(self, expression, ctx: PatternContext) -> bool:
 		if not self.calling_function.check(expression.x, ctx):
 			return False
 
@@ -53,7 +54,7 @@ class HelperExprPat(AbstractPattern):
 		self.helper_name = helper_name
 	
 	@AbstractPattern.initial_check
-	def check(self, expression, ctx) -> bool:
+	def check(self, expression, ctx: PatternContext) -> bool:
 		return self.helper_name == expression.helper if self.helper_name is not None else True
 
 	@property
@@ -67,7 +68,7 @@ class NumPat(AbstractPattern):
 		self.num = num
 
 	@AbstractPattern.initial_check
-	def check(self, expr, ctx):
+	def check(self, expr, ctx: PatternContext) -> bool:
 		if self.num is None:
 			return True
 
@@ -105,7 +106,7 @@ class ObjPat(AbstractPattern):
 			raise TypeError("Object info should be int|str|None")
 
 	@AbstractPattern.initial_check
-	def check(self, expression, ctx) -> bool:
+	def check(self, expression, ctx: PatternContext) -> bool:
 		if self.ea is None and self.name is None:
 			return True
 
@@ -130,7 +131,7 @@ class RefPat(AbstractPattern):
 		self.referenced_object = referenced_object
 
 	@AbstractPattern.initial_check
-	def check(self, expression, ctx) -> bool:
+	def check(self, expression, ctx: PatternContext) -> bool:
 		return self.referenced_object.check(expression.x, ctx)
 
 
@@ -142,7 +143,7 @@ class MemrefExprPat(AbstractPattern):
 		self.field = field
 
 	@AbstractPattern.initial_check
-	def check(self, expression, ctx) -> bool:
+	def check(self, expression, ctx: PatternContext) -> bool:
 		return self.referenced_object.check(expression.x, ctx) and \
 			self.field.check(expression.m, ctx)
 
@@ -155,7 +156,7 @@ class MemptrExprPat(AbstractPattern):
 		self.field = field
 
 	@AbstractPattern.initial_check
-	def check(self, expression, ctx) -> bool:
+	def check(self, expression, ctx: PatternContext) -> bool:
 		return self.pointed_object.check(expression.x, ctx) and \
 			self.field.check(expression.m, ctx)
 
@@ -169,7 +170,7 @@ class TernaryExprPat(AbstractPattern):
 		self.negative_expression = negative_expression
 		
 	@AbstractPattern.initial_check
-	def check(self, expression, ctx):
+	def check(self, expression, ctx: PatternContext) -> bool:
 		return self.condition.check(expression.x, ctx) and \
 			self.positive_expression.check(expression.y, ctx) and \
 			self.negative_expression.check(expression.z, ctx)
@@ -182,7 +183,7 @@ class VarExprPat(AbstractPattern):
 		pass
 
 	@AbstractPattern.initial_check
-	def check(self, expression, ctx) -> bool:
+	def check(self, expression, ctx: PatternContext) -> bool:
 		return True
 
 
@@ -193,7 +194,7 @@ class AbstractUnaryOpPattern(AbstractPattern):
 		self.operand = operand
 
 	@AbstractPattern.initial_check
-	def check(self, expression, ctx) -> bool:
+	def check(self, expression, ctx: PatternContext) -> bool:
 		return self.operand.check(expression.x, ctx)
 
 	@property
@@ -210,7 +211,7 @@ class AbstractBinaryOpPattern(AbstractPattern):
 		self.symmetric = symmetric
 
 	@AbstractPattern.initial_check
-	def check(self, expression, ctx) -> bool:
+	def check(self, expression, ctx: PatternContext) -> bool:
 		first_op_second = self.first_operand.check(expression.x, ctx) and self.second_operand.check(expression.y, ctx)
 		if self.symmetric:
 			second_op_first = self.first_operand.check(expression.y, ctx) and self.second_operand.check(expression.x, ctx)
