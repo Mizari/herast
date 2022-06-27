@@ -60,7 +60,7 @@ class SchemesStorage:
 			if self.module is None:
 				assert self.reload()
 			if not self.error:
-				stored_enabled_array = idb_settings.get_enabled_idb_storages()
+				stored_enabled_array = idb_settings.get_enabled_idb()
 				stored_enabled_array.append(self.path)
 				idb_settings.save_enabled_idb_storages(stored_enabled_array)
 				self.enabled = True
@@ -69,7 +69,7 @@ class SchemesStorage:
 		if not self.enabled:
 			return
 
-		stored_enabled_array = idb_settings.get_enabled_idb_storages()
+		stored_enabled_array = idb_settings.get_enabled_idb()
 		if self.path in stored_enabled_array:
 			stored_enabled_array.remove(self.path)
 		idb_settings.save_enabled_idb_storages(stored_enabled_array)
