@@ -7,7 +7,7 @@ This example show how to automate objects collecting of this form:
 
 class VirtualCollector(herapi.SPScheme):
 	def __init__(self, struct_type=None, offset=None):
-		pattern = herapi.AsgExprPat(herapi.StructMemptr(struct_type, offset), herapi.AnyPat())
+		pattern = herapi.AsgExprPat(herapi.StructFieldAccess(struct_type, offset), herapi.AnyPat())
 		super().__init__("virtual_collector", pattern)
 		self.collection = []
 

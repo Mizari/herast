@@ -283,14 +283,14 @@ class DebugWrapper(AbstractPattern):
 		return rv
 
 
-class StructMemptr(AbstractPattern):
+class StructFieldAccess(AbstractPattern):
 	op = -1
 	def __init__(self, struct_type=None, member_offset=None):
 		self.struct_type = struct_type
 		self.member_offset = member_offset
 
 	def check(self, item, ctx: PatternContext):
-		if item.op != idaapi.cot_memptr:
+		if item.op != idaapi.cot_memptr or item.op != idaapi.cot_memref:
 			return False
 
 		stype = item.x.type
