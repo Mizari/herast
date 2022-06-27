@@ -26,7 +26,8 @@ def save_long_str_to_idb(array_name, value):
 
 ARRAY_NAME = "$herast:PatternStorage"
 class IdbSettings(StoragesSettings):
-	def save_json_str(self, saved_str):
+	@classmethod
+	def save_json_str(cls, saved_str):
 		save_long_str_to_idb(ARRAY_NAME, saved_str)
 
 	@classmethod

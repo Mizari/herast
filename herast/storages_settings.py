@@ -10,7 +10,8 @@ class StoragesSettings:
 	def load_json_str(cls):
 		raise NotImplementedError()
 
-	def save_json_str(self, saved_str):
+	@classmethod
+	def save_json_str(cls, saved_str):
 		raise NotImplementedError()
 
 	@classmethod
