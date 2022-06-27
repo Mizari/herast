@@ -43,6 +43,10 @@ class StoragesSettings:
 		except:
 			return None
 
+		if not isinstance(json_dict, dict):
+			print("[!] WARNING: invalid serialized storages settings, using empty")
+			json_dict = {}
+
 		def check(x):
 			if x is None: return True
 			if not isinstance(x, list): return False
