@@ -31,3 +31,15 @@ def get_storages_folders():
 
 def get_storages_files():
 	return list(herast_settings.files)
+
+def add_herast_file(file_path):
+	if file_path in herast_settings.files:
+		return
+	herast_settings.files.append(file_path)
+	herast_settings.save()
+
+def add_herast_folder(folder_path):
+	if folder_path in herast_settings.folders:
+		return
+	herast_settings.folders.append(folder_path)
+	herast_settings.save()
