@@ -45,6 +45,24 @@ def get_idb_files():
 def get_enabled_idb():
 	return list(idb_settings.enabled)
 
+def add_idb_folder(folder_path):
+	if folder_path in idb_settings.folders:
+		return
+	idb_settings.folders.append(folder_path)
+	idb_settings.save()
+
+def add_idb_file(file_path):
+	if file_path in idb_settings.files:
+		return
+	idb_settings.files.append(file_path)
+	idb_settings.save()
+
+def add_idb_enabled(enabled_path):
+	if enabled_path in idb_settings.enabled:
+		return
+	idb_settings.enabled.append(enabled_path)
+	idb_settings.save()
+
 def save_enabled_idb_storages(stored_enabled_array):
 	idb_settings.enabled = stored_enabled_array
 	idb_settings.save()

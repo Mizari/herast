@@ -46,3 +46,10 @@ def add_herast_folder(folder_path):
 		return
 	herast_settings.folders.append(folder_path)
 	herast_settings.save()
+
+def add_herast_enabled(enabled_path):
+	if enabled_path in herast_settings.enabled:
+		return
+
+	herast_settings.enabled.append(enabled_path)
+	herast_settings.save()
