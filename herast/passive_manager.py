@@ -121,8 +121,8 @@ def disable_storage_in_idb(storage_path):
 	if storage is None or not storage.enabled:
 		return False
 
-	__discard_storage_schemes(storage)
 	idb_settings.remove_enabled_storage(storage_path)
+	__discard_storage_schemes(storage)
 	update_storage_status(storage)
 	return True
 
