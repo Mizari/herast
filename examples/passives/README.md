@@ -1,1 +1,1 @@
-Passive scripts (called scheme storages) export schemes via register_storage_scheme function. These registered schemes can be turned on/off in Storage View or via herapi (enable_storage_in_idb, disable_storage_in_idb etc).
+Passive scripts (called scheme storages) export schemes via register_storage_scheme function. These storages can be enabled/disabled in Storage View or via herapi (enable_storage_in_idb, disable_storage_in_idb etc).
