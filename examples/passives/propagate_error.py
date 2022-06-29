@@ -32,4 +32,4 @@ class ReplacingScheme(SPScheme):
 
 scheme = ReplacingScheme("propagate_error", pattern)
 
-add_storage_scheme(scheme)
+register_storage_scheme(scheme)

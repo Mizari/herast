@@ -79,4 +79,4 @@ class ExceptionCollapserScheme(SPScheme):
 
 		return False
 
-herapi.add_storage_scheme(ExceptionCollapserScheme("exception_collapser", pattern))
+herapi.register_storage_scheme(ExceptionCollapserScheme("exception_collapser", pattern))

@@ -1,2 +1,2 @@
-Scripts: ordinary IDA Pro scripts
+Scripts: ordinary IDA Pro scripts  
 Passives: special type of modules, that export schemes to passive matcher, which later will be applied to every decompiled function via IDA HexRays decompilation hook.

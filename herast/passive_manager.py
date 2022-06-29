@@ -27,7 +27,7 @@ def get_passive_matcher():
 		matcher.add_scheme(s)
 	return matcher
 
-def add_storage_scheme(scheme):
+def register_storage_scheme(scheme):
 	if not isinstance(scheme, Scheme):
 		return
 
