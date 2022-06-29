@@ -51,6 +51,22 @@ def disable_scheme(scheme_name):
 		return
 	enabled_schemes.discard(scheme_name)
 
+def update_storage_status(storage):
+	globally = storage.path in herast_settings.get_herast_enabled()
+	inidb = storage.path in idb_settings.get_enabled_idb()
+	enabled = True
+	if globally and inidb:
+		status = "Enabled globally and in idb"
+	elif globally:
+		status = "Enabled globally"
+	elif inidb:
+		status = "Enabled in IDB"
+	else:
+		enabled = False
+		status = "Disabled"
+	storage.status_text = status
+	storage.enabled = enabled
+
 def load_all_storages():
 	for folder in herast_settings.get_herast_folders():
 		load_storage_folder(folder)
@@ -58,20 +74,7 @@ def load_all_storages():
 		load_storage_file(file)
 
 	for storage in schemes_storages.values():
-		globally = storage.path in herast_settings.get_herast_enabled()
-		inidb = storage.path in idb_settings.get_enabled_idb()
-		enabled = True
-		if globally and inidb:
-			status = "Enabled globally and in idb"
-		elif globally:
-			status = "Enabled globally"
-		elif inidb:
-			status = "Enabled in IDB"
-		else:
-			enabled = False
-			status = "Disabled"
-		storage.status_text = status
-		storage.enabled = enabled
+		update_storage_status(storage)
 
 def enable_all_schemes():
 	for storage_path in herast_settings.get_herast_enabled():
@@ -120,7 +123,8 @@ def disable_storage_in_idb(storage_path):
 
 	__discard_storage_schemes(storage)
 	idb_settings.remove_enabled_storage(storage_path)
-	storage.enabled = False
+	update_storage_status(storage)
+	return True
 
 def enable_storage_in_idb(storage_path):
 	storage = get_storage(storage_path)
@@ -129,7 +133,8 @@ def enable_storage_in_idb(storage_path):
 
 	idb_settings.add_enabled_storage(storage_path)
 	__update_storage_schemes(storage_path)
-	storage.enabled = True
+	update_storage_status(storage)
+	return True
 
 def reload_storage(storage_path):
 	storage = get_storage(storage_path)
@@ -150,7 +155,6 @@ def reload_storage(storage_path):
 		storage.status_text = traceback.format_exc()
 		return False
 
-	storage.status_text = None
 	storage.module = new_module
-	storage.error = False
+	update_storage_status(storage)
 	return True
