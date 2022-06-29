@@ -1,7 +1,5 @@
 import os
-import traceback
 
-import herast.idb_settings as idb_settings
 from .tree.utils import load_python_module_from_file
 
 
@@ -40,42 +38,3 @@ class SchemesStorage:
 			with open(self.path, 'r') as f:
 				self.source = f.read()
 		return self.source
-
-	def enable(self):
-		if self.enabled:
-			return
-
-		if not self.error:
-			if self.module is None:
-				assert self.reload()
-			if not self.error:
-				stored_enabled_array = idb_settings.get_enabled_idb()
-				stored_enabled_array.append(self.path)
-				idb_settings.save_enabled_idb_storages(stored_enabled_array)
-				self.enabled = True
-
-	def disable(self):
-		if not self.enabled:
-			return
-
-		stored_enabled_array = idb_settings.get_enabled_idb()
-		if self.path in stored_enabled_array:
-			stored_enabled_array.remove(self.path)
-		idb_settings.save_enabled_idb_storages(stored_enabled_array)
-		self.enabled = False
-
-	def reload(self):
-		if os.path.isfile(self.path) and os.access(self.path, os.R_OK):
-			try:
-				del self.module
-				self.module = load_python_module_from_file(self.path)
-				self.error = False
-			except Exception as e:
-				self.module = None
-				self.error = True
-				self.enabled = False
-				self.status_text = traceback.format_exc()
-
-			return True
-		else:
-			return False
