@@ -29,14 +29,10 @@ idaapi.require('herast.views.storage_manager_view')
 idaapi.require('herapi')
 
 
-from herast.tree.processing import TreeProcessor
-from herast.tree.matcher import Matcher
 from herast.views.storage_manager_view import ShowScriptManager
 import herast.passive_manager as passive_manager
-import herast.scheme_manager as scheme_manager
 
 from herast.tree.actions import action_manager, hx_callback_manager
-from herast.tree.selection_factory import PatternCreationHandler
 
 
 def unload_callback():
