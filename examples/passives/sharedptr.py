@@ -51,7 +51,7 @@ class HelperReplacer(SPScheme):
 		ctx.modify_instr(item, new_item)
 		return False
 
-add_passive_scheme(HelperReplacer("shptr_release", release_pattern, "__sharedptr::release"))
+add_storage_scheme(HelperReplacer("shptr_release", release_pattern, "__sharedptr::release"))
 
 
 add1 = SkipCasts(CallExprPat(HelperExprPat(helper_name="_InterlockedAdd"), skip_missing=True))
@@ -66,7 +66,7 @@ increment_pattern = OrPat(
 	increment_pattern,
 	IfInsPat(AnyPat(), increment_pattern),
 )
-add_passive_scheme(HelperReplacer("shptr_inc", increment_pattern, "__sharedptr::increment"))
+add_storage_scheme(HelperReplacer("shptr_inc", increment_pattern, "__sharedptr::increment"))
 
 fname = "std::_Sp_counted_base::_M_release"
 std_release_pattern = ExInsPat(SkipCasts(CallExprPat(fname, ignore_arguments=True)))
@@ -76,4 +76,4 @@ std_release_pattern = OrPat(
 )
 
 if SHOULD_REMOVE:
-	add_passive_scheme(SPScheme("shptr_release_remover", RemovePattern(std_release_pattern)))
+	add_storage_scheme(SPScheme("shptr_release_remover", RemovePattern(std_release_pattern)))

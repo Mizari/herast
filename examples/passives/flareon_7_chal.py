@@ -1,5 +1,5 @@
 import struct
-from herapi import SeqPat, ExInsPat, AsgExprPat, AnyPat, BindItem, ForInsPat, BlockPat, AsgxorExprPat, SPScheme, PatternContext, add_passive_scheme
+from herapi import SeqPat, ExInsPat, AsgExprPat, AnyPat, BindItem, ForInsPat, BlockPat, AsgxorExprPat, SPScheme, PatternContext, add_storage_scheme
 
 
 pattern = SeqPat(
@@ -47,4 +47,4 @@ class Flareon7ChalScheme(SPScheme):
 		return False
 
 
-add_passive_scheme(Flareon7ChalScheme("flareon7chal", pattern))
+add_storage_scheme(Flareon7ChalScheme("flareon7chal", pattern))

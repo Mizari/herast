@@ -11,10 +11,12 @@ import herast.herast_settings as herast_settings
 
 
 schemes_storages : Dict[str, SchemesStorage] = {}
-passive_schemes = {}
+schemes : Dict[str, Scheme] = {}
+enabled_schemes = set()
 
 def initialize():
 	load_all_storages()
+	enable_all_schemes()
 
 def get_passive_matcher():
 	matcher = Matcher()
@@ -22,20 +24,36 @@ def get_passive_matcher():
 		matcher.add_scheme(s)
 	return matcher
 
-def add_passive_scheme(scheme):
+def add_storage_scheme(scheme):
 	if not isinstance(scheme, Scheme):
 		return
 
-	passive_schemes[scheme.name] = scheme
+	schemes[scheme.name] = scheme
 
 def get_passive_schemes():
-	return [s for s in passive_schemes.values()]
+	return [s for s in schemes.values() if s.name in enabled_schemes]
+
+def enable_scheme(scheme_name):
+	if scheme_name not in schemes:
+		return
+	enabled_schemes.add(scheme_name)
+
+def disable_scheme(scheme_name):
+	if scheme_name not in schemes:
+		return
+	enabled_schemes.discard(scheme_name)
 
 def load_all_storages():
 	for folder in herast_settings.get_herast_folders():
 		load_storage_folder(folder)
 	for file in herast_settings.get_herast_files():
 		load_storage_file(file)
+
+def enable_all_schemes():
+	for storage_path in herast_settings.get_herast_enabled():
+		enable_storage(storage_path)
+	for storage_path in idb_settings.get_enabled_idb():
+		enable_storage(storage_path)
 
 def load_storage_folder(folder_name: str) -> None:
 	for full_path in glob.iglob(folder_name + '/**/**.py', recursive=True):
@@ -47,7 +65,6 @@ def load_storage_file(filename: str) -> bool:
 		print("[!] WARNING: failed to load", filename, "storage")
 		return False
 
-	storage.enabled = filename in idb_settings.get_enabled_idb()
 	schemes_storages[filename] = storage
 	return True
 
