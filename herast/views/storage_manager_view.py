@@ -212,7 +212,7 @@ class StorageManagerModel(QtCore.QAbstractItemModel):
 		for qindex in indices:
 			storage_path = self.get_storage_path_by_index(qindex)
 			if storage_path is not None:
-				passive_manager.disable_storage(storage_path)
+				passive_manager.disable_storage_in_idb(storage_path)
 				item = self._get_file_item_by_index(qindex)
 				if item is not None:
 					item.disable()
@@ -222,7 +222,7 @@ class StorageManagerModel(QtCore.QAbstractItemModel):
 		for qindex in indices:
 			storage_path = self.get_storage_path_by_index(qindex)
 			if storage_path is not None:
-				passive_manager.enable_storage(storage_path)
+				passive_manager.enable_storage_in_idb(storage_path)
 				item = self._get_file_item_by_index(qindex)
 				if item is not None:
 					item.enable()

@@ -36,10 +36,10 @@ def get_herast_enabled():
 	return list(herast_settings.enabled)
 
 def add_herast_file(file_path):
-	herast_settings.add_file(file_path)
+	herast_settings.add_file_storage(file_path)
 
 def add_herast_folder(folder_path):
-	herast_settings.add_folder(folder_path)
+	herast_settings.add_folder_storage(folder_path)
 
 def add_herast_enabled(enabled_path):
-	herast_settings.add_enabled(enabled_path)
+	herast_settings.add_enabled_storage(enabled_path)

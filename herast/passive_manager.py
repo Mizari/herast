@@ -113,21 +113,21 @@ def __update_storage_schemes(storage_path):
 		return
 	enabled_schemes.update(storage2schemes[storage_path])
 
-def disable_storage(storage_path):
+def disable_storage_in_idb(storage_path):
 	storage = get_storage(storage_path)
 	if storage is None or not storage.enabled:
 		return False
 
 	__discard_storage_schemes(storage)
-	idb_settings.remove_idb_enabled(storage_path)
+	idb_settings.remove_enabled_storage(storage_path)
 	storage.enabled = False
 
-def enable_storage(storage_path):
+def enable_storage_in_idb(storage_path):
 	storage = get_storage(storage_path)
 	if storage is None or storage.enabled or storage.error:
 		return False
 
-	idb_settings.add_idb_enabled(storage_path)
+	idb_settings.add_enabled_storage(storage_path)
 	__update_storage_schemes(storage_path)
 	storage.enabled = True
 

@@ -9,7 +9,7 @@ from herast.tree.matcher import Matcher
 from herast.passive_manager import add_storage_scheme
 from herast.schemes.single_pattern_schemes import SPScheme, ItemRemovalScheme
 from herast.herast_settings import get_herast_enabled, get_herast_files, get_herast_folders, add_herast_enabled, add_herast_file, add_herast_folder
-from herast.idb_settings import get_enabled_idb, get_idb_files, get_idb_folders, add_idb_enabled, add_idb_file, add_idb_folder
+from herast.idb_settings import get_enabled_idb, get_idb_files, get_idb_folders, add_enabled_storage, add_idb_file, add_idb_folder
 
 def get_storages():
 	return [s for s in passive_manager.schemes_storages.values()]

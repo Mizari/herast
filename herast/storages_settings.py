@@ -6,37 +6,37 @@ class StoragesSettings:
 		self.files = files
 		self.enabled = enabled
 
-	def add_file(self, file_path):
+	def add_file_storage(self, file_path):
 		if file_path in self.files:
 			return
 		self.files.append(file_path)
 		self.save()
 
-	def add_folder(self, folder_path):
+	def add_folder_storage(self, folder_path):
 		if folder_path in self.folders:
 			return
 		self.folders.append(folder_path)
 		self.save()
 
-	def add_enabled(self, enabled_path):
+	def add_enabled_storage(self, enabled_path):
 		if enabled_path in self.enabled:
 			return
 		self.enabled.append(enabled_path)
 		self.save()
 
-	def remove_enabled(self, enabled_path):
+	def remove_enabled_storage(self, enabled_path):
 		if enabled_path not in self.enabled:
 			return
 		self.enabled.remove(enabled_path)
 		self.save()
 
-	def remove_file(self, file_path):
+	def remove_file_storage(self, file_path):
 		if file_path not in self.files:
 			return
 		self.files.remove(file_path)
 		self.save()
 
-	def remove_folder(self, folder_path):
+	def remove_folder_storage(self, folder_path):
 		if folder_path not in self.folders:
 			return
 		self.folders.remove(folder_path)
