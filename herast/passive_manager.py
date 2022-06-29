@@ -66,7 +66,7 @@ def load_all_storages():
 		elif globally:
 			status = "Enabled globally"
 		elif inidb:
-			status = "Enabled in idb"
+			status = "Enabled in IDB"
 		else:
 			enabled = False
 			status = "Disabled"
