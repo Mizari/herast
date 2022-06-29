@@ -184,11 +184,15 @@ class StorageManagerModel(QtCore.QAbstractItemModel):
 
 		return QtCore.QVariant()
 
-	def get_storage_by_index(self, idx):
+	def get_storage_path_by_index(self, idx):
 		item = self.get_item(idx)
-		if item.fullpath is None:
+		return item.fullpath
+
+	def get_storage_by_index(self, idx):
+		fullpath = self.get_storage_path_by_index(idx)
+		if fullpath is None:
 			return None
-		return passive_manager.get_storage(item.fullpath)
+		return passive_manager.get_storage(fullpath)
 
 	def _get_item_by_index(self, idx):
 		item = self.get_item(idx)
@@ -206,9 +210,9 @@ class StorageManagerModel(QtCore.QAbstractItemModel):
 
 	def disable_storage(self, indices):
 		for qindex in indices:
-			storage = self.get_storage_by_index(qindex)
-			if storage is not None:
-				storage.disable()
+			storage_path = self.get_storage_path_by_index(qindex)
+			if storage_path is not None:
+				passive_manager.disable_storage(storage_path)
 				item = self._get_file_item_by_index(qindex)
 				if item is not None:
 					item.disable()
@@ -216,9 +220,9 @@ class StorageManagerModel(QtCore.QAbstractItemModel):
 
 	def enable_storage(self, indices):
 		for qindex in indices:
-			storage = self.get_storage_by_index(qindex)
-			if storage is not None:
-				storage.enable()
+			storage_path = self.get_storage_path_by_index(qindex)
+			if storage_path is not None:
+				passive_manager.enable_storage(storage_path)
 				item = self._get_file_item_by_index(qindex)
 				if item is not None:
 					item.enable()
@@ -226,9 +230,9 @@ class StorageManagerModel(QtCore.QAbstractItemModel):
 
 	def reload_storage(self, indices):
 		for qindex in indices:
-			storage = self.get_storage_by_index(qindex)
-			if storage is not None:
-				storage.reload()
+			storage_path = self.get_storage_path_by_index(qindex)
+			if storage_path is not None:
+				passive_manager.reload_storage(storage_path)
 
 	# def flags(self, index):
 	# 	if not index.isValid():

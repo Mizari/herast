@@ -61,3 +61,21 @@ def get_storage(filename: str) -> Optional[SchemesStorage]:
 
 def get_enabled_storages():
 	return [s for s in schemes_storages.values() if s.enabled]
+
+def disable_storage(storage_path):
+	storage = get_storage(storage_path)
+	if storage is None:
+		return
+	storage.disable()
+
+def enable_storage(storage_path):
+	storage = get_storage(storage_path)
+	if storage is None:
+		return
+	storage.enable()
+
+def reload_storage(storage_path):
+	storage = get_storage(storage_path)
+	if storage is None:
+		return
+	storage.reload()
