@@ -24,6 +24,24 @@ class StoragesSettings:
 		self.enabled.append(enabled_path)
 		self.save()
 
+	def remove_enabled(self, enabled_path):
+		if enabled_path not in self.enabled:
+			return
+		self.enabled.remove(enabled_path)
+		self.save()
+
+	def remove_file(self, file_path):
+		if file_path not in self.files:
+			return
+		self.files.remove(file_path)
+		self.save()
+
+	def remove_folder(self, folder_path):
+		if folder_path not in self.folders:
+			return
+		self.folders.remove(folder_path)
+		self.save()
+
 	@classmethod
 	def load_json_str(cls):
 		raise NotImplementedError()
