@@ -54,6 +54,15 @@ def add_idb_file(file_path):
 def add_idb_enabled(enabled_path):
 	idb_settings.add_enabled(enabled_path)
 
+def remove_idb_enabled(enabled_path):
+	idb_settings.remove_enabled(enabled_path)
+
+def remove_idb_file(file_path):
+	idb_settings.remove_file(file_path)
+
+def remove_idb_folder(folder_path):
+	idb_settings.remove_folder(folder_path)
+
 def save_enabled_idb_storages(stored_enabled_array):
 	idb_settings.enabled = stored_enabled_array
 	idb_settings.save()
