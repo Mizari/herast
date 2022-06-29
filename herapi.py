@@ -1,4 +1,4 @@
-import herast.storage_manager as storage_manager
+import herast.passive_manager as passive_manager
 
 # forward imports for herast usage
 from herast.tree.patterns.abstracts import *
@@ -12,10 +12,10 @@ from herast.herast_settings import get_herast_enabled, get_herast_files, get_her
 from herast.idb_settings import get_enabled_idb, get_idb_files, get_idb_folders, add_idb_enabled, add_idb_file, add_idb_folder
 
 def get_storages():
-	return [s for s in storage_manager.schemes_storages.values()]
+	return [s for s in passive_manager.schemes_storages.values()]
 
 def get_storage(storage_path):
-	return storage_manager.get_storage(storage_path)
+	return passive_manager.get_storage(storage_path)
 
 def skip_casts(expr):
 	import idaapi

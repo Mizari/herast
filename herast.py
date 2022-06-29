@@ -22,9 +22,7 @@ idaapi.require('herast.schemes.base_scheme')
 idaapi.require('herast.schemes.multi_pattern_schemes')
 idaapi.require('herast.schemes.single_pattern_schemes')
 
-idaapi.require('herast.storage_manager')
-
-idaapi.require('herast.scheme_manager')
+idaapi.require('herast.passive_manager')
 
 idaapi.require('herast.views.storage_manager_view')
 
@@ -34,7 +32,7 @@ idaapi.require('herapi')
 from herast.tree.processing import TreeProcessor
 from herast.tree.matcher import Matcher
 from herast.views.storage_manager_view import ShowScriptManager
-import herast.storage_manager as storage_manager
+import herast.passive_manager as passive_manager
 import herast.scheme_manager as scheme_manager
 
 from herast.tree.actions import action_manager, hx_callback_manager
@@ -88,10 +86,7 @@ def herast_callback(*args):
 	assert isinstance(cfunc.body.cblock, idaapi.cblock_t), "Function body must be a cblock_t"
 
 	try:
-		matcher = Matcher()
-		for s in scheme_manager.get_passive_schemes():
-			matcher.add_scheme(s)
-
+		matcher = passive_manager.get_passive_matcher()
 		traversal_start = time.time()
 		matcher.match_cfunc(cfunc)
 		traversal_end = time.time()
@@ -133,7 +128,7 @@ def main():
 	print('Hooking for HexRays events')
 	idaapi.install_hexrays_callback(herast_callback)
 
-	storage_manager.load_all_storages()
+	passive_manager.initialize()
 	action_manager.initialize()
 	hx_callback_manager.initialize()
 

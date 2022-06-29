@@ -1,6 +1,8 @@
 import glob
 
 from herast.schemes_storage import SchemesStorage
+from herast.schemes.base_scheme import Scheme
+from herast.tree.matcher import Matcher
 
 from typing import Dict, Optional
 
@@ -9,7 +11,25 @@ import herast.herast_settings as herast_settings
 
 
 schemes_storages : Dict[str, SchemesStorage] = {}
+passive_schemes = {}
 
+def initialize():
+	load_all_storages()
+
+def get_passive_matcher():
+	matcher = Matcher()
+	for s in get_passive_schemes():
+		matcher.add_scheme(s)
+	return matcher
+
+def add_passive_scheme(scheme):
+	if not isinstance(scheme, Scheme):
+		return
+
+	passive_schemes[scheme.name] = scheme
+
+def get_passive_schemes():
+	return [s for s in passive_schemes.values()]
 
 def load_all_storages():
 	for folder in herast_settings.get_herast_folders():

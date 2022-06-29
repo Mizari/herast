@@ -5,7 +5,7 @@ import idaapi
 import os
 import glob
 
-import herast.storage_manager as storage_manager
+import herast.passive_manager as passive_manager
 
 from typing import Optional
 
@@ -83,12 +83,12 @@ class StorageManagerModel(QtCore.QAbstractItemModel):
 	def __init__(self):
 		super().__init__()
 		self.root = SchemeStorageTreeItem(["File"])
-		for storage_folder in storage_manager.get_storages_folders():
+		for storage_folder in passive_manager.get_storages_folders():
 			self.__add_folder(storage_folder)
 
 	def __add_folder(self, storage_folder):
 		for full_path in glob.iglob(storage_folder + '/**/**.py', recursive=True):
-			if storage_manager.get_storage(full_path) is None:
+			if passive_manager.get_storage(full_path) is None:
 				continue
 
 			relative_path = os.path.relpath(full_path, start=storage_folder)
@@ -188,7 +188,7 @@ class StorageManagerModel(QtCore.QAbstractItemModel):
 		item = self.get_item(idx)
 		if item.fullpath is None:
 			return None
-		return storage_manager.get_storage(item.fullpath)
+		return passive_manager.get_storage(item.fullpath)
 
 	def _get_item_by_index(self, idx):
 		item = self.get_item(idx)
