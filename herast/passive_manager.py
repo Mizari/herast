@@ -5,6 +5,7 @@ from herast.schemes.base_scheme import Scheme
 from herast.tree.matcher import Matcher
 
 from typing import Dict, Optional
+from collections import defaultdict
 
 import herast.idb_settings as idb_settings
 import herast.herast_settings as herast_settings
@@ -13,6 +14,8 @@ import herast.herast_settings as herast_settings
 schemes_storages : Dict[str, SchemesStorage] = {}
 schemes : Dict[str, Scheme] = {}
 enabled_schemes = set()
+storage2schemes = defaultdict(list)
+scheme2storage = {}
 
 def initialize():
 	load_all_storages()
@@ -27,6 +30,11 @@ def get_passive_matcher():
 def add_storage_scheme(scheme):
 	if not isinstance(scheme, Scheme):
 		return
+
+	import inspect
+	storage_path = inspect.stack()[1].filename
+	storage2schemes[storage_path].append(scheme.name)
+	scheme2storage[scheme.name] = storage_path
 
 	schemes[scheme.name] = scheme
 
