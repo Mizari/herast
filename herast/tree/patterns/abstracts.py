@@ -1,43 +1,12 @@
 import idaapi
 
 import herast.tree.consts as consts
+from herast.tree.patterns.base_pattern import BasePattern
 from herast.tree.pattern_context import PatternContext
-
-class AbstractPattern:
-	op = None
-
-	def __init__(self):
-		pass
-	
-	def _assert(self, cond, msg=""):
-		assert cond, "%s: %s" % (self.__class__.__name__, msg)
-	
-	def _raise(self, msg):
-		raise "%s: %s" % (self.__class__.__name__, msg)
-
-	def check(self, item, ctx: PatternContext, *args, **kwargs) -> bool:
-		raise NotImplementedError("This is an abstract class")
-
-	@classmethod
-	def get_opname(cls):
-		return consts.op2str.get(cls.op, None)
-
-	@staticmethod
-	def initial_check(func):
-		def __perform_initial_check(self, item, *args, **kwargs):
-			if item is None or (item.op != self.op and self.op is not None):
-				return False
-			else:
-				return func(self, item, *args, **kwargs)
-		return __perform_initial_check
-
-	@property
-	def children(self):
-		raise NotImplementedError("An abstract class doesn't have any children")
 
 
 # any pattern
-class AnyPat(AbstractPattern):
+class AnyPat(BasePattern):
 	op = -1
 
 	def __init__(self, may_be_none=True):
@@ -51,7 +20,7 @@ class AnyPat(AbstractPattern):
 		return ()
 
 # sequence of instructions
-class SeqPat(AbstractPattern):
+class SeqPat(BasePattern):
 	op = -1
 
 	def __init__(self, *pats, skip_missing=True):
@@ -91,7 +60,7 @@ class SeqPat(AbstractPattern):
 	def children(self):
 		return tuple(self.pats)
 
-class OrPat(AbstractPattern):
+class OrPat(BasePattern):
 	op = -1
 
 	def __init__(self, *pats):
@@ -110,7 +79,7 @@ class OrPat(AbstractPattern):
 	def children(self):
 		return self.pats
 
-class AndPat(AbstractPattern):
+class AndPat(BasePattern):
 	op = -1
 
 	def __init__(self, *pats):
@@ -128,7 +97,7 @@ class AndPat(AbstractPattern):
 	def children(self):
 		return self.pats
 
-class SkipCasts(AbstractPattern):
+class SkipCasts(BasePattern):
 	op = -1
 
 	def __init__(self, pat):
@@ -144,7 +113,7 @@ class SkipCasts(AbstractPattern):
 	def children(self):
 		return self.pat
 
-class BindItem(AbstractPattern):
+class BindItem(BasePattern):
 	op = -1
 
 	def __init__(self, name, pat=None):
@@ -162,13 +131,13 @@ class BindItem(AbstractPattern):
 		return False
 
 
-class VarBind(AbstractPattern):
+class VarBind(BasePattern):
 	op = idaapi.cot_var
 
 	def __init__(self, name):
 		self.name = name
 
-	@AbstractPattern.initial_check
+	@BasePattern.initial_check
 	def check(self, expr, ctx: PatternContext) -> bool:
 		if ctx.has_var(self.name):
 			return ctx.get_var(self.name).v.idx == expr.v.idx
@@ -177,7 +146,7 @@ class VarBind(AbstractPattern):
 			return True
 
 
-class DeepExpr(AbstractPattern):
+class DeepExpr(BasePattern):
 	op = -1
 
 	def __init__(self, pat, bind_name=None):
@@ -199,7 +168,7 @@ class DeepExpr(AbstractPattern):
 		return self.found
 
 
-class LabeledInstruction(AbstractPattern):
+class LabeledInstruction(BasePattern):
 	op = -1
 	def __init__(self):
 		return
@@ -234,7 +203,7 @@ class ItemsCollector:
 		tree_proc.process_all_items(item, processing_callback)
 		return self.collected_items
 
-class RemovePattern(AbstractPattern):
+class RemovePattern(BasePattern):
 	op = -1
 	def __init__(self, pat):
 		self.pat = pat
@@ -249,7 +218,7 @@ class RemovePattern(AbstractPattern):
 
 import traceback
 # For debug purposes
-class DebugPattern(AbstractPattern):
+class DebugPattern(BasePattern):
 	op = -1
 	call_depth = 6
 
@@ -267,7 +236,7 @@ class DebugPattern(AbstractPattern):
 		
 
 # useful pattern to determine where big and complex pattern went wrong
-class DebugWrapper(AbstractPattern):
+class DebugWrapper(BasePattern):
 	op = -1
 	def __init__(self, pat, msg=None):
 		self.pat = pat
@@ -282,7 +251,7 @@ class DebugWrapper(AbstractPattern):
 		return rv
 
 
-class StructFieldAccess(AbstractPattern):
+class StructFieldAccess(BasePattern):
 	op = -1
 	def __init__(self, struct_type=None, member_offset=None):
 		self.struct_type = struct_type

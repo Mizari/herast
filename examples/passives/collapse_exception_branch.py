@@ -22,14 +22,14 @@ excstr_getter_pattern = herapi.ExInsPat(
 )
 last_call_pattern = herapi.ExInsPat(make_call_expr('__cxa_throw'))
 
-class ExceptionBody(herapi.AbstractPattern):
+class ExceptionBody(herapi.BasePattern):
 	op = idaapi.cit_block
 	def __init__(self, first_call, excstr_getter, last_call):
 		self.first_call = first_call
 		self.last_call = last_call
 		self.excstr_getter = excstr_getter
 
-	@herapi.AbstractPattern.initial_check
+	@herapi.BasePattern.initial_check
 	def check(self, item, ctx):
 		block = item.cblock
 

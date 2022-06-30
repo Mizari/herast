@@ -1,15 +1,16 @@
 import idaapi
-from .abstracts import AnyPat, AbstractPattern
+from .abstracts import AnyPat
+from herast.tree.patterns.base_pattern import BasePattern
 from herast.tree.pattern_context import PatternContext
 
 
-class BlockPat(AbstractPattern):
+class BlockPat(BasePattern):
 	op = idaapi.cit_block
 
 	def __init__(self, *patterns):
 		self.sequence = patterns
 
-	@AbstractPattern.initial_check
+	@BasePattern.initial_check
 	def check(self, instruction, ctx: PatternContext) -> bool:
 		block = instruction.cblock
 		if len(block) != len(self.sequence):
@@ -25,13 +26,13 @@ class BlockPat(AbstractPattern):
 		return (self.sequence, )       
 
 
-class ExInsPat(AbstractPattern):
+class ExInsPat(BasePattern):
 	op = idaapi.cit_expr
 
 	def __init__(self, expr=None):
 		self.expr = expr or AnyPat()
 
-	@AbstractPattern.initial_check
+	@BasePattern.initial_check
 	def check(self, instruction, ctx: PatternContext) -> bool:
 		return self.expr.check(instruction.cexpr, ctx)
 
@@ -40,7 +41,7 @@ class ExInsPat(AbstractPattern):
 		return (self.expr, )
 
 
-class IfInsPat(AbstractPattern):
+class IfInsPat(BasePattern):
 	op = idaapi.cit_if
 
 	def __init__(self, condition=None, then_branch=None, else_branch=None, should_wrap_in_block=True):
@@ -60,7 +61,7 @@ class IfInsPat(AbstractPattern):
 		self.then_branch = wrap_pattern(then_branch)
 		self.else_branch = wrap_pattern(else_branch)
 
-	@AbstractPattern.initial_check
+	@BasePattern.initial_check
 	def check(self, instruction, ctx: PatternContext) -> bool:
 		cif = instruction.cif
 
@@ -77,7 +78,7 @@ class IfInsPat(AbstractPattern):
 		return (self.expr, self.body)
 
 
-class ForInsPat(AbstractPattern):
+class ForInsPat(BasePattern):
 	op = idaapi.cit_for
 
 	def __init__(self, init=None, expr=None, step=None, body=None):
@@ -87,7 +88,7 @@ class ForInsPat(AbstractPattern):
 		self.body = body or AnyPat()
 
 
-	@AbstractPattern.initial_check
+	@BasePattern.initial_check
 	def check(self, instruction, ctx: PatternContext) -> bool:
 		cfor = instruction.cfor
 
@@ -101,13 +102,13 @@ class ForInsPat(AbstractPattern):
 		return (self.init, self.expr, self.step, self.body)
 
 
-class RetInsPat(AbstractPattern):
+class RetInsPat(BasePattern):
 	op = idaapi.cit_return
 
 	def __init__(self, expr=None):
 		self.expr = expr or AnyPat()
 
-	@AbstractPattern.initial_check
+	@BasePattern.initial_check
 	def check(self, instruction, ctx: PatternContext) -> bool:
 		creturn = instruction.creturn
 
@@ -118,14 +119,14 @@ class RetInsPat(AbstractPattern):
 		return (self.expr, )
 
 
-class WhileInsPat(AbstractPattern):
+class WhileInsPat(BasePattern):
 	op = idaapi.cit_while
 
 	def __init__(self, expr=None, body=None):
 		self.expr = expr or AnyPat()
 		self.body = body or AnyPat()
 
-	@AbstractPattern.initial_check
+	@BasePattern.initial_check
 	def check(self, instruction, ctx: PatternContext) -> bool:
 		cwhile = instruction.cwhile
 
@@ -137,14 +138,14 @@ class WhileInsPat(AbstractPattern):
 		return (self.expr, self.body)
 
 
-class DoInsPat(AbstractPattern):
+class DoInsPat(BasePattern):
 	op = idaapi.cit_do
 
 	def __init__(self, expr=None, body=None):
 		self.expr = expr or AnyPat()
 		self.body = body or AnyPat()
 
-	@AbstractPattern.initial_check
+	@BasePattern.initial_check
 	def check(self, instruction, ctx: PatternContext) -> bool:
 		cdo = instruction.cdo
 
@@ -156,11 +157,11 @@ class DoInsPat(AbstractPattern):
 		return (self.expr, self.body)
 
 
-class GotoPat(AbstractPattern):
+class GotoPat(BasePattern):
 	op = idaapi.cit_goto
 	def __init__(self):
 		return
 
-	@AbstractPattern.initial_check
+	@BasePattern.initial_check
 	def check(self, item, ctx: PatternContext) -> bool:
 		return True
