@@ -2,20 +2,13 @@ import idaapi
 import herapi
 
 
-"""
-"""
-
-def make_pattern(debug_flag):
-	return herapi.IfInsPat(
-		herapi.ObjPat(debug_flag),
-		herapi.DeepExpr(herapi.CallExprPat("printf", ignore_arguments=True), bind_name="debug_print"),
-		should_wrap_in_block=False, # if to not wrap in block, because we want to search inside block's instructions
-	)
-
-
 class FunctionRenamer(herapi.SPScheme):
 	def __init__(self, debug_flag):
-		pattern = make_pattern(debug_flag)
+		pattern = herapi.IfInsPat(
+			herapi.ObjPat(debug_flag),
+			herapi.DeepExpr(herapi.CallExprPat("printf", ignore_arguments=True), bind_name="debug_print"),
+			should_wrap_in_block=False, # if to not wrap in block, because we want to search inside block's instructions
+		)
 		super().__init__("function_renamer", pattern)
 		self.renamings = {}
 		self.conflicts = {}
