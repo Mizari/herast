@@ -226,7 +226,7 @@ class DebugPattern(BasePattern):
 		self.return_value = return_value
 
 	def check(self, item, ctx: PatternContext) -> bool:
-		print('Debug calltrace, address of item: %#x (%s)' % (item.ea, consts.op2str[item.op]))
+		print('Debug calltrace, address of item: %#x (%s)' % (item.ea, item.opname))
 		print('---------------------------------')
 		for i in traceback.format_stack()[:self.call_depth]:
 			print(i)
