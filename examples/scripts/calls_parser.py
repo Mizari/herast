@@ -16,10 +16,7 @@ class CallsParser(herapi.SPScheme):
 		if len(function_address) == 0:
 			raise ValueError("No function address provided")
 
-		if len(function_address) == 1:
-			obj_pat = herapi.ObjPat(function_address[0])
-		else:
-			obj_pat = herapi.OrPat(*[herapi.ObjPat(addr) for addr in function_address])
+		obj_pat = herapi.MultiObject(*function_address)
 		pattern = herapi.CallPat(obj_pat, herapi.ObjPat(), herapi.RefPat(herapi.ObjPat()), skip_missing=True)
 		super().__init__("calls_parser", pattern)
 

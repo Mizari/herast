@@ -7,13 +7,7 @@ from collections import defaultdict
 class AssignmentCounterScheme(herapi.SPScheme):
 	def __init__(self, *candidates):
 		self.count = defaultdict(int)
-		if len(candidates) == 1:
-			cand = candidates[0]
-			obj_pat = herapi.ObjPat(cand)
-		else:
-			objects = [herapi.ObjPat(cand) for cand in candidates]
-			obj_pat = herapi.OrPat(*objects)
-
+		obj_pat = herapi.MultiObject(*candidates)
 		pattern = herapi.AsgExprPat(herapi.AnyPat(), herapi.SkipCasts(herapi.CallPat(obj_pat)))
 		super().__init__("assignment_counter", pattern)
 
