@@ -4,7 +4,7 @@ import herast.passive_manager as passive_manager
 from herast.tree.patterns.abstracts import *
 from herast.tree.patterns.expressions import *
 from herast.tree.patterns.instructions import *
-from herast.tree.patterns.aux import *
+from herast.tree.patterns.helpers import *
 from herast.tree.utils import make_call_helper_instr
 from herast.tree.matcher import Matcher
 from herast.passive_manager import register_storage_scheme
