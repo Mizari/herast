@@ -76,3 +76,23 @@ class IntPat(BasePattern):
 		else:
 			check_value = item.obj_ea
 		return self.value == check_value
+
+
+class StringPat(BasePattern):
+	def __init__(self, str_value=None, minlen=5):
+		self.str_value = str_value
+		self.minlen = minlen
+
+	def check(self, item, ctx: PatternContext) -> bool:
+		if item.op != idaapi.cot_obj:
+			return False
+
+		item.obj_ea
+		name = item.print1(None)
+		name = idaapi.tag_remove(name)
+		name = idaapi.str2user(name)
+
+		if self.str_value is None:
+			return len(name) == self.minlen
+		else:
+			return self.str_value == name
