@@ -2,13 +2,6 @@ import idc
 import idaapi
 import herapi
 
-"""
-This example shows how to automate objects renamings from this:
-	import_function("FooFunction", &dword_123456);
-to this
-	import_function("Foo", &FooFunction);
-"""
-
 def get_unique_name(name_candidate):
 	if idc.get_name_ea_simple(name_candidate) == idaapi.BADADDR:
 		return name_candidate

@@ -3,14 +3,6 @@ import herapi
 import idc
 
 
-"""
-This example demonstrates how to mass-set objects according to how
-they are assigned values by function calls.
-e.g.: 
-	dword_123456 = Foo(123, 3, "qwe")
-into
-	object_7b_3 = Foo(123, 3, "qwe")
-"""
 class ObjectSetterScheme(herapi.SPScheme):
 	def __init__(self, function_address):
 		self.objects = {}

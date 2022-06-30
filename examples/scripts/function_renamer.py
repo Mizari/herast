@@ -3,7 +3,6 @@ import herapi
 
 
 """
-This script renames functions according to pattern found in them
 """
 
 def make_pattern(debug_flag):
