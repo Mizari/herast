@@ -1,7 +1,6 @@
 import idaapi
 
 from herast.tree.patterns.base_pattern import BasePattern
-from herast.tree.patterns.abstracts import AnyPat
 from herast.tree.consts import binary_expressions_ops, unary_expressions_ops, op2str
 from herast.tree.utils import resolve_name_address
 from herast.tree.pattern_context import PatternContext
@@ -17,9 +16,6 @@ class CallExprPat(BasePattern):
 		if isinstance(calling_function, int):
 			calling_function = ObjPat(calling_function)
 
-		if calling_function is None:
-			calling_function = AnyPat()
-
 		self.calling_function = calling_function
 		self.arguments = arguments
 		self.ignore_arguments = ignore_arguments
@@ -27,7 +23,7 @@ class CallExprPat(BasePattern):
 
 	@BasePattern.initial_check
 	def check(self, expression, ctx: PatternContext) -> bool:
-		if not self.calling_function.check(expression.x, ctx):
+		if self.calling_function is not None and not self.calling_function.check(expression.x, ctx):
 			return False
 
 		if self.ignore_arguments:
