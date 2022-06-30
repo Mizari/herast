@@ -90,13 +90,15 @@ class BindItem(BasePattern):
 
 
 class VarBind(BasePattern):
-	op = idaapi.cot_var
+	op = -1
 
 	def __init__(self, name):
 		self.name = name
 
-	@BasePattern.initial_check
 	def check(self, expr, ctx: PatternContext) -> bool:
+		if expr.op != idaapi.cot_var:
+			return False
+
 		if ctx.has_var(self.name):
 			return ctx.get_var(self.name).v.idx == expr.v.idx
 		else:
