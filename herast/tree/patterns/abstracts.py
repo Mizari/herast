@@ -207,30 +207,3 @@ class DebugWrapper(BasePattern):
 		else:
 			print("Debug pattern", self.msg, "rv:", rv)
 		return rv
-
-
-class StructFieldAccess(BasePattern):
-	op = -1
-	def __init__(self, struct_type=None, member_offset=None):
-		self.struct_type = struct_type
-		self.member_offset = member_offset
-
-	def check(self, item, ctx: PatternContext) -> bool:
-		if item.op != idaapi.cot_memptr or item.op != idaapi.cot_memref:
-			return False
-
-		stype = item.x.type
-		stype = stype.get_pointed_object()
-		if not stype.is_struct():
-			return False
-
-		if self.member_offset is not None and self.member_offset != item.m:
-			return False
-
-		if self.struct_type is None:
-			return True
-
-		if isinstance(self.struct_type, str) and self.struct_type == str(stype):
-			return True
-
-		return self.struct_type == stype
