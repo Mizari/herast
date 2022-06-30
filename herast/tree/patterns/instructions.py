@@ -26,7 +26,7 @@ class BlockPat(BasePattern):
 		return (self.sequence, )       
 
 
-class ExInsPat(BasePattern):
+class ExprInsPat(BasePattern):
 	op = idaapi.cit_expr
 
 	def __init__(self, expr=None):
@@ -41,7 +41,7 @@ class ExInsPat(BasePattern):
 		return (self.expr, )
 
 
-class IfInsPat(BasePattern):
+class IfPat(BasePattern):
 	op = idaapi.cit_if
 
 	def __init__(self, condition=None, then_branch=None, else_branch=None, should_wrap_in_block=True):
@@ -78,7 +78,7 @@ class IfInsPat(BasePattern):
 		return (self.expr, self.body)
 
 
-class ForInsPat(BasePattern):
+class ForPat(BasePattern):
 	op = idaapi.cit_for
 
 	def __init__(self, init=None, expr=None, step=None, body=None):
@@ -102,7 +102,7 @@ class ForInsPat(BasePattern):
 		return (self.init, self.expr, self.step, self.body)
 
 
-class RetInsPat(BasePattern):
+class RetPat(BasePattern):
 	op = idaapi.cit_return
 
 	def __init__(self, expr=None):
@@ -119,7 +119,7 @@ class RetInsPat(BasePattern):
 		return (self.expr, )
 
 
-class WhileInsPat(BasePattern):
+class WhilePat(BasePattern):
 	op = idaapi.cit_while
 
 	def __init__(self, expr=None, body=None):
@@ -138,7 +138,7 @@ class WhileInsPat(BasePattern):
 		return (self.expr, self.body)
 
 
-class DoInsPat(BasePattern):
+class DoPat(BasePattern):
 	op = idaapi.cit_do
 
 	def __init__(self, expr=None, body=None):

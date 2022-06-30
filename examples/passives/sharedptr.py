@@ -4,33 +4,33 @@ SHOULD_REMOVE = True
 
 
 release_pattern = SeqPat(
-	ExInsPat(),  # var = memptr
-	RemovePattern(IfInsPat(
+	ExprInsPat(),  # var = memptr
+	RemovePattern(IfPat(
 		AnyPat(),  # if memptr
 		SeqPat(
-			IfInsPat(
+			IfPat(
 				AnyPat(),  # if pthread_cancel
-				ExInsPat(),  # asg interlocked_xchg(any, 0xffffffff)
+				ExprInsPat(),  # asg interlocked_xchg(any, 0xffffffff)
 				SeqPat(
-					ExInsPat(),  # var asg
-					ExInsPat(),  # memptr = var - 1
+					ExprInsPat(),  # var asg
+					ExprInsPat(),  # memptr = var - 1
 				),
 			),
-			IfInsPat(
+			IfPat(
 				AnyPat(), # if decrement result == 1
 				SeqPat(
-					ExInsPat(),  # call(_M_dispose) of *varmemptr + 16
-					IfInsPat(
+					ExprInsPat(),  # call(_M_dispose) of *varmemptr + 16
+					IfPat(
 						AnyPat(),  # if pthread_cancel
-						ExInsPat(),  # asg interlocked_xchg (any, 0xfffffff)
+						ExprInsPat(),  # asg interlocked_xchg (any, 0xfffffff)
 						SeqPat(
-							ExInsPat(),  # var asg
-							ExInsPat(),  # memptr = var - 1
+							ExprInsPat(),  # var asg
+							ExprInsPat(),  # memptr = var - 1
 						),
 					),
-					IfInsPat(
+					IfPat(
 						AnyPat(),  # if decrement result == 1
-						ExInsPat(), # call(_M_destroy) of *varmemptr + 24
+						ExprInsPat(), # call(_M_destroy) of *varmemptr + 24
 					),
 				),
 			),
@@ -54,25 +54,25 @@ class HelperReplacer(SPScheme):
 register_storage_scheme(HelperReplacer("shptr_release", release_pattern, "__sharedptr::release"))
 
 
-add1 = SkipCasts(CallExprPat(HelperExprPat(helper_name="_InterlockedAdd"), skip_missing=True))
+add1 = SkipCasts(CallPat(HelperPat(helper_name="_InterlockedAdd"), skip_missing=True))
 
-increment_pattern = IfInsPat(
+increment_pattern = IfPat(
 	ObjPat("pthread_cancel"),
-	ExInsPat(add1),
-	ExInsPat(),
+	ExprInsPat(add1),
+	ExprInsPat(),
 )
 
 increment_pattern = OrPat(
 	increment_pattern,
-	IfInsPat(AnyPat(), increment_pattern),
+	IfPat(AnyPat(), increment_pattern),
 )
 register_storage_scheme(HelperReplacer("shptr_inc", increment_pattern, "__sharedptr::increment"))
 
 fname = "std::_Sp_counted_base::_M_release"
-std_release_pattern = ExInsPat(SkipCasts(CallExprPat(fname, ignore_arguments=True)))
+std_release_pattern = ExprInsPat(SkipCasts(CallPat(fname, ignore_arguments=True)))
 std_release_pattern = OrPat(
 	std_release_pattern,
-	IfInsPat(AnyPat(), std_release_pattern),
+	IfPat(AnyPat(), std_release_pattern),
 )
 
 if SHOULD_REMOVE:

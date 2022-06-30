@@ -20,7 +20,7 @@ class CallsParser(herapi.SPScheme):
 			obj_pat = herapi.ObjPat(function_address[0])
 		else:
 			obj_pat = herapi.OrPat(*[herapi.ObjPat(addr) for addr in function_address])
-		pattern = herapi.CallExprPat(obj_pat, herapi.ObjPat(), herapi.RefPat(herapi.ObjPat()), skip_missing=True)
+		pattern = herapi.CallPat(obj_pat, herapi.ObjPat(), herapi.RefPat(herapi.ObjPat()), skip_missing=True)
 		super().__init__("calls_parser", pattern)
 
 	def on_matched_item(self, item, ctx: herapi.PatternContext):

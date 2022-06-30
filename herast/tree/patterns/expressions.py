@@ -6,7 +6,7 @@ from herast.tree.utils import resolve_name_address
 from herast.tree.pattern_context import PatternContext
 
 
-class CallExprPat(BasePattern):
+class CallPat(BasePattern):
 	op = idaapi.cot_call
 
 	def __init__(self, calling_function, *arguments, ignore_arguments=False, skip_missing=False):
@@ -44,7 +44,7 @@ class CallExprPat(BasePattern):
 		return (self.calling_function, *self.arguments)
 
 
-class HelperExprPat(BasePattern):
+class HelperPat(BasePattern):
 	op = idaapi.cot_helper
 
 	def __init__(self, helper_name=None):
@@ -132,7 +132,7 @@ class RefPat(BasePattern):
 		return self.referenced_object.check(expression.x, ctx)
 
 
-class MemrefExprPat(BasePattern):
+class MemrefPat(BasePattern):
 	op = idaapi.cot_memref
 
 	def __init__(self, referenced_object, field):
@@ -145,7 +145,7 @@ class MemrefExprPat(BasePattern):
 			self.field.check(expression.m, ctx)
 
 
-class MemptrExprPat(BasePattern):
+class MemptrPat(BasePattern):
 	op = idaapi.cot_memptr
 
 	def __init__(self, pointed_object, field):
@@ -158,7 +158,7 @@ class MemptrExprPat(BasePattern):
 			self.field.check(expression.m, ctx)
 
 
-class TernaryExprPat(BasePattern):
+class TernaryPat(BasePattern):
 	op = idaapi.cot_tern
 
 	def __init__(self, condition, positive_expression, negative_expression):
@@ -173,7 +173,7 @@ class TernaryExprPat(BasePattern):
 			self.negative_expression.check(expression.z, ctx)
 
 
-class VarExprPat(BasePattern):
+class VarPat(BasePattern):
 	op = idaapi.cot_var
 
 	def __init__(self):
@@ -225,9 +225,9 @@ import sys
 module = sys.modules[__name__]
 
 for op in unary_expressions_ops:
-	name = '%sExprPat' % op2str[op].replace('cot_', '').capitalize()
+	name = '%sPat' % op2str[op].replace('cot_', '').capitalize()
 	vars(module)[name] = type(name, (AbstractUnaryOpPattern,), {'op': op})
 
 for op in binary_expressions_ops:
-	name = '%sExprPat' % op2str[op].replace('cot_', '').capitalize()
+	name = '%sPat' % op2str[op].replace('cot_', '').capitalize()
 	vars(module)[name] = type(name, (AbstractBinaryOpPattern,), {'op': op})

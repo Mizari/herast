@@ -6,8 +6,8 @@ import idc
 class ObjectSetterScheme(herapi.SPScheme):
 	def __init__(self, function_address):
 		self.objects = {}
-		call_pattern = herapi.SkipCasts(herapi.CallExprPat(function_address, herapi.NumPat(), herapi.NumPat(), herapi.AnyPat()))
-		pattern = herapi.AsgExprPat(herapi.ObjPat(), call_pattern)
+		call_pattern = herapi.SkipCasts(herapi.CallPat(function_address, herapi.NumPat(), herapi.NumPat(), herapi.AnyPat()))
+		pattern = herapi.AsgPat(herapi.ObjPat(), call_pattern)
 		super().__init__("object_setter", pattern)
 
 	def on_matched_item(self, item, ctx: herapi.PatternContext):

@@ -14,7 +14,7 @@ class AssignmentCounterScheme(herapi.SPScheme):
 			objects = [herapi.ObjPat(cand) for cand in candidates]
 			obj_pat = herapi.OrPat(*objects)
 
-		pattern = herapi.AsgExprPat(herapi.AnyPat(), herapi.SkipCasts(herapi.CallExprPat(obj_pat)))
+		pattern = herapi.AsgExprPat(herapi.AnyPat(), herapi.SkipCasts(herapi.CallPat(obj_pat)))
 		super().__init__("assignment_counter", pattern)
 
 	def on_matched_item(self, item, ctx: herapi.PatternContext):

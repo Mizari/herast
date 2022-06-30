@@ -1,9 +1,9 @@
 from herapi import *
 
-pattern = IfInsPat(
+pattern = IfPat(
 	VarBind("error_var"),
-	ExInsPat(BindItem("logic_expr")),
-	ExInsPat(AsgExprPat(VarBind("error_var"), BindItem("logic_expr")))
+	ExprInsPat(BindItem("logic_expr")),
+	ExprInsPat(AsgPat(VarBind("error_var"), BindItem("logic_expr")))
 )
 
 """

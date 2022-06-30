@@ -5,22 +5,22 @@ import herapi
 from herast.schemes.single_pattern_schemes import SPScheme
 
 def make_call_expr(fname=None):
-	return herapi.SkipCasts(herapi.CallExprPat(fname, ignore_arguments=True))
+	return herapi.SkipCasts(herapi.CallPat(fname, ignore_arguments=True))
 
-first_call_pattern = herapi.ExInsPat(
-							herapi.AsgExprPat(
+first_call_pattern = herapi.ExprInsPat(
+							herapi.AsgPat(
 								herapi.AnyPat(),
 								make_call_expr("__cxa_allocate_exception")
 							)
 						)
 
-excstr_getter_pattern = herapi.ExInsPat(
-	herapi.AsgExprPat(
+excstr_getter_pattern = herapi.ExprInsPat(
+	herapi.AsgPat(
 		herapi.AnyPat(),
-		herapi.CallExprPat(herapi.AnyPat(), herapi.AnyPat(), herapi.SkipCasts(herapi.BindItem("exception_str", herapi.AnyPat())))
+		herapi.CallPat(herapi.AnyPat(), herapi.AnyPat(), herapi.SkipCasts(herapi.BindItem("exception_str", herapi.AnyPat())))
 	)
 )
-last_call_pattern = herapi.ExInsPat(make_call_expr('__cxa_throw'))
+last_call_pattern = herapi.ExprInsPat(make_call_expr('__cxa_throw'))
 
 class ExceptionBody(herapi.BasePattern):
 	op = idaapi.cit_block
@@ -51,7 +51,7 @@ class ExceptionBody(herapi.BasePattern):
 
 		return True
 
-pattern = herapi.IfInsPat(
+pattern = herapi.IfPat(
 	herapi.BindItem("if_expr"),
 	ExceptionBody(first_call_pattern, excstr_getter_pattern, last_call_pattern)
 )
