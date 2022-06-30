@@ -8,7 +8,7 @@ class VirtualCollector(herapi.SPScheme):
 		self.collection = []
 
 	def on_matched_item(self, item, ctx: herapi.PatternContext):
-		func_ea = herapi.get_func_start(item.ea)
+		func_ea = ctx.get_func_ea()
 		struct_type = item.x.x.type.get_pointed_object()
 		offset = item.x.m
 		value = item.y
