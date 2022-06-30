@@ -1,3 +1,5 @@
+import idaapi
+
 import herast.tree.consts as consts
 from herast.tree.patterns.base_pattern import BasePattern
 from herast.tree.pattern_context import PatternContext
@@ -49,7 +51,28 @@ class MultiObject(BasePattern):
 		self.objects = [ObjPat(o) for o in objects]
  
 	def check(self, item, ctx: PatternContext) -> bool:
+		if item.op != idaapi.cot_obj:
+			return False
+
 		for o in self.objects:
 			if o.check(item):
 				return True
 		return False
+
+
+class IntPat(BasePattern):
+	def __init__(self, value=None):
+		self.value = value
+
+	def check(self, item, ctx: PatternContext) -> bool:
+		if item.op not in (idaapi.cot_num, idaapi.cot_obj):
+			return False
+
+		if self.value is None:
+			return True
+
+		if item.op == idaapi.cot_num:
+			check_value = item.n._value
+		else:
+			check_value = item.obj_ea
+		return self.value == check_value
