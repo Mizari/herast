@@ -4,9 +4,7 @@ from herast.schemes_storage import SchemesStorage
 from herast.schemes.base_scheme import Scheme
 from herast.tree.matcher import Matcher
 
-import herast.settings.idb_settings as idb_settings
-import herast.settings.herast_settings as herast_settings
-
+import herast.settings.settings_manager as settings_manager
 
 __schemes_storages : dict[str, SchemesStorage] = {}
 __schemes : dict[str, Scheme] = {}
@@ -14,16 +12,21 @@ __enabled_schemes = set()
 from collections import defaultdict as __defaultdict
 __storage2schemes = __defaultdict(list)
 __scheme2storage = {}
+__passive_matcher = Matcher()
 
 def __initialize():
 	__load_all_storages()
 	__enable_all_schemes()
+	__rebuild_passive_matcher()
 
 def get_passive_matcher():
-	matcher = Matcher()
+	return __passive_matcher
+
+def __rebuild_passive_matcher():
+	global __passive_matcher
+	__passive_matcher = Matcher()
 	for s in __get_passive_schemes():
-		matcher.add_scheme(s)
-	return matcher
+		__passive_matcher.add_scheme(s)
 
 def register_storage_scheme(scheme):
 	if not isinstance(scheme, Scheme):
@@ -43,15 +46,17 @@ def enable_scheme(scheme_name):
 	if scheme_name not in __schemes:
 		return
 	__enabled_schemes.add(scheme_name)
+	__rebuild_passive_matcher()
 
 def disable_scheme(scheme_name):
 	if scheme_name not in __schemes:
 		return
 	__enabled_schemes.discard(scheme_name)
+	__rebuild_passive_matcher()
 
 def update_storage_status(storage):
-	globally = storage.path in herast_settings.get_herast_enabled_storages_paths()
-	inidb = storage.path in idb_settings.get_idb_enabled_storages_paths()
+	globally = storage.path in settings_manager.get_enabled_storages(global_settings=True)
+	inidb = storage.path in settings_manager.get_enabled_storages()
 	enabled = True
 	if globally and inidb:
 		status = "Enabled globally and in idb"
@@ -66,18 +71,18 @@ def update_storage_status(storage):
 	storage.enabled = enabled
 
 def __load_all_storages():
-	for folder in herast_settings.get_herast_storages_folders():
+	for folder in settings_manager.get_storages_folders():
 		load_storage_folder(folder)
-	for file in herast_settings.get_herast_storages_filenames():
+	for file in settings_manager.get_storages_files():
 		load_storage_file(file)
 
 	for storage in __schemes_storages.values():
 		update_storage_status(storage)
 
 def __enable_all_schemes():
-	for storage_path in herast_settings.get_herast_enabled_storages_paths():
+	for storage_path in settings_manager.get_enabled_storages(global_settings=True):
 		__update_storage_schemes(storage_path)
-	for storage_path in idb_settings.get_idb_enabled_storages_paths():
+	for storage_path in settings_manager.get_enabled_storages():
 		__update_storage_schemes(storage_path)
 
 def load_storage_folder(folder_name: str) -> None:
@@ -95,8 +100,8 @@ def load_storage_file(filename: str) -> bool:
 	return True
 
 def get_storages_folders():
-	global_folders = herast_settings.get_herast_storages_folders()
-	idb_folders = idb_settings.get_idb_storages_folders()
+	global_folders = settings_manager.get_storages_folders(global_settings=True)
+	idb_folders = settings_manager.get_storages_folders()
 	return global_folders + idb_folders
 
 def get_storage(filename: str) -> SchemesStorage:
@@ -112,18 +117,20 @@ def __discard_storage_schemes(storage_path):
 	for scheme_name in __storage2schemes.pop(storage_path, []):
 		__enabled_schemes.discard(scheme_name)
 		__schemes.pop(scheme_name, None)
+	__rebuild_passive_matcher()
 
 def __update_storage_schemes(storage_path):
-	if storage_path not in herast_settings.get_herast_enabled_storages_paths() and storage_path not in idb_settings.get_idb_enabled_storages_paths():
+	if storage_path not in settings_manager.get_enabled_storages(global_settings=True) and storage_path not in settings_manager.get_enabled_storages():
 		return
 	__enabled_schemes.update(__storage2schemes[storage_path])
+	__rebuild_passive_matcher()
 
 def disable_storage_in_idb(storage_path):
 	storage = get_storage(storage_path)
 	if storage is None or not storage.enabled:
 		return False
 
-	idb_settings.remove_enabled_storage(storage_path)
+	settings_manager.disable_storage(storage_path)
 	__discard_storage_schemes(storage)
 	update_storage_status(storage)
 	return True
@@ -133,7 +140,7 @@ def enable_storage_in_idb(storage_path):
 	if storage is None or storage.enabled or storage.error:
 		return False
 
-	idb_settings.enable_idb_storage(storage_path)
+	settings_manager.enable_storage(storage_path)
 	__update_storage_schemes(storage_path)
 	update_storage_status(storage)
 	return True
@@ -159,4 +166,5 @@ def reload_storage(storage_path):
 
 	storage.module = new_module
 	update_storage_status(storage)
+	__rebuild_passive_matcher()
 	return True

@@ -2,44 +2,44 @@ import json
 
 class BaseSettings:
 	def __init__(self, folders=[], files=[], enabled=[]):
-		self.folders = folders
-		self.files = files
-		self.enabled = enabled
+		self.storages_folders = folders
+		self.storages_files = files
+		self.enabled_storages = enabled
 
-	def add_file_storage(self, file_path):
-		if file_path in self.files:
+	def add_storage_file(self, file_path):
+		if file_path in self.storages_files:
 			return
-		self.files.append(file_path)
+		self.storages_files.append(file_path)
 		self.save()
 
-	def add_folder_storage(self, folder_path):
-		if folder_path in self.folders:
+	def add_folder_storage(self, storages_folder):
+		if storages_folder in self.storages_folders:
 			return
-		self.folders.append(folder_path)
+		self.storages_folders.append(storages_folder)
 		self.save()
 
-	def add_enabled_storage(self, enabled_path):
-		if enabled_path in self.enabled:
+	def enable_storage(self, storage_path):
+		if storage_path in self.enabled_storages:
 			return
-		self.enabled.append(enabled_path)
+		self.enabled_storages.append(storage_path)
 		self.save()
 
-	def remove_enabled_storage(self, enabled_path):
-		if enabled_path not in self.enabled:
+	def disable_storage(self, storage_path):
+		if storage_path not in self.enabled_storages:
 			return
-		self.enabled.remove(enabled_path)
+		self.enabled_storages.remove(storage_path)
 		self.save()
 
 	def remove_file_storage(self, file_path):
-		if file_path not in self.files:
+		if file_path not in self.storages_files:
 			return
-		self.files.remove(file_path)
+		self.storages_files.remove(file_path)
 		self.save()
 
-	def remove_folder_storage(self, folder_path):
-		if folder_path not in self.folders:
+	def remove_storage_folder(self, folder_path):
+		if folder_path not in self.storages_folders:
 			return
-		self.folders.remove(folder_path)
+		self.storages_folders.remove(folder_path)
 		self.save()
 
 	@classmethod
@@ -81,9 +81,9 @@ class BaseSettings:
 
 	def save(self):
 		json_dict = {
-			"folders": self.folders,
-			"files":   self.files,
-			"enabled": self.enabled,
+			"folders": self.storages_folders,
+			"files":   self.storages_files,
+			"enabled": self.enabled_storages,
 		}
 		json_str = json.dumps(json_dict)
 		self.save_json_str(json_str)
