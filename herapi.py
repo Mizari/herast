@@ -1,5 +1,3 @@
-import herast.passive_manager as passive_manager
-
 # forward imports for herast usage
 from herast.tree.patterns.abstracts import *
 from herast.tree.patterns.expressions import *
