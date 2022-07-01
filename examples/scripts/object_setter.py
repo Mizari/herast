@@ -11,7 +11,7 @@ class ObjectSetterScheme(herapi.SPScheme):
 		super().__init__("object_setter", pattern)
 
 	def on_matched_item(self, item, ctx: herapi.PatternContext):
-		asg_y = herapi.skip_casts(item.y)
+		asg_y = herapi.strip_casts(item.y)
 		arg0 = asg_y.a[0].n._value
 		arg1 = asg_y.a[1].n._value
 		object_name = "object_" + hex(arg0)[2:] + '_' + str(arg1)

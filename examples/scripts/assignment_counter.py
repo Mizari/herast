@@ -12,7 +12,7 @@ class AssignmentCounterScheme(herapi.SPScheme):
 		super().__init__("assignment_counter", pattern)
 
 	def on_matched_item(self, item, ctx: herapi.PatternContext):
-		func_ea = herapi.skip_casts(item.y).x.obj_ea
+		func_ea = herapi.strip_casts(item.y).x.obj_ea
 		self.add_assignment(func_ea)
 		return False
 

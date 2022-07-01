@@ -18,7 +18,7 @@ def get_storages():
 def get_storage(storage_path):
 	return passive_manager.get_storage(storage_path)
 
-def skip_casts(expr):
+def strip_casts(expr):
 	import idaapi
 	if expr.op == idaapi.cot_cast:
 		return expr.x
