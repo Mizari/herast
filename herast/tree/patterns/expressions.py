@@ -1,8 +1,6 @@
 import idaapi
 
 from herast.tree.patterns.base_pattern import BasePattern
-from herast.tree.consts import binary_expressions_ops, unary_expressions_ops, op2str
-from herast.tree.utils import resolve_name_address
 from herast.tree.pattern_context import PatternContext
 
 
@@ -106,6 +104,7 @@ class ObjPat(ExpressionPat):
 				if self.name == '': self.name = None
 
 		elif isinstance(obj_info, str):
+			from herast.tree.utils import resolve_name_address
 			self.name = obj_info
 			ea = resolve_name_address(self.name)
 			if ea == idaapi.BADADDR:
@@ -245,13 +244,16 @@ class AbstractBinaryOpPattern(ExpressionPat):
 		return (self.first_operand, self.second_operand)
 
 
-import sys
-module = sys.modules[__name__]
+def __generate_expression_patterns():
+	import sys
+	module = sys.modules[__name__]
+	from herast.tree.consts import binary_expressions_ops, unary_expressions_ops, op2str
 
-for op in unary_expressions_ops:
-	name = '%sPat' % op2str[op].replace('cot_', '').capitalize()
-	vars(module)[name] = type(name, (AbstractUnaryOpPattern,), {'op': op})
+	for op in unary_expressions_ops:
+		name = '%sPat' % op2str[op].replace('cot_', '').capitalize()
+		vars(module)[name] = type(name, (AbstractUnaryOpPattern,), {'op': op})
 
-for op in binary_expressions_ops:
-	name = '%sPat' % op2str[op].replace('cot_', '').capitalize()
-	vars(module)[name] = type(name, (AbstractBinaryOpPattern,), {'op': op})
+	for op in binary_expressions_ops:
+		name = '%sPat' % op2str[op].replace('cot_', '').capitalize()
+		vars(module)[name] = type(name, (AbstractBinaryOpPattern,), {'op': op})
+__generate_expression_patterns()
