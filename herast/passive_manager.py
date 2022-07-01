@@ -1,5 +1,3 @@
-import glob
-
 from herast.schemes_storage import SchemesStorage
 from herast.schemes.base_scheme import Scheme
 from herast.tree.matcher import Matcher
@@ -83,6 +81,7 @@ def enable_all_schemes():
 		__update_storage_schemes(storage_path)
 
 def load_storage_folder(folder_name: str) -> None:
+	import glob
 	for full_path in glob.iglob(folder_name + '/**/**.py', recursive=True):
 		load_storage_file(full_path)
 
