@@ -9,11 +9,11 @@ import herast.idb_settings as idb_settings
 import herast.herast_settings as herast_settings
 
 
-schemes_storages : Dict[str, SchemesStorage] = {}
-schemes : Dict[str, Scheme] = {}
-enabled_schemes = set()
-storage2schemes = defaultdict(list)
-scheme2storage = {}
+__schemes_storages : Dict[str, SchemesStorage] = {}
+__schemes : Dict[str, Scheme] = {}
+__enabled_schemes = set()
+__storage2schemes = defaultdict(list)
+__scheme2storage = {}
 
 def initialize():
 	load_all_storages()
@@ -31,23 +31,23 @@ def register_storage_scheme(scheme):
 
 	import inspect
 	storage_path = inspect.stack()[1].filename
-	storage2schemes[storage_path].append(scheme.name)
-	scheme2storage[scheme.name] = storage_path
+	__storage2schemes[storage_path].append(scheme.name)
+	__scheme2storage[scheme.name] = storage_path
 
-	schemes[scheme.name] = scheme
+	__schemes[scheme.name] = scheme
 
 def get_passive_schemes():
-	return [s for s in schemes.values() if s.name in enabled_schemes]
+	return [s for s in __schemes.values() if s.name in __enabled_schemes]
 
 def enable_scheme(scheme_name):
-	if scheme_name not in schemes:
+	if scheme_name not in __schemes:
 		return
-	enabled_schemes.add(scheme_name)
+	__enabled_schemes.add(scheme_name)
 
 def disable_scheme(scheme_name):
-	if scheme_name not in schemes:
+	if scheme_name not in __schemes:
 		return
-	enabled_schemes.discard(scheme_name)
+	__enabled_schemes.discard(scheme_name)
 
 def update_storage_status(storage):
 	globally = storage.path in herast_settings.get_herast_enabled()
@@ -71,7 +71,7 @@ def load_all_storages():
 	for file in herast_settings.get_herast_files():
 		load_storage_file(file)
 
-	for storage in schemes_storages.values():
+	for storage in __schemes_storages.values():
 		update_storage_status(storage)
 
 def enable_all_schemes():
@@ -91,7 +91,7 @@ def load_storage_file(filename: str) -> bool:
 		print("[!] WARNING: failed to load", filename, "storage")
 		return False
 
-	schemes_storages[filename] = storage
+	__schemes_storages[filename] = storage
 	return True
 
 def get_storages_folders():
@@ -100,20 +100,20 @@ def get_storages_folders():
 	return global_folders + idb_folders
 
 def get_storage(filename: str) -> Optional[SchemesStorage]:
-	return schemes_storages.get(filename, None)
+	return __schemes_storages.get(filename, None)
 
 def get_enabled_storages():
-	return [s for s in schemes_storages.values() if s.enabled]
+	return [s for s in __schemes_storages.values() if s.enabled]
 
 def __discard_storage_schemes(storage_path):
-	for scheme_name in storage2schemes.pop(storage_path, []):
-		enabled_schemes.discard(scheme_name)
-		schemes.pop(scheme_name, None)
+	for scheme_name in __storage2schemes.pop(storage_path, []):
+		__enabled_schemes.discard(scheme_name)
+		__schemes.pop(scheme_name, None)
 
 def __update_storage_schemes(storage_path):
 	if storage_path not in herast_settings.get_herast_enabled() and storage_path not in idb_settings.get_enabled_idb():
 		return
-	enabled_schemes.update(storage2schemes[storage_path])
+	__enabled_schemes.update(__storage2schemes[storage_path])
 
 def disable_storage_in_idb(storage_path):
 	storage = get_storage(storage_path)

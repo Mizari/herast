@@ -13,7 +13,7 @@ from herast.herast_settings import get_herast_enabled, get_herast_files, get_her
 from herast.idb_settings import get_enabled_idb, get_idb_files, get_idb_folders, add_enabled_storage, add_idb_file, add_idb_folder
 
 def get_storages():
-	return [s for s in passive_manager.schemes_storages.values()]
+	return [s for s in passive_manager.__schemes_storages.values()]
 
 def get_storage(storage_path):
 	return passive_manager.get_storage(storage_path)
