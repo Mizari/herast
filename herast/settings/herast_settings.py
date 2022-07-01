@@ -1,7 +1,7 @@
 import os
 import idaapi
 
-from herast.storages_settings import StoragesSettings
+from herast.settings.storages_settings import StoragesSettings
 
 def get_settings_path():
 	return os.path.join(idaapi.get_user_idadir(), "herast_settings.json")

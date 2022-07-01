@@ -1,6 +1,6 @@
 import idc
 
-from herast.storages_settings import StoragesSettings
+from herast.settings.storages_settings import StoragesSettings
 
 def load_long_str_from_idb(array_name):
 	id = idc.get_array_id(array_name)

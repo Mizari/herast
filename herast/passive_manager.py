@@ -4,8 +4,8 @@ from herast.schemes_storage import SchemesStorage
 from herast.schemes.base_scheme import Scheme
 from herast.tree.matcher import Matcher
 
-import herast.idb_settings as idb_settings
-import herast.herast_settings as herast_settings
+import herast.settings.idb_settings as idb_settings
+import herast.settings.herast_settings as herast_settings
 
 
 __schemes_storages : dict[str, SchemesStorage] = {}
