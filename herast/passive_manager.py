@@ -102,6 +102,9 @@ def get_storages_folders():
 def get_storage(filename: str) -> Optional[SchemesStorage]:
 	return __schemes_storages.get(filename, None)
 
+def get_storages():
+	return [s for s in __schemes_storages.values()]
+
 def get_enabled_storages():
 	return [s for s in __schemes_storages.values() if s.enabled]
 
