@@ -193,7 +193,6 @@ class RemovePattern(BasePattern):
 		return True
 
 
-import traceback
 # For debug purposes
 class DebugPattern(BasePattern):
 	op = -1
@@ -207,6 +206,7 @@ class DebugPattern(BasePattern):
 	def check(self, item, ctx: PatternContext) -> bool:
 		print('Debug calltrace, address of item: %#x (%s)' % (item.ea, item.opname))
 		print('---------------------------------')
+		import traceback
 		for i in traceback.format_stack()[:self.call_depth]:
 			print(i)
 		print('---------------------------------')
