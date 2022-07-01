@@ -124,7 +124,7 @@ def main():
 	print('Hooking for HexRays events')
 	idaapi.install_hexrays_callback(herast_callback)
 
-	passive_manager.initialize()
+	passive_manager.__initialize()
 	action_manager.initialize()
 	hx_callback_manager.initialize()
 

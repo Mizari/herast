@@ -15,13 +15,13 @@ __enabled_schemes = set()
 __storage2schemes = defaultdict(list)
 __scheme2storage = {}
 
-def initialize():
-	load_all_storages()
-	enable_all_schemes()
+def __initialize():
+	__load_all_storages()
+	__enable_all_schemes()
 
 def get_passive_matcher():
 	matcher = Matcher()
-	for s in get_passive_schemes():
+	for s in __get_passive_schemes():
 		matcher.add_scheme(s)
 	return matcher
 
@@ -36,7 +36,7 @@ def register_storage_scheme(scheme):
 
 	__schemes[scheme.name] = scheme
 
-def get_passive_schemes():
+def __get_passive_schemes():
 	return [s for s in __schemes.values() if s.name in __enabled_schemes]
 
 def enable_scheme(scheme_name):
@@ -65,7 +65,7 @@ def update_storage_status(storage):
 	storage.status_text = status
 	storage.enabled = enabled
 
-def load_all_storages():
+def __load_all_storages():
 	for folder in herast_settings.get_herast_folders():
 		load_storage_folder(folder)
 	for file in herast_settings.get_herast_files():
@@ -74,7 +74,7 @@ def load_all_storages():
 	for storage in __schemes_storages.values():
 		update_storage_status(storage)
 
-def enable_all_schemes():
+def __enable_all_schemes():
 	for storage_path in herast_settings.get_herast_enabled():
 		__update_storage_schemes(storage_path)
 	for storage_path in idb_settings.get_enabled_idb():
