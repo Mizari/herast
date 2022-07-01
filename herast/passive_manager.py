@@ -1,18 +1,18 @@
+from __future__ import annotations as __annotiations
+
 from herast.schemes_storage import SchemesStorage
 from herast.schemes.base_scheme import Scheme
 from herast.tree.matcher import Matcher
-
-from typing import Dict, Optional
-from collections import defaultdict
 
 import herast.idb_settings as idb_settings
 import herast.herast_settings as herast_settings
 
 
-__schemes_storages : Dict[str, SchemesStorage] = {}
-__schemes : Dict[str, Scheme] = {}
+__schemes_storages : dict[str, SchemesStorage] = {}
+__schemes : dict[str, Scheme] = {}
 __enabled_schemes = set()
-__storage2schemes = defaultdict(list)
+from collections import defaultdict as __defaultdict
+__storage2schemes = __defaultdict(list)
 __scheme2storage = {}
 
 def __initialize():
@@ -99,8 +99,8 @@ def get_storages_folders():
 	idb_folders = idb_settings.get_idb_folders()
 	return global_folders + idb_folders
 
-def get_storage(filename: str) -> Optional[SchemesStorage]:
-	return __schemes_storages.get(filename, None)
+def get_storage(filename: str) -> SchemesStorage:
+	return __schemes_storages.get(filename)
 
 def get_storages():
 	return [s for s in __schemes_storages.values()]
