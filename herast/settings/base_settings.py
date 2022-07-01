@@ -1,6 +1,6 @@
 import json
 
-class StoragesSettings:
+class BaseSettings:
 	def __init__(self, folders=[], files=[], enabled=[]):
 		self.folders = folders
 		self.files = files

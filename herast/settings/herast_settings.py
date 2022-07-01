@@ -1,12 +1,12 @@
 import os
 import idaapi
 
-from herast.settings.storages_settings import StoragesSettings
+from herast.settings.base_settings import BaseSettings
 
 def get_settings_path():
 	return os.path.join(idaapi.get_user_idadir(), "herast_settings.json")
 
-class HerastSettings(StoragesSettings):
+class HerastSettings(BaseSettings):
 	@classmethod
 	def save_json_str(cls, saved_str):
 		with open(get_settings_path(), 'w') as f:

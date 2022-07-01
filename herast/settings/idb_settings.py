@@ -1,6 +1,6 @@
 import idc
 
-from herast.settings.storages_settings import StoragesSettings
+from herast.settings.base_settings import BaseSettings
 
 def load_long_str_from_idb(array_name):
 	id = idc.get_array_id(array_name)
@@ -25,7 +25,7 @@ def save_long_str_to_idb(array_name, value):
 
 
 ARRAY_NAME = "$herast:PatternStorage"
-class IdbSettings(StoragesSettings):
+class IdbSettings(BaseSettings):
 	@classmethod
 	def save_json_str(cls, saved_str):
 		save_long_str_to_idb(ARRAY_NAME, saved_str)
