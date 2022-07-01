@@ -1,4 +1,4 @@
-from idb_settings import settings_instance as __idb_settings
+from herast.settings.idb_settings import settings_instance as __idb_settings
 from herast.settings.global_settings import settings_instance as __global_settings
 
 def __get_settings(global_settings=False):
