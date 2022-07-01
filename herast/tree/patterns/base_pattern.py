@@ -1,11 +1,14 @@
+import idaapi
 from herast.tree.pattern_context import PatternContext
 import herast.tree.consts as consts
 
 class BasePattern:
 	op = None
 
-	def __init__(self):
-		pass
+	def __init__(self, debug=False, skip_casts=True, check_op=None):
+		self.check_op = check_op
+		self.debug = debug
+		self.skip_casts = skip_casts
 	
 	def _assert(self, cond, msg=""):
 		assert cond, "%s: %s" % (self.__class__.__name__, msg)
@@ -21,13 +24,19 @@ class BasePattern:
 		return consts.op2str.get(cls.op, None)
 
 	@staticmethod
-	def initial_check(func):
-		def __perform_initial_check(self, item, *args, **kwargs):
-			if item is None or (item.op != self.op and self.op is not None):
+	def parent_check(func):
+		def __perform_parent_check(self, item, *args, **kwargs):
+			if item is None:
 				return False
-			else:
-				return func(self, item, *args, **kwargs)
-		return __perform_initial_check
+
+			if self.skip_casts and item.op == idaapi.cot_cast:
+				item = item.x
+
+			if self.check_op is not None and item.op != self.check_op:
+				return False
+
+			return func(self, item, *args, **kwargs)
+		return __perform_parent_check
 
 	@property
 	def children(self):

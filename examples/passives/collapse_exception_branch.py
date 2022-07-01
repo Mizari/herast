@@ -29,7 +29,7 @@ class ExceptionBody(herapi.BasePattern):
 		self.last_call = last_call
 		self.excstr_getter = excstr_getter
 
-	@herapi.BasePattern.initial_check
+	@herapi.BasePattern.parent_check
 	def check(self, item, ctx):
 		block = item.cblock
 

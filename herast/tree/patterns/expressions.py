@@ -6,10 +6,25 @@ from herast.tree.utils import resolve_name_address
 from herast.tree.pattern_context import PatternContext
 
 
-class CallPat(BasePattern):
+class ExpressionPat(BasePattern):
+	op = None
+
+	def __init__(self, debug=False, skip_casts=True, check_op=None):
+		super().__init__(debug, skip_casts, check_op=self.op)
+
+	@staticmethod
+	def parent_check(func):
+		func = super().parent_check(func)
+		def __perform_parent_check(self, item, *args, **kwargs):
+			return func(self, item, *args, **kwargs)
+		return __perform_parent_check
+
+
+class CallPat(ExpressionPat):
 	op = idaapi.cot_call
 
-	def __init__(self, calling_function, *arguments, ignore_arguments=False, skip_missing=False):
+	def __init__(self, calling_function, *arguments, ignore_arguments=False, skip_missing=False, **kwargs):
+		super().__init__(**kwargs)
 		if isinstance(calling_function, str):
 			calling_function = ObjPat(calling_function)
 
@@ -21,7 +36,7 @@ class CallPat(BasePattern):
 		self.ignore_arguments = ignore_arguments
 		self.skip_missing = skip_missing
 
-	@BasePattern.initial_check
+	@ExpressionPat.parent_check
 	def check(self, expression, ctx: PatternContext) -> bool:
 		if self.calling_function is not None and not self.calling_function.check(expression.x, ctx):
 			return False
@@ -44,13 +59,14 @@ class CallPat(BasePattern):
 		return (self.calling_function, *self.arguments)
 
 
-class HelperPat(BasePattern):
+class HelperPat(ExpressionPat):
 	op = idaapi.cot_helper
 
-	def __init__(self, helper_name=None):
+	def __init__(self, helper_name=None, **kwargs):
+		super().__init__(**kwargs)
 		self.helper_name = helper_name
-	
-	@BasePattern.initial_check
+
+	@ExpressionPat.parent_check
 	def check(self, expression, ctx: PatternContext) -> bool:
 		return self.helper_name == expression.helper if self.helper_name is not None else True
 
@@ -59,12 +75,13 @@ class HelperPat(BasePattern):
 		return ()
 
 
-class NumPat(BasePattern):
+class NumPat(ExpressionPat):
 	op = idaapi.cot_num
-	def __init__(self, num=None):
+	def __init__(self, num=None, **kwargs):
+		super().__init__(**kwargs)
 		self.num = num
 
-	@BasePattern.initial_check
+	@ExpressionPat.parent_check
 	def check(self, expr, ctx: PatternContext) -> bool:
 		if self.num is None:
 			return True
@@ -72,10 +89,11 @@ class NumPat(BasePattern):
 		return self.num == expr.n._value
 
 
-class ObjPat(BasePattern):
+class ObjPat(ExpressionPat):
 	op = idaapi.cot_obj
 
-	def __init__(self, obj_info=None):
+	def __init__(self, obj_info=None, **kwargs):
+		super().__init__(**kwargs)
 		self.ea = None
 		self.name = None
 
@@ -102,7 +120,7 @@ class ObjPat(BasePattern):
 		else:
 			raise TypeError("Object info should be int|str|None")
 
-	@BasePattern.initial_check
+	@ExpressionPat.parent_check
 	def check(self, expression, ctx: PatternContext) -> bool:
 		if self.ea is None and self.name is None:
 			return True
@@ -121,76 +139,81 @@ class ObjPat(BasePattern):
 		return demangled_ea_name == self.name
 
 
-class RefPat(BasePattern):
+class RefPat(ExpressionPat):
 	op = idaapi.cot_ref
 
-	def __init__(self, referenced_object):
+	def __init__(self, referenced_object, **kwargs):
+		super().__init__(**kwargs)
 		self.referenced_object = referenced_object
 
-	@BasePattern.initial_check
+	@ExpressionPat.parent_check
 	def check(self, expression, ctx: PatternContext) -> bool:
 		return self.referenced_object.check(expression.x, ctx)
 
 
-class MemrefPat(BasePattern):
+class MemrefPat(ExpressionPat):
 	op = idaapi.cot_memref
 
-	def __init__(self, referenced_object, field):
+	def __init__(self, referenced_object, field, **kwargs):
+		super().__init__(**kwargs)
 		self.referenced_object = referenced_object
 		self.field = field
 
-	@BasePattern.initial_check
+	@ExpressionPat.parent_check
 	def check(self, expression, ctx: PatternContext) -> bool:
 		return self.referenced_object.check(expression.x, ctx) and \
 			self.field.check(expression.m, ctx)
 
 
-class MemptrPat(BasePattern):
+class MemptrPat(ExpressionPat):
 	op = idaapi.cot_memptr
 
-	def __init__(self, pointed_object, field):
+	def __init__(self, pointed_object, field, **kwargs):
+		super().__init__(**kwargs)
 		self.pointed_object = pointed_object
 		self.field = field
 
-	@BasePattern.initial_check
+	@ExpressionPat.parent_check
 	def check(self, expression, ctx: PatternContext) -> bool:
 		return self.pointed_object.check(expression.x, ctx) and \
 			self.field.check(expression.m, ctx)
 
 
-class TernaryPat(BasePattern):
+class TernaryPat(ExpressionPat):
 	op = idaapi.cot_tern
 
-	def __init__(self, condition, positive_expression, negative_expression):
+	def __init__(self, condition, positive_expression, negative_expression, **kwargs):
+		super().__init__(**kwargs)
 		self.condition = condition
 		self.positive_expression = positive_expression
 		self.negative_expression = negative_expression
 		
-	@BasePattern.initial_check
+	@ExpressionPat.parent_check
 	def check(self, expression, ctx: PatternContext) -> bool:
 		return self.condition.check(expression.x, ctx) and \
 			self.positive_expression.check(expression.y, ctx) and \
 			self.negative_expression.check(expression.z, ctx)
 
 
-class VarPat(BasePattern):
+class VarPat(ExpressionPat):
 	op = idaapi.cot_var
 
-	def __init__(self):
-		pass
+	def __init__(self, **kwargs):
+		super().__init__(**kwargs)
 
-	@BasePattern.initial_check
+	@ExpressionPat.parent_check
 	def check(self, expression, ctx: PatternContext) -> bool:
 		return True
 
 
-class AbstractUnaryOpPattern(BasePattern):
+class AbstractUnaryOpPattern(ExpressionPat):
 	op = None
 
-	def __init__(self, operand):
+	def __init__(self, operand, **kwargs):
+		super().__init__(**kwargs)
 		self.operand = operand
 
-	@BasePattern.initial_check
+	@ExpressionPat.parent_check
 	def check(self, expression, ctx: PatternContext) -> bool:
 		return self.operand.check(expression.x, ctx)
 
@@ -199,15 +222,16 @@ class AbstractUnaryOpPattern(BasePattern):
 		return (self.operand, )
 
 
-class AbstractBinaryOpPattern(BasePattern):
+class AbstractBinaryOpPattern(ExpressionPat):
 	op = None
 
-	def __init__(self, first_operand, second_operand, symmetric=False):
+	def __init__(self, first_operand, second_operand, symmetric=False, **kwargs):
+		super().__init__(**kwargs)
 		self.first_operand = first_operand
 		self.second_operand = second_operand
 		self.symmetric = symmetric
 
-	@BasePattern.initial_check
+	@ExpressionPat.parent_check
 	def check(self, expression, ctx: PatternContext) -> bool:
 		first_op_second = self.first_operand.check(expression.x, ctx) and self.second_operand.check(expression.y, ctx)
 		if self.symmetric:
