@@ -147,6 +147,12 @@ def make_call_helper_expr(name, *args, retval=None):
 def make_call_helper_instr(name, *args):
 	return make_expr_instr(make_call_helper_expr(name, *args))
 
+def strip_casts(expr):
+	import idaapi
+	if expr.op == idaapi.cot_cast:
+		return expr.x
+	return expr
+
 def load_python_module_from_file(path):
 	try:
 		spec = importlib.util.spec_from_file_location("module", path)
