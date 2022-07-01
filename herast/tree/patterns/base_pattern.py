@@ -1,6 +1,5 @@
 import idaapi
 from herast.tree.pattern_context import PatternContext
-import herast.tree.consts as consts
 
 class BasePattern:
 	op = None
@@ -21,6 +20,7 @@ class BasePattern:
 
 	@classmethod
 	def get_opname(cls):
+		import herast.tree.consts as consts
 		return consts.op2str.get(cls.op, None)
 
 	@staticmethod
