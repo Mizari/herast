@@ -14,7 +14,7 @@ class ExpressionPat(BasePattern):
 
 	@staticmethod
 	def parent_check(func):
-		func = super().parent_check(func)
+		func = BasePattern.parent_check(func)
 		def __perform_parent_check(self, item, *args, **kwargs):
 			return func(self, item, *args, **kwargs)
 		return __perform_parent_check
