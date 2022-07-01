@@ -36,22 +36,22 @@ class IdbSettings(StoragesSettings):
 
 idb_settings = IdbSettings.create()
 
-def get_idb_folders():
+def get_idb_storages_folders():
 	return list(idb_settings.folders)
 
-def get_idb_files():
+def get_idb_storages_filenames():
 	return list(idb_settings.files)
 
-def get_enabled_idb():
+def get_idb_enabled_storages_paths():
 	return list(idb_settings.enabled)
 
-def add_idb_folder(folder_path):
+def add_idb_storage_folder(folder_path):
 	idb_settings.add_folder_storage(folder_path)
 
-def add_idb_file(file_path):
+def add_idb_storage_file(file_path):
 	idb_settings.add_file_storage(file_path)
 
-def add_enabled_storage(enabled_path):
+def enable_idb_storage(enabled_path):
 	idb_settings.add_enabled_storage(enabled_path)
 
 def remove_enabled_storage(enabled_path):

@@ -50,8 +50,8 @@ def disable_scheme(scheme_name):
 	__enabled_schemes.discard(scheme_name)
 
 def update_storage_status(storage):
-	globally = storage.path in herast_settings.get_herast_enabled()
-	inidb = storage.path in idb_settings.get_enabled_idb()
+	globally = storage.path in herast_settings.get_herast_enabled_storages_paths()
+	inidb = storage.path in idb_settings.get_idb_enabled_storages_paths()
 	enabled = True
 	if globally and inidb:
 		status = "Enabled globally and in idb"
@@ -66,18 +66,18 @@ def update_storage_status(storage):
 	storage.enabled = enabled
 
 def __load_all_storages():
-	for folder in herast_settings.get_herast_folders():
+	for folder in herast_settings.get_herast_storages_folders():
 		load_storage_folder(folder)
-	for file in herast_settings.get_herast_files():
+	for file in herast_settings.get_herast_storages_filenames():
 		load_storage_file(file)
 
 	for storage in __schemes_storages.values():
 		update_storage_status(storage)
 
 def __enable_all_schemes():
-	for storage_path in herast_settings.get_herast_enabled():
+	for storage_path in herast_settings.get_herast_enabled_storages_paths():
 		__update_storage_schemes(storage_path)
-	for storage_path in idb_settings.get_enabled_idb():
+	for storage_path in idb_settings.get_idb_enabled_storages_paths():
 		__update_storage_schemes(storage_path)
 
 def load_storage_folder(folder_name: str) -> None:
@@ -95,8 +95,8 @@ def load_storage_file(filename: str) -> bool:
 	return True
 
 def get_storages_folders():
-	global_folders = herast_settings.get_herast_folders()
-	idb_folders = idb_settings.get_idb_folders()
+	global_folders = herast_settings.get_herast_storages_folders()
+	idb_folders = idb_settings.get_idb_storages_folders()
 	return global_folders + idb_folders
 
 def get_storage(filename: str) -> SchemesStorage:
@@ -114,7 +114,7 @@ def __discard_storage_schemes(storage_path):
 		__schemes.pop(scheme_name, None)
 
 def __update_storage_schemes(storage_path):
-	if storage_path not in herast_settings.get_herast_enabled() and storage_path not in idb_settings.get_enabled_idb():
+	if storage_path not in herast_settings.get_herast_enabled_storages_paths() and storage_path not in idb_settings.get_idb_enabled_storages_paths():
 		return
 	__enabled_schemes.update(__storage2schemes[storage_path])
 
@@ -133,7 +133,7 @@ def enable_storage_in_idb(storage_path):
 	if storage is None or storage.enabled or storage.error:
 		return False
 
-	idb_settings.add_enabled_storage(storage_path)
+	idb_settings.enable_idb_storage(storage_path)
 	__update_storage_schemes(storage_path)
 	update_storage_status(storage)
 	return True
