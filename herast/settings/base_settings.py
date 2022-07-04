@@ -20,14 +20,10 @@ class BaseSettings:
 		self.save()
 
 	def enable_storage(self, storage_path):
-		if storage_path in self.storages_statuses:
-			return
 		self.storages_statuses[storage_path] = "enabled"
 		self.save()
 
 	def disable_storage(self, storage_path):
-		if storage_path not in self.storages_statuses:
-			return
 		self.storages_statuses[storage_path] = "disabled"
 		self.save()
 
