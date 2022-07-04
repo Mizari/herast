@@ -1,10 +1,11 @@
 import json
 
 class BaseSettings:
-	def __init__(self, folders=[], files=[], enabled=[]):
+	def __init__(self, folders=[], files=[], enabled=[], time_matching=None):
 		self.storages_folders = folders
 		self.storages_files = files
 		self.enabled_storages = enabled
+		self.time_matching = time_matching
 
 	def add_storage_file(self, file_path):
 		if file_path in self.storages_files:
@@ -74,8 +75,9 @@ class BaseSettings:
 		files = json_dict.get("files", [])
 		folders = json_dict.get("folders", [])
 		enabled = json_dict.get("enabled", [])
+		time_matching = json_dict.get("time_matching", None)
 		if check(files) and check(folders) and check(enabled):
-			return cls(files=files, folders=folders, enabled=enabled)
+			return cls(files=files, folders=folders, enabled=enabled, time_matching=time_matching)
 		else:
 			return None
 
@@ -85,5 +87,7 @@ class BaseSettings:
 			"files":   self.storages_files,
 			"enabled": self.enabled_storages,
 		}
+		if self.time_matching is not None:
+			json_dict["time_matching"] = self.time_matching
 		json_str = json.dumps(json_dict)
 		self.save_json_str(json_str)

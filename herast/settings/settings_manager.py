@@ -20,6 +20,16 @@ def get_storages_files(global_settings=False):
 	s = __get_settings(global_settings=global_settings)
 	return list(s.storages_files)
 
+def time_matching():
+	rv = __idb_settings.time_matching
+	if rv is not None:
+		return rv
+
+	if __global_settings.time_matching is not None:
+		return __global_settings.time_matching
+	else:
+		return False
+
 
 def enable_storage(storage_path, global_settings=False):
 	s = __get_settings(global_settings=global_settings)

@@ -32,6 +32,7 @@ idaapi.require('herapi')
 
 from herast.views.storage_manager_view import ShowScriptManager
 import herast.passive_manager as passive_manager
+import herast.settings.settings_manager as settings_manager
 
 from herast.tree.actions import action_manager, hx_callback_manager
 
@@ -84,10 +85,13 @@ def herast_callback(*args):
 
 	try:
 		matcher = passive_manager.get_passive_matcher()
-		traversal_start = time.time()
-		matcher.match_cfunc(cfunc)
-		traversal_end = time.time()
-		print("[TIME] Tree traversal done within %f seconds" % (traversal_end - traversal_start))
+		if settings_manager.time_matching():
+			traversal_start = time.time()
+			matcher.match_cfunc(cfunc)
+			traversal_end = time.time()
+			print("[TIME] Tree traversal done within %f seconds" % (traversal_end - traversal_start))
+		else:
+			matcher.match_cfunc(cfunc)
 
 	except Exception as e:
 		print(e)
