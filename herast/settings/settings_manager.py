@@ -10,7 +10,7 @@ def __get_settings(global_settings=False):
 
 def get_storages_statuses(global_settings=False):
 	s = __get_settings(global_settings=global_settings)
-	return list(s.storages_statuses)
+	return dict(s.storages_statuses)
 
 def get_storages_folders(global_settings=False):
 	s = __get_settings(global_settings=global_settings)
