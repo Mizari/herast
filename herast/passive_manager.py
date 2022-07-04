@@ -14,9 +14,20 @@ __storage2schemes = __defaultdict(list)
 __scheme2storage = {}
 __passive_matcher = Matcher()
 
+
 def __initialize():
-	__load_all_storages()
-	__enable_all_schemes()
+	for folder in settings_manager.get_storages_folders():
+		__load_storage_folder(folder)
+	for file in settings_manager.get_storages_files():
+		__load_storage_file(file)
+
+	for storage in __schemes_storages.values():
+		__update_storage_status(storage)
+	for storage_path in settings_manager.get_enabled_storages(global_settings=True):
+		__update_storage_schemes(storage_path)
+	for storage_path in settings_manager.get_enabled_storages():
+		__update_storage_schemes(storage_path)
+
 	__rebuild_passive_matcher()
 
 def __rebuild_passive_matcher():
@@ -44,15 +55,6 @@ def __update_storage_status(storage):
 	storage.status_text = status
 	storage.enabled = enabled
 
-def __load_all_storages():
-	for folder in settings_manager.get_storages_folders():
-		__load_storage_folder(folder)
-	for file in settings_manager.get_storages_files():
-		__load_storage_file(file)
-
-	for storage in __schemes_storages.values():
-		__update_storage_status(storage)
-
 def __load_storage_folder(folder_name: str) -> None:
 	import glob
 	for full_path in glob.iglob(folder_name + '/**/**.py', recursive=True):
@@ -66,12 +68,6 @@ def __load_storage_file(filename: str) -> bool:
 
 	__schemes_storages[filename] = storage
 	return True
-
-def __enable_all_schemes():
-	for storage_path in settings_manager.get_enabled_storages(global_settings=True):
-		__update_storage_schemes(storage_path)
-	for storage_path in settings_manager.get_enabled_storages():
-		__update_storage_schemes(storage_path)
 
 def __discard_storage_schemes(storage_path):
 	for scheme_name in __storage2schemes.pop(storage_path, []):
