@@ -88,7 +88,8 @@ class StorageManagerModel(QtCore.QAbstractItemModel):
 
 	def __add_folder(self, storage_folder):
 		for full_path in glob.iglob(storage_folder + '/**/**.py', recursive=True):
-			if passive_manager.get_storage(full_path) is None:
+			storage = passive_manager.get_storage(full_path)
+			if storage is None:
 				continue
 
 			relative_path = os.path.relpath(full_path, start=storage_folder)
@@ -109,6 +110,7 @@ class StorageManagerModel(QtCore.QAbstractItemModel):
 
 			file_item = SchemeStorageTreeItem([basename], SchemeStorageTreeItem.TYPE_FILE, parent=parent_item)
 			file_item.fullpath = full_path
+			file_item.enabled = storage.enabled
 			parent_item.children.append(file_item)
 
 	def index(self, row, column, parent_index):
