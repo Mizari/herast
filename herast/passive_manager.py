@@ -16,16 +16,33 @@ __passive_matcher = Matcher()
 
 
 def __initialize():
-	for folder in settings_manager.get_storages_folders():
-		__load_storage_folder(folder)
-	for file in settings_manager.get_storages_files():
-		__load_storage_file(file)
+	def find_python_files_in_folder(folder):
+		import glob
+		for file_path in glob.iglob(folder + '/**/**.py', recursive=True):
+			yield file_path
 
-	for storage in __schemes_storages.values():
-		storage.status_text = __get_storage_status_text(storage.path)
-		if settings_manager.get_storage_status(storage.path) == "enabled":
-			storage.enabled = True
-			__enabled_schemes.update(__storage2schemes[storage.path])
+	storages_files = settings_manager.get_storages_files()
+	for folder in settings_manager.get_storages_folders():
+		storages_files += find_python_files_in_folder(folder)
+
+	for file_path in storages_files:
+		if settings_manager.get_storage_status(file_path) == "enabled":
+			storage = SchemesStorage.from_file(file_path)
+			if storage is None:
+				print("[!] WARNING: failed to load", file_path, "storage")
+				storage = SchemesStorage(file_path, None, False, True)
+				storage.status_text = "Failed to load"
+
+			else:
+				storage.status_text = __get_storage_status_text(file_path)
+				storage.enabled = True
+				__enabled_schemes.update(__storage2schemes[file_path])
+
+		else:
+			storage = SchemesStorage(file_path, None, False)
+			storage.status_text = "Disabled"
+
+		__schemes_storages[file_path] = storage
 
 	__rebuild_passive_matcher()
 
@@ -48,20 +65,6 @@ def __get_storage_status_text(storage_path):
 	else:
 		status = "Disabled"
 	return status
-
-def __load_storage_folder(folder_name: str) -> None:
-	import glob
-	for full_path in glob.iglob(folder_name + '/**/**.py', recursive=True):
-		__load_storage_file(full_path)
-
-def __load_storage_file(filename: str) -> bool:
-	storage = SchemesStorage.from_file(filename)
-	if storage is None:
-		print("[!] WARNING: failed to load", filename, "storage")
-		return False
-
-	__schemes_storages[filename] = storage
-	return True
 
 def __discard_storage_schemes(storage_path):
 	for scheme_name in __storage2schemes.get(storage_path, []):
