@@ -13,6 +13,14 @@ class SchemesStorage:
 		self.status_text = None
 		self.source = None
 
+	def load_module(self):
+		module = load_python_module_from_file(self.path)
+		if module is None:
+			return False
+
+		self.module = module
+		return True
+
 	@classmethod
 	def from_file(cls, file_path):
 		module = load_python_module_from_file(file_path)

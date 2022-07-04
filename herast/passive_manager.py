@@ -131,6 +131,12 @@ def enable_storage(storage_path):
 	if storage is None or storage.enabled or storage.error:
 		return False
 
+	if storage.module is None:
+		if storage.load_module():
+			__enabled_schemes.update(__storage2schemes[storage.path])
+		else:
+			return False
+
 	storage.enabled = True
 	settings_manager.enable_storage(storage_path)
 	__update_storage_schemes(storage_path)
