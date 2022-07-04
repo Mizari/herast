@@ -22,7 +22,7 @@ def __initialize():
 		__load_storage_file(file)
 
 	for storage in __schemes_storages.values():
-		storage.status_text = __get_storage_status(storage.path)
+		storage.status_text = __get_storage_status_text(storage.path)
 		if settings_manager.get_storage_status(storage.path) == "enabled":
 			storage.enabled = True
 
@@ -40,7 +40,7 @@ def __rebuild_passive_matcher():
 		if s.name in __enabled_schemes:
 			__passive_matcher.add_scheme(s)
 
-def __get_storage_status(storage):
+def __get_storage_status_text(storage):
 	globally = storage.path in settings_manager.get_storages_statuses(globally=True)
 	inidb = storage.path in settings_manager.get_storages_statuses()
 	if globally and inidb:
@@ -127,7 +127,7 @@ def disable_storage(storage_path):
 	storage.enabled = False
 	settings_manager.disable_storage(storage_path)
 	__discard_storage_schemes(storage)
-	storage.status_text = __get_storage_status(storage)
+	storage.status_text = __get_storage_status_text(storage)
 	return True
 
 def enable_storage(storage_path):
@@ -138,7 +138,7 @@ def enable_storage(storage_path):
 	storage.enabled = True
 	settings_manager.enable_storage(storage_path)
 	__update_storage_schemes(storage_path)
-	storage.status_text = __get_storage_status(storage)
+	storage.status_text = __get_storage_status_text(storage)
 	return True
 
 def reload_storage(storage_path):
@@ -161,6 +161,6 @@ def reload_storage(storage_path):
 		return False
 
 	storage.module = new_module
-	storage.status_text = __get_storage_status(storage)
+	storage.status_text = __get_storage_status_text(storage)
 	__rebuild_passive_matcher()
 	return True
