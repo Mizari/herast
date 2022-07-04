@@ -25,11 +25,7 @@ def __initialize():
 		storage.status_text = __get_storage_status_text(storage.path)
 		if settings_manager.get_storage_status(storage.path) == "enabled":
 			storage.enabled = True
-
-	for storage_path in settings_manager.get_storages_statuses(globally=True):
-		__update_storage_schemes(storage_path)
-	for storage_path in settings_manager.get_storages_statuses():
-		__update_storage_schemes(storage_path)
+			__enabled_schemes.update(__storage2schemes[storage.path])
 
 	__rebuild_passive_matcher()
 
@@ -40,14 +36,14 @@ def __rebuild_passive_matcher():
 		if s.name in __enabled_schemes:
 			__passive_matcher.add_scheme(s)
 
-def __get_storage_status_text(storage):
-	globally = storage.path in settings_manager.get_storages_statuses(globally=True)
-	inidb = storage.path in settings_manager.get_storages_statuses()
-	if globally and inidb:
+def __get_storage_status_text(storage_path):
+	globally = settings_manager.get_storage_status(storage_path, globally=True) == "enabled"
+	in_idb = settings_manager.get_storage_status(storage_path, in_idb=True) == "enabled"
+	if globally and in_idb:
 		status = "Enabled globally and in IDB"
 	elif globally:
 		status = "Enabled globally"
-	elif inidb:
+	elif in_idb:
 		status = "Enabled in IDB"
 	else:
 		status = "Disabled"
@@ -68,14 +64,11 @@ def __load_storage_file(filename: str) -> bool:
 	return True
 
 def __discard_storage_schemes(storage_path):
-	for scheme_name in __storage2schemes.pop(storage_path, []):
+	for scheme_name in __storage2schemes.get(storage_path, []):
 		__enabled_schemes.discard(scheme_name)
-		__schemes.pop(scheme_name, None)
 	__rebuild_passive_matcher()
 
 def __update_storage_schemes(storage_path):
-	if storage_path not in settings_manager.get_storages_statuses(globally=True) and storage_path not in settings_manager.get_storages_statuses():
-		return
 	__enabled_schemes.update(__storage2schemes[storage_path])
 	__rebuild_passive_matcher()
 
@@ -126,8 +119,8 @@ def disable_storage(storage_path):
 
 	storage.enabled = False
 	settings_manager.disable_storage(storage_path)
-	__discard_storage_schemes(storage)
-	storage.status_text = __get_storage_status_text(storage)
+	__discard_storage_schemes(storage_path)
+	storage.status_text = __get_storage_status_text(storage.path)
 	return True
 
 def enable_storage(storage_path):
@@ -138,7 +131,7 @@ def enable_storage(storage_path):
 	storage.enabled = True
 	settings_manager.enable_storage(storage_path)
 	__update_storage_schemes(storage_path)
-	storage.status_text = __get_storage_status_text(storage)
+	storage.status_text = __get_storage_status_text(storage.path)
 	return True
 
 def reload_storage(storage_path):
