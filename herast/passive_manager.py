@@ -33,11 +33,9 @@ def __initialize():
 def __rebuild_passive_matcher():
 	global __passive_matcher
 	__passive_matcher = Matcher()
-	for s in __get_passive_schemes():
-		__passive_matcher.add_scheme(s)
-
-def __get_passive_schemes():
-	return [s for s in __schemes.values() if s.name in __enabled_schemes]
+	for s in __schemes.values():
+		if s.name in __enabled_schemes:
+			__passive_matcher.add_scheme(s)
 
 def __update_storage_status(storage):
 	globally = storage.path in settings_manager.get_enabled_storages(global_settings=True)
