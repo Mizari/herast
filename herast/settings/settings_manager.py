@@ -12,6 +12,9 @@ def get_storages_statuses(global_settings=False):
 	s = __get_settings(global_settings=global_settings)
 	return dict(s.storages_statuses)
 
+def get_storage_status(storage_path):
+	return get_storages_statuses().get(storage_path, "disabled")
+
 def get_storages_folders(global_settings=False):
 	s = __get_settings(global_settings=global_settings)
 	return list(s.storages_folders)
