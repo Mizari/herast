@@ -23,9 +23,9 @@ def __initialize():
 
 	for storage in __schemes_storages.values():
 		__update_storage_status(storage)
-	for storage_path in settings_manager.get_enabled_storages(global_settings=True):
+	for storage_path in settings_manager.get_storages_statuses(global_settings=True):
 		__update_storage_schemes(storage_path)
-	for storage_path in settings_manager.get_enabled_storages():
+	for storage_path in settings_manager.get_storages_statuses():
 		__update_storage_schemes(storage_path)
 
 	__rebuild_passive_matcher()
@@ -38,8 +38,8 @@ def __rebuild_passive_matcher():
 			__passive_matcher.add_scheme(s)
 
 def __update_storage_status(storage):
-	globally = storage.path in settings_manager.get_enabled_storages(global_settings=True)
-	inidb = storage.path in settings_manager.get_enabled_storages()
+	globally = storage.path in settings_manager.get_storages_statuses(global_settings=True)
+	inidb = storage.path in settings_manager.get_storages_statuses()
 	enabled = True
 	if globally and inidb:
 		status = "Enabled globally and in idb"
@@ -74,7 +74,7 @@ def __discard_storage_schemes(storage_path):
 	__rebuild_passive_matcher()
 
 def __update_storage_schemes(storage_path):
-	if storage_path not in settings_manager.get_enabled_storages(global_settings=True) and storage_path not in settings_manager.get_enabled_storages():
+	if storage_path not in settings_manager.get_storages_statuses(global_settings=True) and storage_path not in settings_manager.get_storages_statuses():
 		return
 	__enabled_schemes.update(__storage2schemes[storage_path])
 	__rebuild_passive_matcher()

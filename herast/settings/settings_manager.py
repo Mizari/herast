@@ -8,9 +8,9 @@ def __get_settings(global_settings=False):
 		return __idb_settings
 
 
-def get_enabled_storages(global_settings=False):
+def get_storages_statuses(global_settings=False):
 	s = __get_settings(global_settings=global_settings)
-	return list(s.enabled_storages)
+	return list(s.storages_statuses)
 
 def get_storages_folders(global_settings=False):
 	s = __get_settings(global_settings=global_settings)
