@@ -1,4 +1,5 @@
 import os
+import traceback
 
 from .tree.utils import load_python_module_from_file
 
@@ -12,14 +13,26 @@ class SchemesStorage:
 		self.error = error
 		self.status_text = None
 		self.source = None
+	
+	def unload_module(self):
+		self.enabled = False
+		self.module = None
+		self.status_text = "Disabled"
+		self.error = False
 
 	def load_module(self):
-		module = load_python_module_from_file(self.path)
-		if module is None:
+		self.module = load_python_module_from_file(self.path)
+		if self.module is None:
+			self.status_text = traceback.format_exc()
+			self.error = True
+			self.enabled = False
+			self.module = None
 			return False
 
-		self.module = module
-		return True
+		else:
+			self.status_text = None
+			self.error = False
+			return True
 
 	@classmethod
 	def from_file(cls, file_path):

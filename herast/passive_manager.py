@@ -26,23 +26,7 @@ def __initialize():
 		storages_files += find_python_files_in_folder(folder)
 
 	for file_path in storages_files:
-		if settings_manager.get_storage_status(file_path) == "enabled":
-			storage = SchemesStorage.from_file(file_path)
-			if storage is None:
-				print("[!] WARNING: failed to load", file_path, "storage")
-				storage = SchemesStorage(file_path, None, False, True)
-				storage.status_text = "Failed to load"
-
-			else:
-				storage.status_text = __get_storage_status_text(file_path)
-				storage.enabled = True
-				__enabled_schemes.update(__storage2schemes[file_path])
-
-		else:
-			storage = SchemesStorage(file_path, None, False)
-			storage.status_text = "Disabled"
-
-		__schemes_storages[file_path] = storage
+		load_storage(file_path)
 
 	__rebuild_passive_matcher()
 
@@ -143,26 +127,53 @@ def enable_storage(storage_path):
 	storage.status_text = __get_storage_status_text(storage.path)
 	return True
 
+def load_storage(storage_path):
+	if settings_manager.get_storage_status(storage_path) == "enabled":
+		storage = SchemesStorage.from_file(storage_path)
+		if storage is None:
+			print("[!] WARNING: failed to load", storage_path, "storage")
+			storage = SchemesStorage(storage_path, None, False, True)
+			storage.status_text = "Failed to load"
+			return False
+
+		else:
+			storage.status_text = __get_storage_status_text(storage_path)
+			storage.enabled = True
+			__enabled_schemes.update(__storage2schemes[storage_path])
+
+	else:
+		storage = SchemesStorage(storage_path, None, False)
+		storage.status_text = "Disabled"
+
+	__schemes_storages[storage_path] = storage
+	return True
+
+def unload_storage(storage_path):
+	storage = get_storage(storage_path)
+	if storage is None:
+		return False
+
+	if storage.module is None:
+		return True
+
+	storage.unload_module()
+	del __schemes_storages[storage_path]
+	for scheme_name in __storage2schemes[storage_path]:
+		del __schemes[scheme_name]
+		__enabled_schemes.discard(scheme_name)
+		del __scheme2storage[scheme_name]
+	del __storage2schemes[storage_path]
+	__rebuild_passive_matcher()
+	return True
+
 def reload_storage(storage_path):
 	storage = get_storage(storage_path)
 	if storage is None:
 		return False
 
-	try:
-		from .tree.utils import load_python_module_from_file
-		new_module = load_python_module_from_file(storage_path)
-	except Exception as e:
-		new_module = None
-
-	if new_module is None:
-		import traceback
-		storage.module = None
-		storage.error = True
-		storage.enabled = False
-		storage.status_text = traceback.format_exc()
+	unload_storage(storage_path)
+	if load_storage(storage_path):
+		__rebuild_passive_matcher()
+		return True
+	else:
 		return False
-
-	storage.module = new_module
-	storage.status_text = __get_storage_status_text(storage)
-	__rebuild_passive_matcher()
-	return True
