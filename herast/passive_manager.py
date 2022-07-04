@@ -119,7 +119,7 @@ def disable_scheme(scheme_name):
 	__enabled_schemes.discard(scheme_name)
 	__rebuild_passive_matcher()
 
-def disable_storage_in_idb(storage_path):
+def disable_storage(storage_path):
 	storage = get_storage(storage_path)
 	if storage is None or not storage.enabled:
 		return False
@@ -129,7 +129,7 @@ def disable_storage_in_idb(storage_path):
 	__update_storage_status(storage)
 	return True
 
-def enable_storage_in_idb(storage_path):
+def enable_storage(storage_path):
 	storage = get_storage(storage_path)
 	if storage is None or storage.enabled or storage.error:
 		return False
