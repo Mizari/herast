@@ -63,25 +63,32 @@ class Matcher:
 			self.match_cfunc(cfunc)
 
 	def match_cfunc(self, cfunc):
-		def processing_callback(tree_proc, item):
-			return self.check_schemes(tree_proc, item)
-
 		tp = TreeProcessor(cfunc)
-		if self.expressions_traversal_is_needed():
-			tp.process_all_items(cfunc.body, processing_callback)
-		else:
-			tp.process_all_instrs(cfunc.body, processing_callback)
+		while True:
+			contexts = {s.name: PatternContext(tp) for s in self.schemes}
+			for scheme in self.schemes:
+				scheme.on_tree_iteration_start(contexts[scheme.name])
+
+			is_tree_modified = False
+			for subitem in tp.iterate_subitems(cfunc.body):
+				is_tree_modified = self.check_schemes(tp, subitem)
+				if is_tree_modified:
+					break
+
+			if not is_tree_modified:
+				break
+
+			for scheme in self.schemes:
+				scheme.on_tree_iteration_end(contexts[scheme.name])
 
 	def check_schemes(self, tree_processor: TreeProcessor, item: idaapi.citem_t) -> bool:
 		item_ctx = PatternContext(tree_processor)
 
 		for scheme in self.schemes:
-			self.check_scheme(scheme, item, item_ctx)
-			if tree_processor.is_tree_modified:
+			if self.check_scheme(scheme, item, item_ctx):
 				return True
 
-			self.finalize_item_context(item_ctx)
-			if tree_processor.is_tree_modified:
+			if self.finalize_item_context(item_ctx):
 				return True
 
 		return False
@@ -91,14 +98,14 @@ class Matcher:
 			item_ctx.cleanup()
 		except Exception as e:
 			print('[!] Got an exception during context cleanup: %s' % e)
-			return
+			return False
 
 		try:
 			if not scheme.on_new_item(item, item_ctx):
-				return
+				return False
 		except Exception as e:
 			print('[!] Got an exception during pattern matching: %s' % e)
-			return
+			return False
 
 		try:
 			is_tree_modified = scheme.on_matched_item(item, item_ctx)
@@ -106,14 +113,16 @@ class Matcher:
 				raise Exception("Handler return invalid return type, should be bool")
 
 			if is_tree_modified:
-				return
+				return True
 		except Exception as e:
 			print('[!] Got an exception during pattern handling: %s' % e)
-			return
+			return False
 
 	def finalize_item_context(self, ctx: PatternContext):
 		tree_proc = ctx.tree_proc
+		is_tree_modified = False
 		for modified_instr in ctx.modified_instrs():
+			is_tree_modified = True
 			item = modified_instr.item
 			new_item = modified_instr.new_item
 
@@ -121,6 +130,7 @@ class Matcher:
 				tree_proc.remove_item(item)
 			else:
 				tree_proc.replace_item(item, new_item)
+		return is_tree_modified
 
 	def add_scheme(self, scheme):
 		self.schemes.append(scheme)

@@ -84,27 +84,8 @@ class TreeProcessor:
 		self.cfunc = cfunc
 		self.is_tree_modified = False
 
-	def process(self, tree_root, callback, iterator):
-		if self.is_tree_modified:
-			return
-
-		self.is_tree_modified = True # just to enter into while loop
-		while self.is_tree_modified:
-			self.is_tree_modified = False
-			for subitem in iterator(tree_root):
-				is_tree_modified = callback(self, subitem)
-				if is_tree_modified:
-					self.is_tree_modified = True
-
-				# goto outer loop to iterate from start again
-				if self.is_tree_modified:
-					break
-
-	def process_all_items(self, tree_root, callback):
-		return self.process(tree_root, callback, iterate_all_subitems)
-
-	def process_all_instrs(self, tree_root, callback):
-		return self.process(tree_root, callback, iterate_all_subinstrs)
+	def iterate_subitems(self, root_item):
+		yield from iterate_all_subitems(root_item)
 
 	def get_parent_block(self, item):
 		parent = self.cfunc.body.find_parent_of(item)
