@@ -22,7 +22,7 @@ def __initialize():
 		__load_storage_file(file)
 
 	for storage in __schemes_storages.values():
-		__update_storage_status(storage)
+		__get_storage_status(storage)
 	for storage_path in settings_manager.get_storages_statuses(global_settings=True):
 		__update_storage_schemes(storage_path)
 	for storage_path in settings_manager.get_storages_statuses():
@@ -37,21 +37,18 @@ def __rebuild_passive_matcher():
 		if s.name in __enabled_schemes:
 			__passive_matcher.add_scheme(s)
 
-def __update_storage_status(storage):
+def __get_storage_status(storage):
 	globally = storage.path in settings_manager.get_storages_statuses(global_settings=True)
 	inidb = storage.path in settings_manager.get_storages_statuses()
-	enabled = True
 	if globally and inidb:
-		status = "Enabled globally and in idb"
+		status = "Enabled globally and in IDB"
 	elif globally:
 		status = "Enabled globally"
 	elif inidb:
 		status = "Enabled in IDB"
 	else:
-		enabled = False
 		status = "Disabled"
-	storage.status_text = status
-	storage.enabled = enabled
+	return status
 
 def __load_storage_folder(folder_name: str) -> None:
 	import glob
@@ -124,9 +121,10 @@ def disable_storage(storage_path):
 	if storage is None or not storage.enabled:
 		return False
 
+	storage.enabled = False
 	settings_manager.disable_storage(storage_path)
 	__discard_storage_schemes(storage)
-	__update_storage_status(storage)
+	storage.status_text = __get_storage_status(storage)
 	return True
 
 def enable_storage(storage_path):
@@ -134,9 +132,10 @@ def enable_storage(storage_path):
 	if storage is None or storage.enabled or storage.error:
 		return False
 
+	storage.enabled = True
 	settings_manager.enable_storage(storage_path)
 	__update_storage_schemes(storage_path)
-	__update_storage_status(storage)
+	storage.status_text = __get_storage_status(storage)
 	return True
 
 def reload_storage(storage_path):
@@ -159,6 +158,6 @@ def reload_storage(storage_path):
 		return False
 
 	storage.module = new_module
-	__update_storage_status(storage)
+	storage.status_text = __get_storage_status(storage)
 	__rebuild_passive_matcher()
 	return True
