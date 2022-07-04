@@ -22,7 +22,7 @@ def __initialize():
 		__load_storage_file(file)
 
 	for storage in __schemes_storages.values():
-		__get_storage_status(storage)
+		storage.status_text = __get_storage_status(storage)
 	for storage_path in settings_manager.get_storages_statuses(globally=True):
 		__update_storage_schemes(storage_path)
 	for storage_path in settings_manager.get_storages_statuses():
