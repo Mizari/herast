@@ -23,7 +23,7 @@ def __initialize():
 
 	for storage in __schemes_storages.values():
 		__get_storage_status(storage)
-	for storage_path in settings_manager.get_storages_statuses(global_settings=True):
+	for storage_path in settings_manager.get_storages_statuses(globally=True):
 		__update_storage_schemes(storage_path)
 	for storage_path in settings_manager.get_storages_statuses():
 		__update_storage_schemes(storage_path)
@@ -38,7 +38,7 @@ def __rebuild_passive_matcher():
 			__passive_matcher.add_scheme(s)
 
 def __get_storage_status(storage):
-	globally = storage.path in settings_manager.get_storages_statuses(global_settings=True)
+	globally = storage.path in settings_manager.get_storages_statuses(globally=True)
 	inidb = storage.path in settings_manager.get_storages_statuses()
 	if globally and inidb:
 		status = "Enabled globally and in IDB"
@@ -71,7 +71,7 @@ def __discard_storage_schemes(storage_path):
 	__rebuild_passive_matcher()
 
 def __update_storage_schemes(storage_path):
-	if storage_path not in settings_manager.get_storages_statuses(global_settings=True) and storage_path not in settings_manager.get_storages_statuses():
+	if storage_path not in settings_manager.get_storages_statuses(globally=True) and storage_path not in settings_manager.get_storages_statuses():
 		return
 	__enabled_schemes.update(__storage2schemes[storage_path])
 	__rebuild_passive_matcher()
@@ -91,7 +91,7 @@ def register_storage_scheme(scheme):
 	__schemes[scheme.name] = scheme
 
 def get_storages_folders():
-	global_folders = settings_manager.get_storages_folders(global_settings=True)
+	global_folders = settings_manager.get_storages_folders(globally=True)
 	idb_folders = settings_manager.get_storages_folders()
 	return global_folders + idb_folders
 

@@ -85,7 +85,7 @@ def herast_callback(*args):
 
 	try:
 		matcher = passive_manager.get_passive_matcher()
-		if settings_manager.time_matching():
+		if settings_manager.get_time_matching():
 			traversal_start = time.time()
 			matcher.match_cfunc(cfunc)
 			traversal_end = time.time()
