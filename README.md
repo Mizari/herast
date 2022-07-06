@@ -4,7 +4,7 @@ Rewritten for IDAPython3 (IDA_VERSION >= 7.4) version of [@groke](https://github
 
 
 # What it does
-Herast helps with finding AST subtrees and with following work with found items. Herast provides its API via herapi module and via GUI view via Shift-M hotkey. Herast is designed for easy expandability, simple reusage and for fast scripting.
+Herast helps with finding AST subtrees and with following work with found items. Herast provides its API via [herapi](https://github.com/mostobriv/herast/tree/main/documentation/herapi.md) module and via GUI view via Shift-M hotkey. Herast is designed for easy expandability, simple reusage and for fast scripting.
 <p align='center'>
 <img src='pictures/storages_manager_view.png'>
 </p>
