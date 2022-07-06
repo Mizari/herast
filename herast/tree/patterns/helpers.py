@@ -3,7 +3,8 @@ import idaapi
 import herast.tree.consts as consts
 from herast.tree.patterns.base_pattern import BasePattern
 from herast.tree.pattern_context import PatternContext
-from herast.tree.patterns.expressions import ObjPat
+from herast.tree.patterns.expressions import ObjPat, AsgPat
+from herast.tree.patterns.instructions import ExprInsPat
 
 # sequence of instructions
 class SeqPat(BasePattern):
@@ -133,3 +134,9 @@ class StructFieldAccess(BasePattern):
 			return True
 
 		return self.struct_type == stype
+
+def CallInsnPat(calling_function, *arguments, ignore_arguments=False, skip_missing=False, **kwargs):
+	return ExprInsPat(calling_function, *arguments, ignore_arguments=ignore_arguments, skip_missing=skip_missing)
+
+def AsgInsnPat(x, y):
+	return ExprInsPat(AsgPat(x, y))
