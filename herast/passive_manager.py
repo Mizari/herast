@@ -73,11 +73,6 @@ def register_storage_scheme(scheme):
 
 	__schemes[scheme.name] = scheme
 
-def get_storages_folders():
-	global_folders = settings_manager.get_storages_folders(globally=True)
-	idb_folders = settings_manager.get_storages_folders()
-	return global_folders + idb_folders
-
 def get_storage(filename: str) -> SchemesStorage:
 	return __schemes_storages.get(filename)
 
