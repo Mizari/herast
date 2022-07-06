@@ -3,7 +3,7 @@ from herapi import *
 pattern = IfPat(
 	VarBind("error_var"),
 	ExprInsPat(BindItem("logic_expr")),
-	ExprInsPat(AsgPat(VarBind("error_var"), BindItem("logic_expr")))
+	AsgInsnPat(VarBind("error_var"), BindItem("logic_expr"))
 )
 
 class ReplacingScheme(SPScheme):

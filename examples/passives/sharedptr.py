@@ -54,11 +54,9 @@ class HelperReplacer(SPScheme):
 register_storage_scheme(HelperReplacer("shptr_release", release_pattern, "__sharedptr::release"))
 
 
-add1 = SkipCasts(CallPat(HelperPat(helper_name="_InterlockedAdd"), skip_missing=True))
-
 increment_pattern = IfPat(
 	ObjPat("pthread_cancel"),
-	ExprInsPat(add1),
+	CallInsnPat(HelperPat(helper_name="_InterlockedAdd"), skip_missing=True),
 	ExprInsPat(),
 )
 
@@ -69,10 +67,9 @@ increment_pattern = OrPat(
 register_storage_scheme(HelperReplacer("shptr_inc", increment_pattern, "__sharedptr::increment"))
 
 fname = "std::_Sp_counted_base::_M_release"
-std_release_pattern = ExprInsPat(SkipCasts(CallPat(fname, ignore_arguments=True)))
 std_release_pattern = OrPat(
-	std_release_pattern,
-	IfPat(AnyPat(), std_release_pattern),
+	CallInsnPat(fname, ignore_arguments=True),
+	IfPat(AnyPat(), CallInsnPat(fname, ignore_arguments=True)),
 )
 
 if SHOULD_REMOVE:
