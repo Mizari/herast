@@ -6,16 +6,6 @@ pattern = IfPat(
 	ExprInsPat(AsgPat(VarBind("error_var"), BindItem("logic_expr")))
 )
 
-"""
-This scheme replaces things like
-	if (error_var) {
-		logic_expr;
-	} else {
-		error_var = logic_expr;
-	}
-to
-	error_var = __propagate_error(error_var, logic_expr);
-"""
 class ReplacingScheme(SPScheme):
 	def on_matched_item(self, item, ctx: PatternContext):
 		error_var = ctx.get_var("error_var")
