@@ -2,13 +2,10 @@ import idaapi
 from herapi import *
 
 
-def make_call_expr(fname=None):
-	return SkipCasts(CallPat(fname, ignore_arguments=True))
-
 first_call_pattern = ExprInsPat(
 							AsgPat(
 								AnyPat(),
-								make_call_expr("__cxa_allocate_exception")
+								CallPat("__cxa_allocate_exception")
 							)
 						)
 
@@ -18,7 +15,7 @@ excstr_getter_pattern = ExprInsPat(
 		CallPat(AnyPat(), AnyPat(), SkipCasts(BindItem("exception_str", AnyPat())))
 	)
 )
-last_call_pattern = ExprInsPat(make_call_expr('__cxa_throw'))
+last_call_pattern = ExprInsPat(CallPat('__cxa_throw'))
 
 class ExceptionBody(BasePattern):
 	op = idaapi.cit_block
