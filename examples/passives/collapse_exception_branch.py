@@ -1,35 +1,33 @@
 import idaapi
-import herapi
+from herapi import *
 
-
-from herast.schemes.single_pattern_schemes import SPScheme
 
 def make_call_expr(fname=None):
-	return herapi.SkipCasts(herapi.CallPat(fname, ignore_arguments=True))
+	return SkipCasts(CallPat(fname, ignore_arguments=True))
 
-first_call_pattern = herapi.ExprInsPat(
-							herapi.AsgPat(
-								herapi.AnyPat(),
+first_call_pattern = ExprInsPat(
+							AsgPat(
+								AnyPat(),
 								make_call_expr("__cxa_allocate_exception")
 							)
 						)
 
-excstr_getter_pattern = herapi.ExprInsPat(
-	herapi.AsgPat(
-		herapi.AnyPat(),
-		herapi.CallPat(herapi.AnyPat(), herapi.AnyPat(), herapi.SkipCasts(herapi.BindItem("exception_str", herapi.AnyPat())))
+excstr_getter_pattern = ExprInsPat(
+	AsgPat(
+		AnyPat(),
+		CallPat(AnyPat(), AnyPat(), SkipCasts(BindItem("exception_str", AnyPat())))
 	)
 )
-last_call_pattern = herapi.ExprInsPat(make_call_expr('__cxa_throw'))
+last_call_pattern = ExprInsPat(make_call_expr('__cxa_throw'))
 
-class ExceptionBody(herapi.BasePattern):
+class ExceptionBody(BasePattern):
 	op = idaapi.cit_block
 	def __init__(self, first_call, excstr_getter, last_call):
 		self.first_call = first_call
 		self.last_call = last_call
 		self.excstr_getter = excstr_getter
 
-	@herapi.BasePattern.parent_check
+	@BasePattern.parent_check
 	def check(self, item, ctx):
 		block = item.cblock
 
@@ -51,13 +49,13 @@ class ExceptionBody(herapi.BasePattern):
 
 		return True
 
-pattern = herapi.IfPat(
-	herapi.BindItem("if_expr"),
+pattern = IfPat(
+	BindItem("if_expr"),
 	ExceptionBody(first_call_pattern, excstr_getter_pattern, last_call_pattern)
 )
 
 class ExceptionCollapserScheme(SPScheme):
-	def on_matched_item(self, item, ctx: herapi.PatternContext) -> bool:
+	def on_matched_item(self, item, ctx: PatternContext) -> bool:
 		helper_args = []
 
 		if_expr = ctx.get_expr("if_expr")
@@ -73,10 +71,10 @@ class ExceptionCollapserScheme(SPScheme):
 				arg2.assign(exception_str)
 				helper_args.append(arg2)
 
-		new_item = herapi.make_call_helper_instr("__throw_if", *helper_args)
+		new_item = make_call_helper_instr("__throw_if", *helper_args)
 
 		ctx.modify_instr(item, new_item)
 
 		return False
 
-herapi.register_storage_scheme(ExceptionCollapserScheme("exception_collapser", pattern))
+register_storage_scheme(ExceptionCollapserScheme("exception_collapser", pattern))
