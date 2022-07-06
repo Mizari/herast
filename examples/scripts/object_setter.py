@@ -1,17 +1,16 @@
-import idaapi
-import herapi
-import idc
+import idaapi, idc
+from herapi import *
 
 
-class ObjectSetterScheme(herapi.SPScheme):
+class ObjectSetterScheme(SPScheme):
 	def __init__(self, function_address):
 		self.objects = {}
-		call_pattern = herapi.SkipCasts(herapi.CallPat(function_address, herapi.NumPat(), herapi.NumPat(), herapi.AnyPat()))
-		pattern = herapi.AsgPat(herapi.ObjPat(), call_pattern)
+		call_pattern = CallPat(function_address, NumPat(), NumPat(), AnyPat())
+		pattern = AsgPat(ObjPat(), call_pattern)
 		super().__init__("object_setter", pattern)
 
-	def on_matched_item(self, item, ctx: herapi.PatternContext):
-		asg_y = herapi.strip_casts(item.y)
+	def on_matched_item(self, item, ctx: PatternContext) -> bool:
+		asg_y = strip_casts(item.y)
 		arg0 = asg_y.a[0].n._value
 		arg1 = asg_y.a[1].n._value
 		object_name = "object_" + hex(arg0)[2:] + '_' + str(arg1)
@@ -52,12 +51,8 @@ class ObjectSetterScheme(herapi.SPScheme):
 
 
 def collect_objects(function_address, default_type=None):
-	if function_address == idaapi.BADADDR:
-		print("Error: function address is invalid")
-		return
-
 	scheme = ObjectSetterScheme(function_address)
-	matcher = herapi.Matcher()
+	matcher = Matcher()
 	matcher.add_scheme(scheme)
 	matcher.match_objects_xrefs(function_address)
 	scheme.apply_new_info(default_type)

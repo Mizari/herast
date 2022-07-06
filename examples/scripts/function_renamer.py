@@ -1,19 +1,19 @@
 import idaapi
-import herapi
+from herapi import *
 
 
-class FunctionRenamer(herapi.SPScheme):
+class FunctionRenamer(SPScheme):
 	def __init__(self, debug_flag):
-		pattern = herapi.IfPat(
-			herapi.ObjPat(debug_flag),
-			herapi.DeepExpr(herapi.CallPat("printf", ignore_arguments=True), bind_name="debug_print"),
+		pattern = IfPat(
+			ObjPat(debug_flag),
+			DeepExpr(CallPat("printf", ignore_arguments=True), bind_name="debug_print"),
 			should_wrap_in_block=False, # if to not wrap in block, because we want to search inside block's instructions
 		)
 		super().__init__("function_renamer", pattern)
 		self.renamings = {}
 		self.conflicts = {}
 
-	def on_matched_item(self, item, ctx: herapi.PatternContext):
+	def on_matched_item(self, item, ctx: PatternContext) -> bool:
 		func_ea = ctx.get_func_ea()
 		debug_print = ctx.get_expr("debug_print")
 		s = debug_print.a[1]
@@ -53,7 +53,7 @@ class FunctionRenamer(herapi.SPScheme):
 
 def do_renames(debug_flag: int):
 	scheme = FunctionRenamer(debug_flag)
-	matcher = herapi.Matcher(scheme)
+	matcher = Matcher(scheme)
 	matcher.match_objects_xrefs(debug_flag)
 	scheme.apply_renamings()
 	scheme.print_conflicts()

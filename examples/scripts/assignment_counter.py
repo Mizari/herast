@@ -1,18 +1,17 @@
-import herapi
-import idautils
-import idaapi
+import idautils, idaapi
+from herapi import *
 from collections import defaultdict
 
 
-class AssignmentCounterScheme(herapi.SPScheme):
+class AssignmentCounterScheme(SPScheme):
 	def __init__(self, *candidates):
 		self.count = defaultdict(int)
-		obj_pat = herapi.MultiObject(*candidates)
-		pattern = herapi.AsgExprPat(herapi.AnyPat(), herapi.SkipCasts(herapi.CallPat(obj_pat)))
+		obj_pat = MultiObject(*candidates)
+		pattern = AsgPat(AnyPat(), CallPat(obj_pat))
 		super().__init__("assignment_counter", pattern)
 
-	def on_matched_item(self, item, ctx: herapi.PatternContext):
-		func_ea = herapi.strip_casts(item.y).x.obj_ea
+	def on_matched_item(self, item, ctx: PatternContext) -> bool:
+		func_ea = strip_casts(item.y).x.obj_ea
 		self.add_assignment(func_ea)
 		return False
 
@@ -35,7 +34,7 @@ def count_assignments(*functions, assignments_amount_threshold=15):
 	functions = [f for f in functions if count_xrefs_to(f) > assignments_amount_threshold]
 
 	scheme = AssignmentCounterScheme(*functions)
-	matcher = herapi.Matcher(scheme)
+	matcher = Matcher(scheme)
 	matcher.match_objects_xrefs(*functions)
 
 	scheme.trim_assignments(assignments_amount_threshold)

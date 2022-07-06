@@ -1,13 +1,13 @@
-import herapi
+from herapi import *
 
 
-class VirtualCollector(herapi.SPScheme):
+class VirtualCollector(SPScheme):
 	def __init__(self, struct_type=None, offset=None):
-		pattern = herapi.AsgExprPat(herapi.StructFieldAccess(struct_type, offset), herapi.AnyPat())
+		pattern = AsgPat(StructFieldAccess(struct_type, offset), AnyPat())
 		super().__init__("virtual_collector", pattern)
 		self.collection = []
 
-	def on_matched_item(self, item, ctx: herapi.PatternContext):
+	def on_matched_item(self, item, ctx: PatternContext) -> bool:
 		func_ea = ctx.get_func_ea()
 		struct_type = item.x.x.type.get_pointed_object()
 		offset = item.x.m
@@ -17,7 +17,7 @@ class VirtualCollector(herapi.SPScheme):
 
 def collect_virtual_properties(*functions, struct_type=None, offset=None):
 	scheme = VirtualCollector(struct_type, offset)
-	matcher = herapi.Matcher(scheme)
+	matcher = Matcher(scheme)
 	for f in functions:
 		matcher.match(f)
 
