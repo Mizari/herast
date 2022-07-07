@@ -121,6 +121,7 @@ class DeepExpr(BasePattern):
 			if self.bind_name is not None:
 				ctx.save_expr(self.bind_name, item)
 			return True
+		return False
 
 
 class LabeledInstruction(BasePattern):
