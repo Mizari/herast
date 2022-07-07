@@ -1,10 +1,11 @@
 import idaapi
+import typing
 from herast.tree.pattern_context import PatternContext
 
 class BasePattern:
 	op = None
 
-	def __init__(self, debug=False, skip_casts=True, check_op=None):
+	def __init__(self, debug=False, skip_casts=True, check_op: typing.Optional[int] = None):
 		self.check_op = check_op
 		self.debug = debug
 		self.skip_casts = skip_casts

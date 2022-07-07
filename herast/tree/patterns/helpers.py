@@ -8,7 +8,7 @@ from herast.tree.patterns.instructions import ExprInsPat
 
 # sequence of instructions
 class SeqPat(BasePattern):
-	op = -1
+	op = None
 
 	def __init__(self, *pats, skip_missing=True, **kwargs):
 		super().__init__(**kwargs)
@@ -108,7 +108,7 @@ class StringPat(BasePattern):
 
 
 class StructFieldAccess(BasePattern):
-	op = -1
+	op = None
 	def __init__(self, struct_type=None, member_offset=None, **kwargs):
 		super().__init__(**kwargs)
 		self.struct_type = struct_type

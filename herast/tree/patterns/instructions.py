@@ -1,4 +1,5 @@
 import idaapi
+import typing
 from .abstracts import AnyPat
 from herast.tree.patterns.base_pattern import BasePattern
 from herast.tree.pattern_context import PatternContext
@@ -12,7 +13,7 @@ class InstructionPat(BasePattern):
 class BlockPat(InstructionPat):
 	op = idaapi.cit_block
 
-	def __init__(self, *patterns, **kwargs):
+	def __init__(self, *patterns: BasePattern, **kwargs):
 		super().__init__(**kwargs)
 		self.sequence = patterns
 

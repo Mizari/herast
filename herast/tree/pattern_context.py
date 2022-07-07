@@ -1,3 +1,4 @@
+import typing
 from herast.tree.processing import TreeProcessor
 
 class InstrModification:
@@ -9,9 +10,9 @@ class InstrModification:
 class PatternContext:
 	def __init__(self, tree_proc: TreeProcessor):
 		self.tree_proc = tree_proc
-		self.expressions = dict()
-		self.variables = dict()
-		self.instrs_to_modify = []
+		self.expressions : typing.Dict[str, int] = dict()
+		self.variables : typing.Dict = dict()
+		self.instrs_to_modify : typing.List = []
 
 	def get_func_ea(self):
 		return self.tree_proc.cfunc.entry_ea

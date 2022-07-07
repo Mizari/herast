@@ -1,4 +1,4 @@
-from __future__ import annotations as __annotiations
+import typing
 
 from herast.schemes_storage import SchemesStorage
 from herast.schemes.base_scheme import Scheme
@@ -6,11 +6,11 @@ from herast.tree.matcher import Matcher
 
 import herast.settings.settings_manager as settings_manager
 
-__schemes_storages : dict[str, SchemesStorage] = {}
-__schemes : dict[str, Scheme] = {}
-__enabled_schemes = set()
+__schemes_storages : typing.Dict[str, SchemesStorage] = {}
+__schemes : typing.Dict[str, Scheme] = {}
+__enabled_schemes : typing.Set[Scheme] = set()
 from collections import defaultdict as __defaultdict
-__storage2schemes = __defaultdict(list)
+__storage2schemes : typing.Dict[str, typing.List[str]]= __defaultdict(list)
 __scheme2storage = {}
 __passive_matcher = Matcher()
 
@@ -37,7 +37,7 @@ def __rebuild_passive_matcher():
 		if s.name in __enabled_schemes:
 			__passive_matcher.add_scheme(s)
 
-def __get_storage_status_text(storage_path):
+def __get_storage_status_text(storage_path: str) -> str:
 	globally = settings_manager.get_storage_status(storage_path, globally=True) == "enabled"
 	in_idb = settings_manager.get_storage_status(storage_path, in_idb=True) == "enabled"
 	if globally and in_idb:
@@ -50,22 +50,19 @@ def __get_storage_status_text(storage_path):
 		status = "Disabled"
 	return status
 
-def __discard_storage_schemes(storage_path):
+def __discard_storage_schemes(storage_path: str):
 	for scheme_name in __storage2schemes.get(storage_path, []):
 		__enabled_schemes.discard(scheme_name)
 	__rebuild_passive_matcher()
 
-def __update_storage_schemes(storage_path):
+def __update_storage_schemes(storage_path: str):
 	__enabled_schemes.update(__storage2schemes[storage_path])
 	__rebuild_passive_matcher()
 
-def get_passive_matcher():
+def get_passive_matcher() -> Matcher:
 	return __passive_matcher
 
-def register_storage_scheme(scheme):
-	if not isinstance(scheme, Scheme):
-		return
-
+def register_storage_scheme(scheme: Scheme):
 	import inspect
 	storage_path = inspect.stack()[1].filename
 	__storage2schemes[storage_path].append(scheme.name)
@@ -73,28 +70,28 @@ def register_storage_scheme(scheme):
 
 	__schemes[scheme.name] = scheme
 
-def get_storage(filename: str) -> SchemesStorage:
+def get_storage(filename: str) -> typing.Optional[SchemesStorage]:
 	return __schemes_storages.get(filename)
 
-def get_storages():
+def get_storages() -> typing.List[SchemesStorage]:
 	return [s for s in __schemes_storages.values()]
 
-def get_enabled_storages():
+def get_enabled_storages() -> typing.List[SchemesStorage]:
 	return [s for s in __schemes_storages.values() if s.enabled]
 
-def enable_scheme(scheme_name):
+def enable_scheme(scheme_name: str):
 	if scheme_name not in __schemes:
 		return
 	__enabled_schemes.add(scheme_name)
 	__rebuild_passive_matcher()
 
-def disable_scheme(scheme_name):
+def disable_scheme(scheme_name: str):
 	if scheme_name not in __schemes:
 		return
 	__enabled_schemes.discard(scheme_name)
 	__rebuild_passive_matcher()
 
-def disable_storage(storage_path):
+def disable_storage(storage_path: str) -> bool:
 	storage = get_storage(storage_path)
 	if storage is None or not storage.enabled:
 		return False
@@ -105,7 +102,7 @@ def disable_storage(storage_path):
 	storage.status_text = __get_storage_status_text(storage.path)
 	return True
 
-def enable_storage(storage_path):
+def enable_storage(storage_path: str) -> bool:
 	storage = get_storage(storage_path)
 	if storage is None or storage.enabled or storage.error:
 		return False
@@ -122,7 +119,7 @@ def enable_storage(storage_path):
 	storage.status_text = __get_storage_status_text(storage.path)
 	return True
 
-def load_storage(storage_path):
+def load_storage(storage_path: str) -> bool:
 	if settings_manager.get_storage_status(storage_path) == "enabled":
 		storage = SchemesStorage.from_file(storage_path)
 		if storage is None:
@@ -143,7 +140,7 @@ def load_storage(storage_path):
 	__schemes_storages[storage_path] = storage
 	return True
 
-def unload_storage(storage_path):
+def unload_storage(storage_path:  str):
 	storage = get_storage(storage_path)
 	if storage is None:
 		return False
@@ -161,7 +158,7 @@ def unload_storage(storage_path):
 	__rebuild_passive_matcher()
 	return True
 
-def reload_storage(storage_path):
+def reload_storage(storage_path: str) -> bool:
 	storage = get_storage(storage_path)
 	if storage is None:
 		return False

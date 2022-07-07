@@ -1,4 +1,5 @@
 import idaapi
+import typing
 
 from herast.tree.patterns.base_pattern import BasePattern
 from herast.tree.pattern_context import PatternContext
@@ -6,8 +7,6 @@ from herast.tree.pattern_context import PatternContext
 
 # any pattern
 class AnyPat(BasePattern):
-	op = -1
-
 	def __init__(self, may_be_none=True, **kwargs):
 		super().__init__(**kwargs)
 		self.may_be_none = may_be_none
@@ -21,9 +20,7 @@ class AnyPat(BasePattern):
 		return ()
 
 class OrPat(BasePattern):
-	op = -1
-
-	def __init__(self, *pats, **kwargs):
+	def __init__(self, *pats: BasePattern, **kwargs):
 		super().__init__(**kwargs)
 		if len(pats) <= 1:
 			print("[*] WARNING: OrPat expects at least two patterns")
@@ -42,9 +39,7 @@ class OrPat(BasePattern):
 		return self.pats
 
 class AndPat(BasePattern):
-	op = -1
-
-	def __init__(self, *pats, **kwargs):
+	def __init__(self, *pats: BasePattern, **kwargs):
 		super().__init__(**kwargs)
 		self._assert(len(pats) > 1, "Passing one or less patterns to AndPat is useless")
 		self.pats = tuple(pats)
@@ -62,9 +57,7 @@ class AndPat(BasePattern):
 		return self.pats
 
 class SkipCasts(BasePattern):
-	op = -1
-
-	def __init__(self, pat, **kwargs):
+	def __init__(self, pat: BasePattern, **kwargs):
 		super().__init__(**kwargs)
 		self.pat = pat
 
@@ -80,9 +73,7 @@ class SkipCasts(BasePattern):
 		return self.pat
 
 class BindItem(BasePattern):
-	op = -1
-
-	def __init__(self, name, pat=None, **kwargs):
+	def __init__(self, name: str, pat: typing.Optional[BasePattern] = None, **kwargs):
 		super().__init__(**kwargs)
 		self.pat = pat or AnyPat()
 		self.name = name
@@ -100,9 +91,7 @@ class BindItem(BasePattern):
 
 
 class VarBind(BasePattern):
-	op = -1
-
-	def __init__(self, name, **kwargs):
+	def __init__(self, name: str, **kwargs):
 		super().__init__(**kwargs)
 		self.name = name
 
@@ -119,9 +108,7 @@ class VarBind(BasePattern):
 
 
 class DeepExpr(BasePattern):
-	op = -1
-
-	def __init__(self, pat, bind_name=None, **kwargs):
+	def __init__(self, pat: BasePattern, bind_name=None, **kwargs):
 		super().__init__(**kwargs)
 		self.pat = pat
 		self.found = False
@@ -143,7 +130,6 @@ class DeepExpr(BasePattern):
 
 
 class LabeledInstruction(BasePattern):
-	op = -1
 	def __init__(self, **kwargs):
 		super().__init__(**kwargs)
 
@@ -156,10 +142,9 @@ class LabeledInstruction(BasePattern):
 
 
 class ItemsCollector:
-	op = -1
-	def __init__(self, pat):
+	def __init__(self, pat: BasePattern):
 		self.pat = pat
-		self.collected_items = []
+		self.collected_items : typing.List = []
 
 	def check_pattern(self, tree_proc, item):
 		ctx = PatternContext(tree_proc)
@@ -179,8 +164,7 @@ class ItemsCollector:
 		return self.collected_items
 
 class RemovePattern(BasePattern):
-	op = -1
-	def __init__(self, pat, **kwargs):
+	def __init__(self, pat: BasePattern, **kwargs):
 		super().__init__(**kwargs)
 		self.pat = pat
 
@@ -195,7 +179,6 @@ class RemovePattern(BasePattern):
 
 # For debug purposes
 class DebugPattern(BasePattern):
-	op = -1
 	call_depth = 6
 
 	def __init__(self, return_value=False, **kwargs):
@@ -216,8 +199,7 @@ class DebugPattern(BasePattern):
 
 # useful pattern to determine where big and complex pattern went wrong
 class DebugWrapper(BasePattern):
-	op = -1
-	def __init__(self, pat, msg=None, **kwargs):
+	def __init__(self, pat: BasePattern, msg=None, **kwargs):
 		super().__init__(**kwargs)
 		self.pat = pat
 		self.msg = msg
