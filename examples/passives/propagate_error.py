@@ -1,12 +1,16 @@
 from herapi import *
 
-pattern = IfPat(
-	VarBind("error_var"),
-	ExprInsPat(BindItem("logic_expr")),
-	AsgInsnPat(VarBind("error_var"), BindItem("logic_expr"))
-)
 
 class ReplacingScheme(SPScheme):
+	def __init__(self, name, pattern):
+		pattern = IfPat(
+			VarBind("error_var"),
+			ExprInsPat(BindItem("logic_expr")),
+			AsgInsnPat(VarBind("error_var"), BindItem("logic_expr"))
+		)
+		name = "propagate_erro"
+		super().__init__(name, pattern)
+
 	def on_matched_item(self, item, ctx: PatternContext):
 		error_var = ctx.get_var("error_var")
 		if error_var is None:
@@ -20,6 +24,4 @@ class ReplacingScheme(SPScheme):
 		ctx.modify_instr(item, new_item)
 		return False
 
-scheme = ReplacingScheme("propagate_error", pattern)
-
-register_storage_scheme(scheme)
+register_storage_scheme(ReplacingScheme())

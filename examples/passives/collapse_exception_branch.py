@@ -31,16 +31,21 @@ class ExceptionBody(BasePattern):
 
 		return True
 
-first_call_pattern    = AsgInsnPat(AnyPat(), CallPat("__cxa_allocate_exception"))
-excstr_getter_pattern = AsgInsnPat(AnyPat(), CallPat(AnyPat(), AnyPat(), SkipCasts(BindItem("exception_str", AnyPat()))))
-last_call_pattern = ExprInsPat(CallPat('__cxa_throw'))
-
-pattern = IfPat(
-	BindItem("if_expr"),
-	ExceptionBody(first_call_pattern, excstr_getter_pattern, last_call_pattern)
-)
 
 class ExceptionCollapserScheme(SPScheme):
+	def __init__(self, name, pattern):
+		pattern = IfPat(
+			BindItem("if_expr"),
+			ExceptionBody(
+				AsgInsnPat(AnyPat(), CallPat("__cxa_allocate_exception")),
+				AsgInsnPat(AnyPat(), CallPat(AnyPat(), AnyPat(), BindItem("exception_str", AnyPat()))),
+				CallInsnPat('__cxa_throw'),
+			)
+		)
+
+		name = "exception_collapser"
+		super().__init__(name, pattern)
+
 	def on_matched_item(self, item, ctx: PatternContext) -> bool:
 		helper_args = []
 
@@ -63,4 +68,4 @@ class ExceptionCollapserScheme(SPScheme):
 
 		return False
 
-register_storage_scheme(ExceptionCollapserScheme("exception_collapser", pattern))
+register_storage_scheme(ExceptionCollapserScheme())
