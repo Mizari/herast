@@ -111,22 +111,16 @@ class DeepExpr(BasePattern):
 	def __init__(self, pat: BasePattern, bind_name=None, **kwargs):
 		super().__init__(**kwargs)
 		self.pat = pat
-		self.found = False
 		self.bind_name = bind_name
 
 	@BasePattern.parent_check
 	def check(self, expr, ctx: PatternContext) -> bool:
-		self.found = False
-		def processing_callback(tree_proc, item):
-			if not self.found:
-				if self.pat.check(item, ctx):
-					if self.bind_name is not None:
-						ctx.save_expr(self.bind_name, item)
-					self.found = True
-			return False
-		ctx.tree_proc.process_all_items(expr, processing_callback)
-
-		return self.found
+		for item in ctx.tree_proc.iterate_subitems(expr):
+			if not self.pat.check(item, ctx):
+				continue
+			if self.bind_name is not None:
+				ctx.save_expr(self.bind_name, item)
+			return True
 
 
 class LabeledInstruction(BasePattern):
