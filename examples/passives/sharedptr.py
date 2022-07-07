@@ -1,6 +1,10 @@
 from herapi import *
 
 class HelperReplacer(SPScheme):
+	"""
+		this scheme either removes or replaces one item
+		with helper function of a given name without arguments
+	"""
 	def __init__(self, name, pattern, helper_name, should_remove=False):
 		self.helper_name = helper_name
 		self.should_remove = should_remove
@@ -14,62 +18,111 @@ class HelperReplacer(SPScheme):
 		ctx.modify_instr(item, new_item)
 		return False
 
-
-release_pattern = SeqPat(
-	ExprInsPat(),  # var = memptr
-	RemovePattern(IfPat(
-		AnyPat(),  # if memptr
-		SeqPat(
-			IfPat(
-				AnyPat(),  # if pthread_cancel
-				ExprInsPat(),  # asg interlocked_xchg(any, 0xffffffff)
-				SeqPat(
-					ExprInsPat(),  # var asg
-					ExprInsPat(),  # memptr = var - 1
+"""
+	A rather complex pattern representing releasing of C++'s sharedptr
+	incomplete for now, but still sufficient for matching purposes
+	if (...) {              # outer IF
+		if (...) {          # inner IF0
+			...;
+		} else {
+			...;
+			...;
+		}
+		if (...) {          # inner IF1
+			...;
+			if (...) {      # inner IF2
+				...;
+			} else {
+				...;
+				...;
+			}
+			if (...) {      # inner IF3
+				...;
+			}
+		}
+	}
+"""
+release_pattern = \
+	IfPat(                                 # outer IF
+		AnyPat(),                          # if memptr
+		BlockPat(
+			IfPat(                         # inner IF0
+				AnyPat(),                  # if pthread_cancel
+				ExprInsPat(),              # asg interlocked_xchg(any, 0xffffffff)
+				BlockPat(
+					ExprInsPat(),          # var asg
+					ExprInsPat(),          # memptr = var - 1
 				),
 			),
-			IfPat(
-				AnyPat(), # if decrement result == 1
-				SeqPat(
-					ExprInsPat(),  # call(_M_dispose) of *varmemptr + 16
-					IfPat(
-						AnyPat(),  # if pthread_cancel
-						ExprInsPat(),  # asg interlocked_xchg (any, 0xfffffff)
-						SeqPat(
+			IfPat(                         # inner IF1
+				AnyPat(),                  # if decrement result == 1
+				BlockPat(
+					ExprInsPat(),          # call(_M_dispose) of *varmemptr + 16
+					IfPat(                 # inner IF2
+						AnyPat(),          # if pthread_cancel
+						ExprInsPat(),      # asg interlocked_xchg (any, 0xfffffff)
+						BlockPat(
 							ExprInsPat(),  # var asg
 							ExprInsPat(),  # memptr = var - 1
 						),
 					),
-					IfPat(
-						AnyPat(),  # if decrement result == 1
-						ExprInsPat(), # call(_M_destroy) of *varmemptr + 24
+					IfPat(                 # inner IF3
+						AnyPat(),          # if decrement result == 1
+						ExprInsPat(),      # call(_M_destroy) of *varmemptr + 24
 					),
 				),
 			),
 		),
-	)),
-)
+	)
 
+"""
+	this patterns looks for two instructions
+	first one will later be replaced/removed in HelperReplacer
+	second one will be deleted via Remove Pattern
+"""
+release_pattern = SeqPat(AsgInsnPat(VarPat(), AnyPat()), RemovePattern(release_pattern))
 register_storage_scheme(HelperReplacer("shptr_release", release_pattern, "__sharedptr::release"))
 
+def cond_insn(pat):
+	"""
+		try to match first on IfPat(Any, pat), then on pat
+	"""
+	return OrPat(IfPat(AnyPat(), pat), pat)
 
-increment_pattern = IfPat(
+
+"""
+	increment_pattern is for removing/replacing this code:
+		if (pthread_cancel) {
+			_InterlockedAdd(...);
+		}
+	OR
+		if (...) {
+			if (pthread_cancel) {
+				_InterlockedAdd(...);
+			}
+		}
+"""
+increment_pattern = cond_insn(IfPat(
 	ObjPat("pthread_cancel"),
 	CallInsnPat(HelperPat("_InterlockedAdd"), skip_missing=True),
 	ExprInsPat(),
-)
+))
 
-increment_pattern = OrPat(
-	IfPat(AnyPat(), increment_pattern),
-	increment_pattern,
-)
 register_storage_scheme(HelperReplacer("shptr_inc", increment_pattern, "__sharedptr::increment"))
 
 
-fname = "std::_Sp_counted_base::_M_release"
-std_release_pattern = OrPat(
-	IfPat(AnyPat(), CallInsnPat(fname, ignore_arguments=True)),
-	CallInsnPat(fname, ignore_arguments=True),
-)
 
+
+"""
+	std_release_pattern is for removing this code:
+		std::_Sp_counted_base::_M_release(...);
+	OR
+		if (...) {
+			std::_Sp_counted_base::_M_release(...);
+		}
+"""
+std_release_pattern = cond_insn(CallInsnPat(
+									"std::_Sp_counted_base::_M_release",
+									ignore_arguments=True
+								))
 register_storage_scheme(ItemRemovalScheme("shptr_release_remover", RemovePattern(std_release_pattern)))

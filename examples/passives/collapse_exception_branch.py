@@ -3,6 +3,10 @@ from herapi import *
 
 
 class ExceptionBody(BasePattern):
+	"""
+		Exception body checks the very first and the very last instructions.
+		Then it will try to find instruction with exception string.
+	"""
 	op = idaapi.cit_block
 	def __init__(self, first_call, excstr_getter, last_call):
 		self.first_call = first_call
@@ -34,6 +38,16 @@ class ExceptionBody(BasePattern):
 
 class ExceptionCollapserScheme(SPScheme):
 	def __init__(self, name, pattern):
+		"""
+			pattern looks like this:
+				if (if_expr) {
+					... = __cxa_allocate_exception();
+					...
+					... = some_function(..., "exception string");
+					...
+					__cxa_throw();
+				}
+		"""
 		pattern = IfPat(
 			BindItem("if_expr"),
 			ExceptionBody(
@@ -47,6 +61,10 @@ class ExceptionCollapserScheme(SPScheme):
 		super().__init__(name, pattern)
 
 	def on_matched_item(self, item, ctx: PatternContext) -> bool:
+		"""
+			on match will try to construct from found item and binded expressions
+			__throw_if(if_expr, "exception string")
+		"""
 		helper_args = []
 
 		if_expr = ctx.get_expr("if_expr")

@@ -3,6 +3,16 @@ from herapi import *
 
 class ReplacingScheme(SPScheme):
 	def __init__(self, name, pattern):
+		"""
+		pattern of form:
+		if (error_var) {
+			some_logic_expr;
+		}
+		else {
+			error_var = some_logic_expr;
+		}
+		pattern checks that some_logic_exprs are equal via BindItem calls
+		"""
 		pattern = IfPat(
 			VarBind("error_var"),
 			ExprInsPat(BindItem("logic_expr")),
