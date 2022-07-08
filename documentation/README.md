@@ -5,6 +5,15 @@
 - Matcher is an object, that applies schemes to functions.
 
 
+# Schemes Storages View
+Actions of schemes storages view are for in-IDB settings only. In order to do actions globally currently it is required to use herapi.  
+- Disable: disables selected storage
+- Enable: enables selected storage
+- Reload: reload selected storage module
+- Refresh all: reload all storage modules
+- Disable all: disable all storages
+
+
 # Settings
 There are two ways to configure settings: globally in C:\Users\USERNAME\AppData\Roaming\Hex-Rays\IDA Pro\herast_settings.json or in specific IDB "$herast:PatternStorage" netnode. IDB settings overwrite global.  
 - Storage folders: folders with schemes storages. Every .py file from folders will be imported with expectation of herapi.register_storage_scheme() calls.
