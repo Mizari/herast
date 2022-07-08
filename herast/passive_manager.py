@@ -26,7 +26,7 @@ def __initialize():
 		storages_files += __find_python_files_in_folder(folder)
 
 	for file_path in storages_files:
-		load_storage(file_path)
+		load_storage(file_path, rebuild_passive=False)
 
 	__rebuild_passive_matcher()
 
@@ -155,6 +155,9 @@ def remove_storage_file(storage_path: str, global_settings=False):
 	unload_storage(storage_path)
 
 def load_storage(storage_path: str, rebuild_passive=True) -> bool:
+	if get_storage(storage_path) is not None:
+		return False
+
 	if settings_manager.get_storage_status(storage_path) == "enabled":
 		storage = SchemesStorage.from_file(storage_path)
 		if storage is None:
