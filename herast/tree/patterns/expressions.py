@@ -1,10 +1,10 @@
 import idaapi
 
-from herast.tree.patterns.base_pattern import BasePattern
+from herast.tree.patterns.base_pattern import BasePat
 from herast.tree.pattern_context import PatternContext
 
 
-class ExpressionPat(BasePattern):
+class ExpressionPat(BasePat):
 	"""Base class for expression items patterns."""
 	op = None
 
@@ -13,7 +13,7 @@ class ExpressionPat(BasePattern):
 
 	@staticmethod
 	def parent_check(func):
-		func = BasePattern.parent_check(func)
+		func = BasePat.parent_check(func)
 		def __perform_parent_check(self, item, *args, **kwargs):
 			return func(self, item, *args, **kwargs)
 		return __perform_parent_check
@@ -225,7 +225,7 @@ class VarPat(ExpressionPat):
 		return True
 
 
-class AbstractUnaryOpPattern(ExpressionPat):
+class AbstractUnaryOpPat(ExpressionPat):
 	"""Abstract class for C's unary operators."""
 	def __init__(self, operand, **kwargs):
 		super().__init__(**kwargs)
@@ -240,7 +240,7 @@ class AbstractUnaryOpPattern(ExpressionPat):
 		return (self.operand, )
 
 
-class AbstractBinaryOpPattern(ExpressionPat):
+class AbstractBinaryOpPat(ExpressionPat):
 	"""Abstract class for C's binary operators."""
 	def __init__(self, first_operand, second_operand, symmetric=False, **kwargs):
 		super().__init__(**kwargs)
@@ -285,11 +285,11 @@ def __generate_expression_patterns():
 
 	for op in unary_expressions_ops:
 		name = '%sPat' % op2str[op].replace('cot_', '').capitalize()
-		vars(module)[name] = type(name, (AbstractUnaryOpPattern,), {'op': op})
+		vars(module)[name] = type(name, (AbstractUnaryOpPat,), {'op': op})
 
 	for op in binary_expressions_ops:
 		# skip assignment, because it is explicitly defined for easier coding
 		if op == idaapi.cot_asg: continue
 		name = '%sPat' % op2str[op].replace('cot_', '').capitalize()
-		vars(module)[name] = type(name, (AbstractBinaryOpPattern,), {'op': op})
+		vars(module)[name] = type(name, (AbstractBinaryOpPat,), {'op': op})
 __generate_expression_patterns()

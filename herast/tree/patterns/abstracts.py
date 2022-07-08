@@ -1,11 +1,11 @@
 import idaapi
 import typing
 
-from herast.tree.patterns.base_pattern import BasePattern
+from herast.tree.patterns.base_pattern import BasePat
 from herast.tree.pattern_context import PatternContext
 
 
-class AnyPat(BasePattern):
+class AnyPat(BasePat):
 	"""Pattern that always successfully matches"""
 	def __init__(self, may_be_none=True, **kwargs):
 		"""
@@ -14,7 +14,7 @@ class AnyPat(BasePattern):
 		super().__init__(**kwargs)
 		self.may_be_none = may_be_none
 
-	@BasePattern.parent_check
+	@BasePat.parent_check
 	def check(self, item, ctx: PatternContext) -> bool:
 		return item is not None or self.may_be_none
 
@@ -22,15 +22,15 @@ class AnyPat(BasePattern):
 	def children(self):
 		return ()
 
-class OrPat(BasePattern):
+class OrPat(BasePat):
 	"""Logical or pattern."""
-	def __init__(self, *pats: BasePattern, **kwargs):
+	def __init__(self, *pats: BasePat, **kwargs):
 		super().__init__(**kwargs)
 		if len(pats) <= 1:
 			print("[*] WARNING: OrPat expects at least two patterns")
 		self.pats = tuple(pats)
 
-	@BasePattern.parent_check
+	@BasePat.parent_check
 	def check(self, item, ctx: PatternContext) -> bool:
 		for p in self.pats:
 			if p.check(item, ctx):
@@ -42,15 +42,15 @@ class OrPat(BasePattern):
 	def children(self):
 		return self.pats
 
-class AndPat(BasePattern):
+class AndPat(BasePat):
 	"""Logical and pattern."""
-	def __init__(self, *pats: BasePattern, **kwargs):
+	def __init__(self, *pats: BasePat, **kwargs):
 		super().__init__(**kwargs)
 		if len(pats) <= 1:
 			print("[*] WARNING: one or less patterns to AndPat is useless")
 		self.pats = tuple(pats)
 
-	@BasePattern.parent_check
+	@BasePat.parent_check
 	def check(self, item, ctx: PatternContext) -> bool:
 		for p in self.pats:
 			if not p.check(item, ctx):
@@ -62,13 +62,13 @@ class AndPat(BasePattern):
 	def children(self):
 		return self.pats
 
-class SkipCasts(BasePattern):
+class SkipCasts(BasePat):
 	"""Pattern to skip every type cast and check given pattern directly"""
-	def __init__(self, pat: BasePattern, **kwargs):
+	def __init__(self, pat: BasePat, **kwargs):
 		super().__init__(**kwargs)
 		self.pat = pat
 
-	@BasePattern.parent_check
+	@BasePat.parent_check
 	def check(self, item, ctx: PatternContext) -> bool:
 		while item.op == idaapi.cot_cast:
 			item = item.x
@@ -79,15 +79,15 @@ class SkipCasts(BasePattern):
 	def children(self):
 		return self.pat
 
-class BindItem(BasePattern):
+class BindItem(BasePat):
 	"""Save item in context after successful matching. If item with given
 	name already exists in context, then checks their equality"""
-	def __init__(self, name: str, pat: typing.Optional[BasePattern] = None, **kwargs):
+	def __init__(self, name: str, pat: typing.Optional[BasePat] = None, **kwargs):
 		super().__init__(**kwargs)
 		self.pat = pat or AnyPat()
 		self.name = name
 
-	@BasePattern.parent_check
+	@BasePat.parent_check
 	def check(self, item, ctx: PatternContext) -> bool:
 		if self.pat.check(item, ctx):
 			current_expr = ctx.get_expr(self.name)
@@ -99,14 +99,14 @@ class BindItem(BasePattern):
 		return False
 
 
-class VarBind(BasePattern):
+class VarBind(BasePat):
 	"""Save variable in context after successful matching. If variable with
 	given name already exists in context, then checks their indexes"""
 	def __init__(self, name: str, **kwargs):
 		super().__init__(**kwargs)
 		self.name = name
 
-	@BasePattern.parent_check
+	@BasePat.parent_check
 	def check(self, expr, ctx: PatternContext) -> bool:
 		if expr.op != idaapi.cot_var:
 			return False
@@ -118,15 +118,15 @@ class VarBind(BasePattern):
 			return True
 
 
-class DeepExpr(BasePattern):
+class DeepExpr(BasePat):
 	"""Find pattern somewhere inside an item and save it in context if 
 	bind_name is provided."""
-	def __init__(self, pat: BasePattern, bind_name=None, **kwargs):
+	def __init__(self, pat: BasePat, bind_name=None, **kwargs):
 		super().__init__(**kwargs)
 		self.pat = pat
 		self.bind_name = bind_name
 
-	@BasePattern.parent_check
+	@BasePat.parent_check
 	def check(self, expr, ctx: PatternContext) -> bool:
 		for item in ctx.tree_proc.iterate_subitems(expr):
 			if not self.pat.check(item, ctx):
@@ -137,12 +137,12 @@ class DeepExpr(BasePattern):
 		return False
 
 
-class LabeledInstruction(BasePattern):
+class LabeledInstruction(BasePat):
 	"""Find instruction with a label on it."""
 	def __init__(self, **kwargs):
 		super().__init__(**kwargs)
 
-	@BasePattern.parent_check
+	@BasePat.parent_check
 	def check(self, item, ctx: PatternContext) -> bool:
 		lbl = item.label_num
 		if lbl == -1:
@@ -151,7 +151,7 @@ class LabeledInstruction(BasePattern):
 
 
 class ItemsCollector:
-	def __init__(self, pat: BasePattern):
+	def __init__(self, pat: BasePat):
 		self.pat = pat
 		self.collected_items : typing.List = []
 
@@ -172,13 +172,13 @@ class ItemsCollector:
 		tree_proc.process_all_items(item, processing_callback)
 		return self.collected_items
 
-class RemovePattern(BasePattern):
+class RemovePattern(BasePat):
 	"""Pattern, that will queue item removal after successful matching."""
-	def __init__(self, pat: BasePattern, **kwargs):
+	def __init__(self, pat: BasePat, **kwargs):
 		super().__init__(**kwargs)
 		self.pat = pat
 
-	@BasePattern.parent_check
+	@BasePat.parent_check
 	def check(self, item, ctx: PatternContext) -> bool:
 		if not self.pat.check(item, ctx):
 			return False
@@ -187,14 +187,14 @@ class RemovePattern(BasePattern):
 		return True
 
 
-class DebugPattern(BasePattern):
+class DebugPattern(BasePat):
 	"""Debug pattern that will print out callstack of a chosen length."""
 	def __init__(self, return_value=False, call_depth=6, **kwargs):
 		super().__init__(**kwargs)
 		self.call_depth=call_depth
 		self.return_value = return_value
 
-	@BasePattern.parent_check
+	@BasePat.parent_check
 	def check(self, item, ctx: PatternContext) -> bool:
 		print('Debug calltrace, address of item: %#x (%s)' % (item.ea, item.opname))
 		print('---------------------------------')
@@ -206,14 +206,14 @@ class DebugPattern(BasePattern):
 		return self.return_value
 		
 
-class DebugWrapper(BasePattern):
+class DebugWrapper(BasePat):
 	"""Useful pattern to determine where big and complex pattern went wrong."""
-	def __init__(self, pat: BasePattern, msg=None, **kwargs):
+	def __init__(self, pat: BasePat, msg=None, **kwargs):
 		super().__init__(**kwargs)
 		self.pat = pat
 		self.msg = msg
 
-	@BasePattern.parent_check
+	@BasePat.parent_check
 	def check(self, item, ctx: PatternContext) -> bool:
 		rv = self.pat.check(item, ctx)
 		if self.msg is None:

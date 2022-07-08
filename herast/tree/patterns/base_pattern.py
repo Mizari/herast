@@ -2,7 +2,7 @@ import idaapi
 import typing
 from herast.tree.pattern_context import PatternContext
 
-class BasePattern:
+class BasePat:
 	"""Base class for all patterns."""
 	op = None
 

@@ -2,7 +2,7 @@ import idaapi
 from herapi import *
 
 
-class ExceptionBody(BasePattern):
+class ExceptionBody(BasePat):
 	"""
 		Exception body checks the very first and the very last instructions.
 		Then it will try to find instruction with exception string.
@@ -13,7 +13,7 @@ class ExceptionBody(BasePattern):
 		self.last_call = last_call
 		self.excstr_getter = excstr_getter
 
-	@BasePattern.parent_check
+	@BasePat.parent_check
 	def check(self, item, ctx):
 		block = item.cblock
 

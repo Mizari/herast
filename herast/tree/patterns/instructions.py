@@ -1,11 +1,11 @@
 import idaapi
 import typing
 from .abstracts import AnyPat
-from herast.tree.patterns.base_pattern import BasePattern
+from herast.tree.patterns.base_pattern import BasePat
 from herast.tree.pattern_context import PatternContext
 
 
-class InstructionPat(BasePattern):
+class InstructionPat(BasePat):
 	"""Base pattern for instructions patterns."""
 	def __init__(self, debug=False, skip_casts=True, check_op=None):
 		super().__init__(debug, skip_casts, check_op=self.op)
@@ -15,7 +15,7 @@ class BlockPat(InstructionPat):
 	"""Pattern for block instruction aka curly braces."""
 	op = idaapi.cit_block
 
-	def __init__(self, *patterns: BasePattern, **kwargs):
+	def __init__(self, *patterns: BasePat, **kwargs):
 		super().__init__(**kwargs)
 		self.sequence = patterns
 

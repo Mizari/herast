@@ -6,7 +6,7 @@ from collections import defaultdict
 class AssignmentCounterScheme(SPScheme):
 	def __init__(self, *candidates):
 		self.count = defaultdict(int)
-		obj_pat = MultiObject(*candidates)
+		obj_pat = MultiObjectPat(*candidates)
 		pattern = AsgPat(AnyPat(), CallPat(obj_pat))
 		super().__init__("assignment_counter", pattern)
 

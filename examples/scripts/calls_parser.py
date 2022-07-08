@@ -15,7 +15,7 @@ class CallsParser(SPScheme):
 		if len(function_address) == 0:
 			raise ValueError("No function address provided")
 
-		obj_pat = MultiObject(*function_address)
+		obj_pat = MultiObjectPat(*function_address)
 		pattern = CallPat(obj_pat, ObjPat(), RefPat(ObjPat()), skip_missing=True)
 		super().__init__("calls_parser", pattern)
 
