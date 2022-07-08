@@ -14,16 +14,16 @@ __storage2schemes : typing.Dict[str, typing.List[str]]= __defaultdict(list)
 __scheme2storage = {}
 __passive_matcher = Matcher()
 
+def __find_python_files_in_folder(folder: str):
+	import glob
+	for file_path in glob.iglob(folder + '/**/**.py', recursive=True):
+		yield file_path
 
 def __initialize():
-	def find_python_files_in_folder(folder):
-		import glob
-		for file_path in glob.iglob(folder + '/**/**.py', recursive=True):
-			yield file_path
 
 	storages_files = settings_manager.get_storages_files()
 	for folder in settings_manager.get_storages_folders():
-		storages_files += find_python_files_in_folder(folder)
+		storages_files += __find_python_files_in_folder(folder)
 
 	for file_path in storages_files:
 		load_storage(file_path)
@@ -119,7 +119,39 @@ def enable_storage(storage_path: str) -> bool:
 	storage.status_text = __get_storage_status_text(storage.path)
 	return True
 
-def load_storage(storage_path: str) -> bool:
+def add_storage_folder(storages_folder: str, global_settings=False):
+	if storages_folder in settings_manager.get_storages_folders(globally=global_settings):
+		return
+	settings_manager.add_storage_folder(storages_folder, global_settings=global_settings)
+
+	storages_files = __find_python_files_in_folder(storages_folder)
+	for file_path in storages_files:
+		load_storage(file_path, rebuild_passive=False)
+	__rebuild_passive_matcher()
+
+def remove_storage_folder(storages_folder: str, global_settings=False):
+	if storages_folder not in settings_manager.get_storages_folders(globally=global_settings):
+		return
+	settings_manager.remove_storage_folder(storages_folder, global_settings)
+
+	storages_files = __find_python_files_in_folder(storages_folder)
+	for file_path in storages_files:
+		unload_storage(file_path, rebuild_passive=False)
+	__rebuild_passive_matcher()
+
+def add_storage_file(storage_path: str, global_settings=False):
+	if storage_path in settings_manager.get_storages_files(globally=global_settings):
+		return
+	settings_manager.add_storage_file(storage_path, global_settings)
+	load_storage(storage_path)
+
+def remove_storage_file(storage_path: str, global_settings=False):
+	if storage_path in settings_manager.get_storages_files(globally=global_settings):
+		return
+	settings_manager.add_storage_file(storage_path, global_settings)
+	unload_storage(storage_path)
+
+def load_storage(storage_path: str, rebuild_passive=True) -> bool:
 	if settings_manager.get_storage_status(storage_path) == "enabled":
 		storage = SchemesStorage.from_file(storage_path)
 		if storage is None:
@@ -138,9 +170,11 @@ def load_storage(storage_path: str) -> bool:
 		storage.status_text = "Disabled"
 
 	__schemes_storages[storage_path] = storage
+	if rebuild_passive:
+		__rebuild_passive_matcher()
 	return True
 
-def unload_storage(storage_path:  str):
+def unload_storage(storage_path: str, rebuild_passive=True):
 	storage = get_storage(storage_path)
 	if storage is None:
 		return False
@@ -155,17 +189,19 @@ def unload_storage(storage_path:  str):
 		__enabled_schemes.discard(scheme_name)
 		del __scheme2storage[scheme_name]
 	del __storage2schemes[storage_path]
-	__rebuild_passive_matcher()
+	if rebuild_passive:
+		__rebuild_passive_matcher()
 	return True
 
-def reload_storage(storage_path: str) -> bool:
+def reload_storage(storage_path: str, rebuild_passive=True) -> bool:
 	storage = get_storage(storage_path)
 	if storage is None:
 		return False
 
-	unload_storage(storage_path)
-	if load_storage(storage_path):
-		__rebuild_passive_matcher()
+	unload_storage(storage_path, rebuild_passive=False)
+	if load_storage(storage_path, rebuild_passive=False):
+		if rebuild_passive:
+			__rebuild_passive_matcher()
 		return True
 	else:
 		return False
