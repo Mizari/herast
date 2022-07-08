@@ -270,12 +270,12 @@ class AsgPat(ExpressionPat):
 		super().__init__(**kwargs)
 		self.lhs = lhs
 		self.rhs = rhs
-	
+
 	@ExpressionPat.parent_check
 	def check(self, item, ctx: PatternContext) -> bool:
-		if not self.lhs.check(item.x):
+		if not self.lhs.check(item.x, ctx):
 			return False
-		return self.rhs.check(item.y)
+		return self.rhs.check(item.y, ctx)
 
 
 def __generate_expression_patterns():
