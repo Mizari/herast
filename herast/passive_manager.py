@@ -122,7 +122,7 @@ def enable_storage(storage_path: str) -> bool:
 def add_storage_folder(storages_folder: str, global_settings=False):
 	if storages_folder in settings_manager.get_storages_folders(globally=global_settings):
 		return
-	settings_manager.add_storage_folder(storages_folder, global_settings=global_settings)
+	settings_manager.add_storage_folder(storages_folder, globally=global_settings)
 
 	storages_files = __find_python_files_in_folder(storages_folder)
 	for file_path in storages_files:

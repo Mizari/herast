@@ -1,39 +1,40 @@
 import json
 
 class BaseSettings:
+	"""Base class for all possible settings."""
 	def __init__(self, folders=[], files=[], statuses=[], time_matching=None):
 		self.storages_folders = folders
 		self.storages_files = files
 		self.storages_statuses = statuses
 		self.time_matching = time_matching
 
-	def add_storage_file(self, file_path):
+	def add_storage_file(self, file_path: str):
 		if file_path in self.storages_files:
 			return
 		self.storages_files.append(file_path)
 		self.save()
 
-	def add_folder_storage(self, storages_folder):
+	def add_folder_storage(self, storages_folder: str):
 		if storages_folder in self.storages_folders:
 			return
 		self.storages_folders.append(storages_folder)
 		self.save()
 
-	def enable_storage(self, storage_path):
+	def enable_storage(self, storage_path: str):
 		self.storages_statuses[storage_path] = "enabled"
 		self.save()
 
-	def disable_storage(self, storage_path):
+	def disable_storage(self, storage_path: str):
 		self.storages_statuses[storage_path] = "disabled"
 		self.save()
 
-	def remove_file_storage(self, file_path):
+	def remove_file_storage(self, file_path: str):
 		if file_path not in self.storages_files:
 			return
 		self.storages_files.remove(file_path)
 		self.save()
 
-	def remove_storage_folder(self, folder_path):
+	def remove_storage_folder(self, folder_path: str):
 		if folder_path not in self.storages_folders:
 			return
 		self.storages_folders.remove(folder_path)
@@ -44,7 +45,7 @@ class BaseSettings:
 		raise NotImplementedError()
 
 	@classmethod
-	def save_json_str(cls, saved_str):
+	def save_json_str(cls, saved_str: str):
 		raise NotImplementedError()
 
 	@classmethod

@@ -24,14 +24,16 @@ def save_long_str_to_idb(array_name, value):
 		idc.set_array_string(id, idx, s)
 
 
-ARRAY_NAME = "$herast:PatternStorage"
 class IdbSettings(BaseSettings):
+	"""Class for settings, stored for per project in IDB."""
+
+	array_name = "$herast:PatternStorage"
 	@classmethod
 	def save_json_str(cls, saved_str):
-		save_long_str_to_idb(ARRAY_NAME, saved_str)
+		save_long_str_to_idb(cls.array_name, saved_str)
 
 	@classmethod
 	def load_json_str(cls):
-		return load_long_str_from_idb(ARRAY_NAME) or '{}'
+		return load_long_str_from_idb(cls.array_name) or '{}'
 
 settings_instance = IdbSettings.create()

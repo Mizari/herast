@@ -5,6 +5,7 @@ from herast.tree.pattern_context import PatternContext
 
 
 class ExpressionPat(BasePattern):
+	"""Base class for expression items patterns."""
 	op = None
 
 	def __init__(self, debug=False, skip_casts=True, check_op=None):
@@ -19,9 +20,16 @@ class ExpressionPat(BasePattern):
 
 
 class CallPat(ExpressionPat):
+	"""Pattern for matching function calls."""
 	op = idaapi.cot_call
 
 	def __init__(self, calling_function, *arguments, ignore_arguments=False, skip_missing=False, **kwargs):
+		"""
+		:param calling_function:  what function is called. will try to make ObjPat from it
+		:param arguments:         call arguments
+		:param ignore_arguments:  whether or not should match arguments
+		:param skip_missing:      skip missing either call arguments or patterns for call arguments
+		"""
 		super().__init__(**kwargs)
 		if isinstance(calling_function, str):
 			calling_function = ObjPat(calling_function)
@@ -58,6 +66,7 @@ class CallPat(ExpressionPat):
 
 
 class HelperPat(ExpressionPat):
+	"""Pattern for matching helper objects."""
 	op = idaapi.cot_helper
 
 	def __init__(self, helper_name=None, **kwargs):
@@ -74,7 +83,9 @@ class HelperPat(ExpressionPat):
 
 
 class NumPat(ExpressionPat):
+	"""Pattern for matching numbers."""
 	op = idaapi.cot_num
+
 	def __init__(self, num=None, **kwargs):
 		super().__init__(**kwargs)
 		self.num = num
@@ -88,9 +99,13 @@ class NumPat(ExpressionPat):
 
 
 class ObjPat(ExpressionPat):
+	"""Pattern for matching objects with addresses."""
 	op = idaapi.cot_obj
 
 	def __init__(self, obj_info=None, **kwargs):
+		"""
+		:param obj_info: information for construction object. will try to get int address from it
+		"""
 		super().__init__(**kwargs)
 		self.ea = None
 		self.name = None
@@ -139,6 +154,7 @@ class ObjPat(ExpressionPat):
 
 
 class RefPat(ExpressionPat):
+	"""Pattern for matching references."""
 	op = idaapi.cot_ref
 
 	def __init__(self, referenced_object, **kwargs):
@@ -151,6 +167,7 @@ class RefPat(ExpressionPat):
 
 
 class MemrefPat(ExpressionPat):
+	"""Pattern for matching memory references."""
 	op = idaapi.cot_memref
 
 	def __init__(self, referenced_object, field, **kwargs):
@@ -165,6 +182,7 @@ class MemrefPat(ExpressionPat):
 
 
 class MemptrPat(ExpressionPat):
+	"""Pattern for matching memory pointers."""
 	op = idaapi.cot_memptr
 
 	def __init__(self, pointed_object, field, **kwargs):
@@ -179,6 +197,7 @@ class MemptrPat(ExpressionPat):
 
 
 class TernaryPat(ExpressionPat):
+	"""Pattern for C's ternary operator."""
 	op = idaapi.cot_tern
 
 	def __init__(self, condition, positive_expression, negative_expression, **kwargs):
@@ -195,6 +214,7 @@ class TernaryPat(ExpressionPat):
 
 
 class VarPat(ExpressionPat):
+	"""Pattern for matching variables."""
 	op = idaapi.cot_var
 
 	def __init__(self, **kwargs):
@@ -206,8 +226,7 @@ class VarPat(ExpressionPat):
 
 
 class AbstractUnaryOpPattern(ExpressionPat):
-	op = None
-
+	"""Abstract class for C's unary operators."""
 	def __init__(self, operand, **kwargs):
 		super().__init__(**kwargs)
 		self.operand = operand
@@ -222,8 +241,7 @@ class AbstractUnaryOpPattern(ExpressionPat):
 
 
 class AbstractBinaryOpPattern(ExpressionPat):
-	op = None
-
+	"""Abstract class for C's binary operators."""
 	def __init__(self, first_operand, second_operand, symmetric=False, **kwargs):
 		super().__init__(**kwargs)
 		self.first_operand = first_operand

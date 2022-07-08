@@ -6,11 +6,13 @@ from herast.tree.pattern_context import PatternContext
 from herast.tree.patterns.expressions import ObjPat, AsgPat
 from herast.tree.patterns.instructions import ExprInsPat
 
-# sequence of instructions
 class SeqPat(BasePattern):
-	op = None
-
+	"""Pattern for matching sequence of instructions inside Block Pattern aka curly braces."""
 	def __init__(self, *pats, skip_missing=True, **kwargs):
+		"""
+		:param pats: instructions patterns
+		:param skip_missing: whether should skip missing instructions or patterns for them
+		"""
 		super().__init__(**kwargs)
 		self.skip_missing = skip_missing
 
@@ -50,6 +52,7 @@ class SeqPat(BasePattern):
 		return tuple(self.pats)
 
 class MultiObject(BasePattern):
+	"""Pattern for expression, that is allowed to be one of multiple objects"""
 	def __init__(self, *objects, **kwargs):
 		super().__init__(**kwargs)
 		self.objects = [ObjPat(o) for o in objects]
@@ -66,6 +69,7 @@ class MultiObject(BasePattern):
 
 
 class IntPat(BasePattern):
+	"""Pattern for expression, that could be interpreted as integer."""
 	def __init__(self, value=None, **kwargs):
 		super().__init__(**kwargs)
 		self.value = value
@@ -86,6 +90,7 @@ class IntPat(BasePattern):
 
 
 class StringPat(BasePattern):
+	"""Pattern for expression that could be interpreted as string."""
 	def __init__(self, str_value=None, minlen=5, **kwargs):
 		super().__init__(**kwargs)
 		self.str_value = str_value
@@ -108,7 +113,7 @@ class StringPat(BasePattern):
 
 
 class StructFieldAccess(BasePattern):
-	op = None
+	"""Pattern for structure field access either by pointer or by reference."""
 	def __init__(self, struct_type=None, member_offset=None, **kwargs):
 		super().__init__(**kwargs)
 		self.struct_type = struct_type
@@ -136,7 +141,13 @@ class StructFieldAccess(BasePattern):
 		return self.struct_type == stype
 
 def CallInsnPat(calling_function, *arguments, ignore_arguments=False, skip_missing=False, **kwargs):
+	"""Pseudopattern for quite popular operation of
+	Expression Instruction with Call Expression
+	"""
 	return ExprInsPat(calling_function, *arguments, ignore_arguments=ignore_arguments, skip_missing=skip_missing)
 
 def AsgInsnPat(x, y):
+	"""Pseudopattern for quite popular operation of
+	Expression Instruction with Assignment Expression
+	"""
 	return ExprInsPat(AsgPat(x, y))

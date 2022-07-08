@@ -3,9 +3,15 @@ import typing
 from herast.tree.pattern_context import PatternContext
 
 class BasePattern:
+	"""Base class for all patterns."""
 	op = None
 
 	def __init__(self, debug=False, skip_casts=True, check_op: typing.Optional[int] = None):
+		"""
+		:param debug: should provide debug information during matching
+		:param skip_casts: should skip type casting
+		:param check_op: what item type to check. skips this check if None
+		"""
 		self.check_op = check_op
 		self.debug = debug
 		self.skip_casts = skip_casts
@@ -17,6 +23,11 @@ class BasePattern:
 		raise "%s: %s" % (self.__class__.__name__, msg)
 
 	def check(self, item, ctx: PatternContext, *args, **kwargs) -> bool:
+		"""Base matching operation.
+	
+		:param item: AST item
+		:param ctx: matching context
+		"""
 		raise NotImplementedError("This is an abstract class")
 
 	@classmethod
@@ -26,6 +37,9 @@ class BasePattern:
 
 	@staticmethod
 	def parent_check(func):
+		"""Decorator for child classes instead of inheritance, since
+		before and after calls are needed.
+		"""
 		def __perform_parent_check(self, item, *args, **kwargs):
 			if item is None:
 				return False

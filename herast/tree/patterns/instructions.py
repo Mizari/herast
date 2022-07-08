@@ -6,11 +6,13 @@ from herast.tree.pattern_context import PatternContext
 
 
 class InstructionPat(BasePattern):
+	"""Base pattern for instructions patterns."""
 	def __init__(self, debug=False, skip_casts=True, check_op=None):
 		super().__init__(debug, skip_casts, check_op=self.op)
 
 
 class BlockPat(InstructionPat):
+	"""Pattern for block instruction aka curly braces."""
 	op = idaapi.cit_block
 
 	def __init__(self, *patterns: BasePattern, **kwargs):
@@ -34,6 +36,7 @@ class BlockPat(InstructionPat):
 
 
 class ExprInsPat(InstructionPat):
+	"""Pattern for expression instruction aka ...;"""
 	op = idaapi.cit_expr
 
 	def __init__(self, expr=None, **kwargs):
@@ -50,9 +53,16 @@ class ExprInsPat(InstructionPat):
 
 
 class IfPat(InstructionPat):
+	"""Pattern for if instruction."""
 	op = idaapi.cit_if
 
 	def __init__(self, condition=None, then_branch=None, else_branch=None, should_wrap_in_block=True, **kwargs):
+		"""
+		:param condition: if condition
+		:param then_branch: if then block
+		:param else_bran: if else block
+		:param should_wrap_in_block: whether should wrap then and else branches in BlockPat
+		"""
 		super().__init__(**kwargs)
 		def wrap_pattern(pat):
 			if pat is None:
@@ -88,6 +98,7 @@ class IfPat(InstructionPat):
 
 
 class ForPat(InstructionPat):
+	"""Pattern for for cycle instruction."""
 	op = idaapi.cit_for
 
 	def __init__(self, init=None, expr=None, step=None, body=None, **kwargs):
@@ -112,6 +123,7 @@ class ForPat(InstructionPat):
 
 
 class RetPat(InstructionPat):
+	"""Pattern for return instruction."""
 	op = idaapi.cit_return
 
 	def __init__(self, expr=None, **kwargs):
@@ -130,6 +142,7 @@ class RetPat(InstructionPat):
 
 
 class WhilePat(InstructionPat):
+	"""Pattern for while cycle instruction."""
 	op = idaapi.cit_while
 
 	def __init__(self, expr=None, body=None, **kwargs):
@@ -150,6 +163,7 @@ class WhilePat(InstructionPat):
 
 
 class DoPat(InstructionPat):
+	"""Pattern for do while cycle instruction."""
 	op = idaapi.cit_do
 
 	def __init__(self, expr=None, body=None, **kwargs):
@@ -170,7 +184,9 @@ class DoPat(InstructionPat):
 
 
 class GotoPat(InstructionPat):
+	"""Pattern for goto instruction."""
 	op = idaapi.cit_goto
+
 	def __init__(self, **kwargs):
 		super().__init__(**kwargs)
 

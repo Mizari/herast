@@ -35,6 +35,9 @@ class Matcher:
 		self.schemes : list[Scheme] = list(schemes)
 
 	def match(self, func):
+		"""Match schemes for function body.
+
+		:param func: matched function. Can be decompiled or just function address"""
 		if func is None:
 			return
 
@@ -50,6 +53,7 @@ class Matcher:
 		raise Exception("Invalid function type")
 
 	def match_objects_xrefs(self, *objects):
+		"""Match objects' xrefs in functions. Might decompile a lot of functions"""
 		cfuncs_eas = set()
 		for func_ea in objects:
 			calls = get_func_calls_to(func_ea)
@@ -63,6 +67,7 @@ class Matcher:
 			self.match_cfunc(cfunc)
 
 	def match_cfunc(self, cfunc):
+		"""Match schemes in decompiled function."""
 		tp = TreeProcessor(cfunc)
 		while True:
 			contexts = {s.name: PatternContext(tp) for s in self.schemes}
@@ -82,6 +87,12 @@ class Matcher:
 				scheme.on_tree_iteration_end(contexts[scheme.name])
 
 	def check_schemes(self, tree_processor: TreeProcessor, item: idaapi.citem_t) -> bool:
+		"""Match item in schemes.
+
+		:param tree_processor:
+		:param item: AST item
+		:return: is item modified/removed?
+		"""
 		item_ctx = PatternContext(tree_processor)
 
 		for scheme in self.schemes:

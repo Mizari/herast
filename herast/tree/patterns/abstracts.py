@@ -5,9 +5,12 @@ from herast.tree.patterns.base_pattern import BasePattern
 from herast.tree.pattern_context import PatternContext
 
 
-# any pattern
 class AnyPat(BasePattern):
+	"""Pattern that always successfully matches"""
 	def __init__(self, may_be_none=True, **kwargs):
+		"""
+		:param may_be_none: whether item is allowed to be None
+		"""
 		super().__init__(**kwargs)
 		self.may_be_none = may_be_none
 
@@ -20,6 +23,7 @@ class AnyPat(BasePattern):
 		return ()
 
 class OrPat(BasePattern):
+	"""Logical or pattern."""
 	def __init__(self, *pats: BasePattern, **kwargs):
 		super().__init__(**kwargs)
 		if len(pats) <= 1:
@@ -39,9 +43,11 @@ class OrPat(BasePattern):
 		return self.pats
 
 class AndPat(BasePattern):
+	"""Logical and pattern."""
 	def __init__(self, *pats: BasePattern, **kwargs):
 		super().__init__(**kwargs)
-		self._assert(len(pats) > 1, "Passing one or less patterns to AndPat is useless")
+		if len(pats) <= 1:
+			print("[*] WARNING: one or less patterns to AndPat is useless")
 		self.pats = tuple(pats)
 
 	@BasePattern.parent_check
@@ -57,6 +63,7 @@ class AndPat(BasePattern):
 		return self.pats
 
 class SkipCasts(BasePattern):
+	"""Pattern to skip every type cast and check given pattern directly"""
 	def __init__(self, pat: BasePattern, **kwargs):
 		super().__init__(**kwargs)
 		self.pat = pat
@@ -73,6 +80,8 @@ class SkipCasts(BasePattern):
 		return self.pat
 
 class BindItem(BasePattern):
+	"""Save item in context after successful matching. If item with given
+	name already exists in context, then checks their equality"""
 	def __init__(self, name: str, pat: typing.Optional[BasePattern] = None, **kwargs):
 		super().__init__(**kwargs)
 		self.pat = pat or AnyPat()
@@ -91,6 +100,8 @@ class BindItem(BasePattern):
 
 
 class VarBind(BasePattern):
+	"""Save variable in context after successful matching. If variable with
+	given name already exists in context, then checks their indexes"""
 	def __init__(self, name: str, **kwargs):
 		super().__init__(**kwargs)
 		self.name = name
@@ -108,6 +119,8 @@ class VarBind(BasePattern):
 
 
 class DeepExpr(BasePattern):
+	"""Find pattern somewhere inside an item and save it in context if 
+	bind_name is provided."""
 	def __init__(self, pat: BasePattern, bind_name=None, **kwargs):
 		super().__init__(**kwargs)
 		self.pat = pat
@@ -125,6 +138,7 @@ class DeepExpr(BasePattern):
 
 
 class LabeledInstruction(BasePattern):
+	"""Find instruction with a label on it."""
 	def __init__(self, **kwargs):
 		super().__init__(**kwargs)
 
@@ -159,6 +173,7 @@ class ItemsCollector:
 		return self.collected_items
 
 class RemovePattern(BasePattern):
+	"""Pattern, that will queue item removal after successful matching."""
 	def __init__(self, pat: BasePattern, **kwargs):
 		super().__init__(**kwargs)
 		self.pat = pat
@@ -172,12 +187,11 @@ class RemovePattern(BasePattern):
 		return True
 
 
-# For debug purposes
 class DebugPattern(BasePattern):
-	call_depth = 6
-
-	def __init__(self, return_value=False, **kwargs):
+	"""Debug pattern that will print out callstack of a chosen length."""
+	def __init__(self, return_value=False, call_depth=6, **kwargs):
 		super().__init__(**kwargs)
+		self.call_depth=call_depth
 		self.return_value = return_value
 
 	@BasePattern.parent_check
@@ -192,8 +206,8 @@ class DebugPattern(BasePattern):
 		return self.return_value
 		
 
-# useful pattern to determine where big and complex pattern went wrong
 class DebugWrapper(BasePattern):
+	"""Useful pattern to determine where big and complex pattern went wrong."""
 	def __init__(self, pat: BasePattern, msg=None, **kwargs):
 		super().__init__(**kwargs)
 		self.pat = pat
