@@ -5,7 +5,7 @@ from herast.settings.base_settings import BaseSettings
 
 class HerastSettings(BaseSettings):
 	"""Class for global settings, usually saved in
-	C:\Users\USERNAME\AppData\Roaming\Hex-Rays\IDA Pro\herast_settings.json
+	C:\\Users\\USERNAME\\AppData\\Roaming\\Hex-Rays\\IDA Pro\\herast_settings.json
 	"""
 
 	path = os.path.join(idaapi.get_user_idadir(), "herast_settings.json")
