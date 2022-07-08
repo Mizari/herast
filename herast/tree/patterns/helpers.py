@@ -1,6 +1,5 @@
 import idaapi
 
-import herast.tree.consts as consts
 from herast.tree.patterns.base_pattern import BasePattern
 from herast.tree.pattern_context import PatternContext
 from herast.tree.patterns.expressions import ObjPat, AsgPat
@@ -19,6 +18,7 @@ class SeqPat(BasePattern):
 		if len(pats) == 1 and isinstance(pats[0], list):
 			pats = pats[0]
 
+		import herast.tree.consts as consts
 		for p in pats:
 			if p.op < 0:
 				continue
