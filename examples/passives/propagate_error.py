@@ -2,7 +2,7 @@ from herapi import *
 
 
 class ReplacingScheme(SPScheme):
-	def __init__(self, name, pattern):
+	def __init__(self):
 		"""
 		pattern of form:
 		if (error_var) {
