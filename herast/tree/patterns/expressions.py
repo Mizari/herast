@@ -262,6 +262,22 @@ class AbstractBinaryOpPattern(ExpressionPat):
 		return (self.first_operand, self.second_operand)
 
 
+class AsgPat(ExpressionPat):
+	"""Class for assignment expression."""
+
+	op = idaapi.cot_asg
+	def __init__(self, lhs, rhs, **kwargs):
+		super().__init__(**kwargs)
+		self.lhs = lhs
+		self.rhs = rhs
+	
+	@ExpressionPat.parent_check
+	def check(self, item, ctx: PatternContext) -> bool:
+		if not self.lhs.check(item.x):
+			return False
+		return self.rhs.check(item.y)
+
+
 def __generate_expression_patterns():
 	import sys
 	module = sys.modules[__name__]
@@ -272,6 +288,8 @@ def __generate_expression_patterns():
 		vars(module)[name] = type(name, (AbstractUnaryOpPattern,), {'op': op})
 
 	for op in binary_expressions_ops:
+		# skip assignment, because it is explicitly defined for easier coding
+		if op == idaapi.cot_asg: continue
 		name = '%sPat' % op2str[op].replace('cot_', '').capitalize()
 		vars(module)[name] = type(name, (AbstractBinaryOpPattern,), {'op': op})
 __generate_expression_patterns()
