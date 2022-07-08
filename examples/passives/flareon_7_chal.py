@@ -1,14 +1,14 @@
 import struct
-from herapi import SeqPat, ExprInsPat, AsgPat, AnyPat, BindItem, ForPat, BlockPat, AsgxorPat, SPScheme, PatternContext, register_storage_scheme
+from herapi import SeqPat, ExprInsPat, AsgPat, AnyPat, BindItemPat, ForPat, BlockPat, AsgxorPat, SPScheme, PatternContext, register_storage_scheme
 
 
 pattern = SeqPat(
 				# ExInsPat(AsgPat(BindExpr('gobj', ObjPat()), SkipCasts(CallPat(ObjPat(name='j__malloc_base'), ignore_arguments=True)))),
 				# ExInsPat(AnyPat()),
-				ExprInsPat(AsgPat(AnyPat(), BindItem('num0', AnyPat()))),
-				ExprInsPat(AsgPat(AnyPat(), BindItem('num1', AnyPat()))),
-				ExprInsPat(AsgPat(AnyPat(), BindItem('num2', AnyPat()))),
-				ExprInsPat(AsgPat(AnyPat(), BindItem('num3', AnyPat()))),
+				ExprInsPat(AsgPat(AnyPat(), BindItemPat('num0', AnyPat()))),
+				ExprInsPat(AsgPat(AnyPat(), BindItemPat('num1', AnyPat()))),
+				ExprInsPat(AsgPat(AnyPat(), BindItemPat('num2', AnyPat()))),
+				ExprInsPat(AsgPat(AnyPat(), BindItemPat('num3', AnyPat()))),
 				# ExInsPat(AsgPat(AnyPat(), BindExpr('num4', AnyPat()))),
 				# ExInsPat(AsgPat(AnyPat(), BindExpr('num5', AnyPat()))),
 				# ExInsPat(AsgPat(AnyPat(), BindExpr('num6', AnyPat()))),
@@ -16,7 +16,7 @@ pattern = SeqPat(
 				ForPat(
 					AnyPat(), AnyPat(), AnyPat(),
 					BlockPat(
-						ExprInsPat(BindItem('xor', AsgxorPat(AnyPat(), AnyPat())))
+						ExprInsPat(BindItemPat('xor', AsgxorPat(AnyPat(), AnyPat())))
 					)
 				)
 		)

@@ -80,7 +80,7 @@ release_pattern = \
 	first one will later be replaced/removed in HelperReplacer
 	second one will be deleted via Remove Pattern
 """
-release_pattern = SeqPat(AsgInsnPat(VarPat(), AnyPat()), RemovePattern(release_pattern))
+release_pattern = SeqPat(AsgInsnPat(VarPat(), AnyPat()), RemovePat(release_pattern))
 register_storage_scheme(HelperReplacer("shptr_release", release_pattern, "__sharedptr::release"))
 
 def cond_insn(pat):
@@ -125,4 +125,4 @@ std_release_pattern = cond_insn(CallInsnPat(
 									"std::_Sp_counted_base::_M_release",
 									ignore_arguments=True
 								))
-register_storage_scheme(ItemRemovalScheme("shptr_release_remover", RemovePattern(std_release_pattern)))
+register_storage_scheme(ItemRemovalScheme("shptr_release_remover", RemovePat(std_release_pattern)))

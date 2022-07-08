@@ -6,7 +6,7 @@ class FunctionRenamer(SPScheme):
 	def __init__(self, debug_flag):
 		pattern = IfPat(
 			ObjPat(debug_flag),
-			DeepExpr(CallPat("printf", ignore_arguments=True), bind_name="debug_print"),
+			DeepExprPat(CallPat("printf", ignore_arguments=True), bind_name="debug_print"),
 			should_wrap_in_block=False, # if to not wrap in block, because we want to search inside block's instructions
 		)
 		super().__init__("function_renamer", pattern)

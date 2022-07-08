@@ -1,7 +1,7 @@
 import idaapi
 import idautils
 
-from herast.tree.patterns.abstracts import BindItem, VarBind
+from herast.tree.patterns.abstracts import BindItemPat, VarBindPat
 from herast.tree.pattern_context import PatternContext
 from herast.tree.processing import TreeProcessor
 from herast.schemes.base_scheme import Scheme
@@ -147,7 +147,7 @@ class Matcher:
 		self.schemes.append(scheme)
 
 	def expressions_traversal_is_needed(self):
-		abstract_expression_patterns = (VarBind, BindItem)
+		abstract_expression_patterns = (VarBindPat, BindItemPat)
 		for s in self.schemes:
 			for p in s.get_patterns():
 				if p.op >= 0 and p.op < idaapi.cit_empty or isinstance(p, abstract_expression_patterns):

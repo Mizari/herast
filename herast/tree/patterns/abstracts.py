@@ -62,7 +62,7 @@ class AndPat(BasePat):
 	def children(self):
 		return self.pats
 
-class SkipCasts(BasePat):
+class SkipCastsPat(BasePat):
 	"""Pattern to skip every type cast and check given pattern directly"""
 	def __init__(self, pat: BasePat, **kwargs):
 		super().__init__(**kwargs)
@@ -79,7 +79,7 @@ class SkipCasts(BasePat):
 	def children(self):
 		return self.pat
 
-class BindItem(BasePat):
+class BindItemPat(BasePat):
 	"""Save item in context after successful matching. If item with given
 	name already exists in context, then checks their equality"""
 	def __init__(self, name: str, pat: typing.Optional[BasePat] = None, **kwargs):
@@ -99,7 +99,7 @@ class BindItem(BasePat):
 		return False
 
 
-class VarBind(BasePat):
+class VarBindPat(BasePat):
 	"""Save variable in context after successful matching. If variable with
 	given name already exists in context, then checks their indexes"""
 	def __init__(self, name: str, **kwargs):
@@ -118,7 +118,7 @@ class VarBind(BasePat):
 			return True
 
 
-class DeepExpr(BasePat):
+class DeepExprPat(BasePat):
 	"""Find pattern somewhere inside an item and save it in context if 
 	bind_name is provided."""
 	def __init__(self, pat: BasePat, bind_name=None, **kwargs):
@@ -137,7 +137,7 @@ class DeepExpr(BasePat):
 		return False
 
 
-class LabeledInstruction(BasePat):
+class LabeledInstructionPat(BasePat):
 	"""Find instruction with a label on it."""
 	def __init__(self, **kwargs):
 		super().__init__(**kwargs)
@@ -172,7 +172,7 @@ class ItemsCollector:
 		tree_proc.process_all_items(item, processing_callback)
 		return self.collected_items
 
-class RemovePattern(BasePat):
+class RemovePat(BasePat):
 	"""Pattern, that will queue item removal after successful matching."""
 	def __init__(self, pat: BasePat, **kwargs):
 		super().__init__(**kwargs)
@@ -187,7 +187,7 @@ class RemovePattern(BasePat):
 		return True
 
 
-class DebugPattern(BasePat):
+class DebugPat(BasePat):
 	"""Debug pattern that will print out callstack of a chosen length."""
 	def __init__(self, return_value=False, call_depth=6, **kwargs):
 		super().__init__(**kwargs)
@@ -206,7 +206,7 @@ class DebugPattern(BasePat):
 		return self.return_value
 		
 
-class DebugWrapper(BasePat):
+class DebugWrapperPat(BasePat):
 	"""Useful pattern to determine where big and complex pattern went wrong."""
 	def __init__(self, pat: BasePat, msg=None, **kwargs):
 		super().__init__(**kwargs)

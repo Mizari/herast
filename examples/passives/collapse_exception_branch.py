@@ -49,10 +49,10 @@ class ExceptionCollapserScheme(SPScheme):
 				}
 		"""
 		pattern = IfPat(
-			BindItem("if_expr"),
+			BindItemPat("if_expr"),
 			ExceptionBody(
 				AsgInsnPat(AnyPat(), CallPat("__cxa_allocate_exception")),
-				AsgInsnPat(AnyPat(), CallPat(AnyPat(), AnyPat(), BindItem("exception_str", AnyPat()))),
+				AsgInsnPat(AnyPat(), CallPat(AnyPat(), AnyPat(), BindItemPat("exception_str", AnyPat()))),
 				CallInsnPat('__cxa_throw'),
 			)
 		)
