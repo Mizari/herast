@@ -32,7 +32,7 @@ def __initialize():
 
 def __rebuild_passive_matcher():
 	global __passive_matcher
-	__passive_matcher = Matcher()
+	__passive_matcher.schemes.clear()
 	for s in __schemes.values():
 		if s.name in __enabled_schemes:
 			__passive_matcher.add_scheme(s)
