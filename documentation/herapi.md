@@ -1,4 +1,5 @@
-herapi is designed for safe "import * from herapi". In order to get more information use help(herapi.FUNCTION_OR_CLASS)  
+herapi is designed for safe "import * from herapi". In order to get more information use help(herapi.FUNCTION_OR_CLASS).
+ Use herapi.herapi_help() instead of help(herapi).  
   
   
 herapi functions:
