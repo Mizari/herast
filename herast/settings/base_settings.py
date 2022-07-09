@@ -2,10 +2,11 @@ import json
 
 class BaseSettings:
 	"""Base class for all possible settings."""
-	def __init__(self, folders=[], files=[], statuses=[], time_matching=None):
+	def __init__(self, folders=[], files=[], storages_statuses={}, schemes_statuses={}, time_matching=None):
 		self.storages_folders = folders
 		self.storages_files = files
-		self.storages_statuses = statuses
+		self.storages_statuses = storages_statuses
+		self.schemes_statuses = schemes_statuses
 		self.time_matching = time_matching
 
 	def add_storage_file(self, file_path: str):
@@ -26,6 +27,14 @@ class BaseSettings:
 
 	def disable_storage(self, storage_path: str):
 		self.storages_statuses[storage_path] = "disabled"
+		self.save()
+	
+	def enable_scheme(self, scheme_name: str):
+		self.schemes_statuses[scheme_name] = "enabled"
+		self.save()
+
+	def disable_scheme(self, scheme_name: str):
+		self.schemes_statuses[scheme_name] = "disabled"
 		self.save()
 
 	def remove_file_storage(self, file_path: str):
@@ -71,10 +80,17 @@ class BaseSettings:
 
 		files = json_dict.get("files", [])
 		folders = json_dict.get("folders", [])
-		statuses = json_dict.get("statuses", {})
+		storages_statuses = json_dict.get("storages_statuses", {})
+		schemes_statuses = json_dict.get("schemes_statuses", {})
 		time_matching = json_dict.get("time_matching", None)
-		if check(files) and check(folders) and isinstance(statuses, dict):
-			return cls(files=files, folders=folders, statuses=statuses, time_matching=time_matching)
+		if check(files) and check(folders) and isinstance(storages_statuses, dict):
+			return cls(
+				files=files,
+				folders=folders,
+				storages_statuses=storages_statuses,
+				schemes_statuses=schemes_statuses,
+				time_matching=time_matching
+			)
 		else:
 			return None
 
@@ -82,7 +98,8 @@ class BaseSettings:
 		json_dict = {
 			"folders": self.storages_folders,
 			"files":   self.storages_files,
-			"statuses": self.storages_statuses,
+			"storages_statuses": self.storages_statuses,
+			"schemes_statuses": self.schemes_statuses,
 		}
 		if self.time_matching is not None:
 			json_dict["time_matching"] = self.time_matching

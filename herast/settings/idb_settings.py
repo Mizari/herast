@@ -28,6 +28,7 @@ class IdbSettings(BaseSettings):
 	"""Class for settings, stored for per project in IDB."""
 
 	array_name = "$herast:PatternStorage"
+
 	@classmethod
 	def save_json_str(cls, saved_str):
 		save_long_str_to_idb(cls.array_name, saved_str)

@@ -83,15 +83,23 @@ def get_enabled_storages() -> typing.List[SchemesStorage]:
 	return [s for s in __schemes_storages.values() if s.enabled]
 
 def enable_scheme(scheme_name: str):
-	if scheme_name not in __schemes:
+	if scheme_name in __enabled_schemes:
 		return
 	__enabled_schemes.add(scheme_name)
+	settings_manager.enable_scheme(scheme_name)
+
+	if scheme_name not in __schemes:
+		return
 	__rebuild_passive_matcher()
 
 def disable_scheme(scheme_name: str):
-	if scheme_name not in __schemes:
+	if scheme_name not in __enabled_schemes:
 		return
 	__enabled_schemes.discard(scheme_name)
+	settings_manager.disable_scheme(scheme_name)
+
+	if scheme_name not in __schemes:
+		return
 	__rebuild_passive_matcher()
 
 def disable_storage(storage_path: str) -> bool:

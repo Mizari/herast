@@ -10,9 +10,6 @@ class HerastSettings(BaseSettings):
 
 	path = os.path.join(idaapi.get_user_idadir(), "herast_settings.json")
 
-	def __init__(self, folders=..., files=..., statuses=..., time_matching=None):
-		super().__init__(folders, files, statuses, time_matching)
-
 	@classmethod
 	def save_json_str(cls, saved_str):
 		with open(cls.path, 'w') as f:

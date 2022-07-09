@@ -107,6 +107,16 @@ def disable_storage(storage_path: str, globally=False):
 	s = __get_settings(globally=globally)
 	s.disable_storage(storage_path)
 
+def enable_scheme(scheme_name: str, globally=False):
+	"""By default in IDB, given globally=True does globally only."""
+	s = __get_settings(globally=globally)
+	s.enable_scheme(scheme_name)
+
+def disable_scheme(scheme_name:str, globally=False):
+	"""By default in IDB, given globally=True does globally only."""
+	s = __get_settings(globally=globally)
+	s.disable_scheme(scheme_name)
+
 def add_storage_folder(storages_folder: str, globally=False):
 	"""By default in IDB, given globally=True does globally only."""
 	s = __get_settings(globally=globally)
