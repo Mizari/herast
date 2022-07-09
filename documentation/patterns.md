@@ -6,7 +6,7 @@ Herast's patterns are divided into following groups:
 - [abstracts](https://github.com/mostobriv/herast/blob/main/herast/tree/patterns/abstracts.py)
 - [helpers](https://github.com/mostobriv/herast/blob/main/herast/tree/patterns/helpers.py)
 
-There is also a base pattern for all of them: [BasePattern](https://github.com/mostobriv/herast/blob/main/herast/tree/patterns/base_pattern.py). It has useful options like skip_casts for ignoring type castings and debug for troubleshooting patterns.
+There is also a base pattern for all of them: [BasePat](https://github.com/mostobriv/herast/blob/main/herast/tree/patterns/base_pattern.py). It has useful options like skip_casts for ignoring type castings and debug for troubleshooting patterns.
 
 
 # Patterns table
