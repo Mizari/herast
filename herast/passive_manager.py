@@ -60,9 +60,11 @@ def __update_storage_schemes(storage_path: str):
 	__rebuild_passive_matcher()
 
 def get_passive_matcher() -> Matcher:
+	"""Get matcher, that automatically matches in every decompilation."""
 	return __passive_matcher
 
 def register_storage_scheme(scheme: Scheme):
+	"""API for storages to export their schemes."""
 	import inspect
 	storage_path = inspect.stack()[1].filename
 	__storage2schemes[storage_path].append(scheme.name)
@@ -71,18 +73,23 @@ def register_storage_scheme(scheme: Scheme):
 	__schemes[scheme.name] = scheme
 
 def get_storage(filename: str) -> typing.Optional[SchemesStorage]:
+	"""Get storage by its path."""
 	return __schemes_storages.get(filename)
 
 def get_storages() -> typing.List[SchemesStorage]:
+	"""Get all storages."""
 	return [s for s in __schemes_storages.values()]
 
 def get_storages_folders() -> typing.List[str]:
+	"""Get all storages folders."""
 	return settings_manager.get_storages_folders()
 
 def get_enabled_storages() -> typing.List[SchemesStorage]:
+	"""Get only enabled storages."""
 	return [s for s in __schemes_storages.values() if s.enabled]
 
 def enable_scheme(scheme_name: str):
+	"""Change status of scheme to activate it in passive matching."""
 	if scheme_name in __enabled_schemes:
 		return
 	__enabled_schemes.add(scheme_name)
@@ -93,6 +100,7 @@ def enable_scheme(scheme_name: str):
 	__rebuild_passive_matcher()
 
 def disable_scheme(scheme_name: str):
+	"""Change status of scheme to deactivate it in passive matching."""
 	if scheme_name not in __enabled_schemes:
 		return
 	__enabled_schemes.discard(scheme_name)
@@ -103,6 +111,7 @@ def disable_scheme(scheme_name: str):
 	__rebuild_passive_matcher()
 
 def disable_storage(storage_path: str) -> bool:
+	"""Change status of a storage to not export schemes to passive matcher."""
 	storage = get_storage(storage_path)
 	if storage is None or not storage.enabled:
 		return False
@@ -114,6 +123,7 @@ def disable_storage(storage_path: str) -> bool:
 	return True
 
 def enable_storage(storage_path: str) -> bool:
+	"""Change status of a storage to export schemes to passive matcher."""
 	storage = get_storage(storage_path)
 	if storage is None or storage.enabled or storage.error:
 		return False
@@ -131,6 +141,7 @@ def enable_storage(storage_path: str) -> bool:
 	return True
 
 def add_storage_folder(storages_folder: str, global_settings=False):
+	"""Add new storages from folder and rebuild passive matcher."""
 	if storages_folder in settings_manager.get_storages_folders(globally=global_settings):
 		return
 	settings_manager.add_storage_folder(storages_folder, globally=global_settings)
@@ -141,6 +152,7 @@ def add_storage_folder(storages_folder: str, global_settings=False):
 	__rebuild_passive_matcher()
 
 def remove_storage_folder(storages_folder: str, global_settings=False):
+	"""Remove existing storages from folder and rebuild passive matcher."""
 	if storages_folder not in settings_manager.get_storages_folders(globally=global_settings):
 		return
 	settings_manager.remove_storage_folder(storages_folder, global_settings)
@@ -151,18 +163,21 @@ def remove_storage_folder(storages_folder: str, global_settings=False):
 	__rebuild_passive_matcher()
 
 def add_storage_file(storage_path: str, global_settings=False):
+	"""Add new storage and rebuild passive matcher."""
 	if storage_path in settings_manager.get_storages_files(globally=global_settings):
 		return
 	settings_manager.add_storage_file(storage_path, global_settings)
 	load_storage(storage_path)
 
 def remove_storage_file(storage_path: str, global_settings=False):
+	"""Remove existing storage and rebuild passive matcher."""
 	if storage_path in settings_manager.get_storages_files(globally=global_settings):
 		return
 	settings_manager.add_storage_file(storage_path, global_settings)
 	unload_storage(storage_path)
 
 def load_storage(storage_path: str, rebuild_passive=True) -> bool:
+	"""Load new storage, that will not be saved in settings and rebuild passive matcher."""
 	if get_storage(storage_path) is not None:
 		return False
 
@@ -189,6 +204,7 @@ def load_storage(storage_path: str, rebuild_passive=True) -> bool:
 	return True
 
 def unload_storage(storage_path: str, rebuild_passive=True):
+	"""Remove existing storage, that will not be saved in settings and rebuild passive matcher."""
 	storage = get_storage(storage_path)
 	if storage is None:
 		return False
@@ -208,6 +224,7 @@ def unload_storage(storage_path: str, rebuild_passive=True):
 	return True
 
 def reload_storage(storage_path: str, rebuild_passive=True) -> bool:
+	"""Reload storage and rebuild passive matcher."""
 	storage = get_storage(storage_path)
 	if storage is None:
 		return False
