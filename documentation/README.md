@@ -5,6 +5,11 @@
 - Matcher is an object, that applies schemes to functions.
 
 
+# herapi
+herapi is designed for safe "import * from herapi". In order to get more information for herapi entries use help(herapi.FUNCTION_OR_CLASS).
+ Use herapi.herapi_help() instead of help(herapi), since herapi only imports from others.  
+
+
 # Schemes Storages View
 Actions of schemes storages view are for in-IDB settings only. In order to do actions globally currently it is required to use herapi.  
 - Disable: disables selected storage
