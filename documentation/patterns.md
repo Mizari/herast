@@ -11,10 +11,11 @@ There is also a base pattern for all of them: [BasePat](https://github.com/mosto
 
 # If example
 <p align='center'>
-<img src='pictures/if_example.png'>
-<img src='pictures/if_ast_example.png'>
-</p>
-Pattern for this AST code will look like this:  
+<img src='https://github.com/mostobriv/herast/blob/main/pictures/if_example.png'>
+<img src='https://github.com/mostobriv/herast/blob/main/pictures/if_ast_example.png'>
+</p>  
+  
+Pattern for this AST code will look like this:
 ```
 IfPat(
 	ObjPat("debug_on"),
@@ -30,10 +31,11 @@ Notice how there is no need for BlockPat around CallPat, since it is only 1 inst
 
 # Struct field access example
 <p align='center'>
-<img src='pictures/struct_field_access_example.png'>
-<img src='pictures/struct_field_access_ast_example.png'>
-</p>
-Pattern for this AST code will look like this:  
+<img src='https://github.com/mostobriv/herast/blob/main/pictures/struct_field_access_example.png'>
+<img src='https://github.com/mostobriv/herast/blob/main/pictures/struct_field_access_ast_example.png'>
+</p>  
+  
+Pattern for this AST code will look like this:
 ```
 AsgPat(
 	StructFieldAccessPat("struct_1", 0x60),
