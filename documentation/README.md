@@ -1,7 +1,9 @@
 # Terminology
 - Pattern is a way to describe part of decompiled AST. Patterns are further described in https://github.com/mostobriv/herast/tree/main/documentation/patterns.md
 - Scheme is a way to handle found patterns in decompiled functions. Schemes are further described in https://github.com/mostobriv/herast/tree/main/documentation/schemes.md
-- Storage is a module, that exports schemes to herast.
+- Storage is a module, that can export schemes to herast.
+- Enabled storage is a storage, that passive matcher will load and import schemes from.
+- Enabled scheme is a imported scheme, that will be automatically applied by passive matcher during every decompilation.
 - Matcher is an object, that applies schemes to functions.
 
 
