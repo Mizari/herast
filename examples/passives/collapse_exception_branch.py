@@ -7,11 +7,11 @@ class ExceptionBody(BasePat):
 		Exception body checks the very first and the very last instructions.
 		Then it will try to find instruction with exception string.
 	"""
-	op = idaapi.cit_block
-	def __init__(self, first_call, excstr_getter, last_call):
+	def __init__(self, first_call, excstr_getter, last_call, **kwargs):
 		self.first_call = first_call
 		self.last_call = last_call
 		self.excstr_getter = excstr_getter
+		super().__init__(check_op=idaapi.cit_block, **kwargs)
 
 	@BasePat.parent_check
 	def check(self, item, ctx):
