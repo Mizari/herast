@@ -37,7 +37,7 @@ class ExceptionBody(BasePat):
 
 
 class ExceptionCollapserScheme(SPScheme):
-	def __init__(self, name, pattern):
+	def __init__(self):
 		"""
 			pattern looks like this:
 				if (if_expr) {
