@@ -21,7 +21,12 @@ class ExceptionBody(BasePat):
 			return False
 
 		if not self.first_call.check(block[0], ctx):
+			b0 = block[0]
+			if b0.op == idaapi.cit_if: return False
+			c = b0.cexpr
+			if c.y.op != idaapi.cot_call: return False
 			return False
+
 		if not self.last_call.check(block[len(block) - 1], ctx):
 			return False
 
@@ -49,11 +54,11 @@ class ExceptionCollapserScheme(SPScheme):
 				}
 		"""
 		pattern = IfPat(
-			BindItemPat("if_expr"),
+			AnyPat(),
 			ExceptionBody(
-				AsgInsnPat(AnyPat(), CallPat("__cxa_allocate_exception")),
-				AsgInsnPat(AnyPat(), CallPat(AnyPat(), AnyPat(), BindItemPat("exception_str", AnyPat()))),
-				CallInsnPat('__cxa_throw'),
+				AsgInsnPat(AnyPat(), CallPat("__cxa_allocate_exception", ignore_arguments=True)),
+				AsgInsnPat(AnyPat(), CallPat(AnyPat(), AnyPat(), BindItemPat("exception_str", ObjPat()))),
+				CallInsnPat('__cxa_throw', ignore_arguments=True),
 			),
 			should_wrap_in_block=False,
 		)
@@ -66,23 +71,13 @@ class ExceptionCollapserScheme(SPScheme):
 			on match will try to construct from found item and binded expressions
 			__throw_if(if_expr, "exception string")
 		"""
-		helper_args = []
 
-		if_expr = ctx.get_expr("if_expr")
-		if if_expr is not None:
-			arg1 = idaapi.carg_t()
-			arg1.assign(if_expr)
-			helper_args.append(arg1)
-
+		if_condition = item.cif.expr
 		exception_str = ctx.get_expr("exception_str")
-		if exception_str is not None:
-			if exception_str.op == idaapi.cot_obj:
-				arg2 = idaapi.carg_t()
-				arg2.assign(exception_str)
-				helper_args.append(arg2)
-
-		new_item = make_call_helper_instr("__throw_if", *helper_args)
-
+		if exception_str is None:
+			new_item = make_call_helper_instr("__throw_if", if_condition)
+		else:
+			new_item = make_call_helper_instr("__throw_if", if_condition, exception_str)
 		ctx.modify_instr(item, new_item)
 
 		return False

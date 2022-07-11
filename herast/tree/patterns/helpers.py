@@ -146,8 +146,8 @@ def CallInsnPat(*args, **kwargs):
 	"""
 	return ExprInsPat(CallPat(*args, **kwargs))
 
-def AsgInsnPat(x, y):
+def AsgInsnPat(x, y, **kwargs):
 	"""Pseudopattern for quite popular operation of
 	Expression Instruction with Assignment Expression
 	"""
-	return ExprInsPat(AsgPat(x, y))
+	return ExprInsPat(AsgPat(x, y, **kwargs))
