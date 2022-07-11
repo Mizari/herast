@@ -39,10 +39,10 @@ Pattern for this AST code will look like this:
 ```
 AsgPat(
 	StructFieldAccessPat("struct_1", 0x60),
-	CallPat(ObjPat("calloc"), AnyPat(), AnyPat()),
+	CallPat("calloc", AnyPat(), AnyPat()),
 )
 ```
-Notice lack of type casting, since skip_casts is turned on by default in base pattern.
+Notice lack of type casting, since skip_casts is turned on by default in base pattern. Also no ObjPat inside CallPat.
 
 # Patterns table
 TODO
