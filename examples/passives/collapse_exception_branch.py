@@ -54,7 +54,8 @@ class ExceptionCollapserScheme(SPScheme):
 				AsgInsnPat(AnyPat(), CallPat("__cxa_allocate_exception")),
 				AsgInsnPat(AnyPat(), CallPat(AnyPat(), AnyPat(), BindItemPat("exception_str", AnyPat()))),
 				CallInsnPat('__cxa_throw'),
-			)
+			),
+			should_wrap_in_block=False,
 		)
 
 		name = "exception_collapser"
