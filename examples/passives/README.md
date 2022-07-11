@@ -2,7 +2,15 @@
 TODO
 
 # collapse_exception_branch
-Replaces long and complex exception throwing instruction into short and simple __throw_if function call
+Replaces
+<p align='center'>
+<img src='https://github.com/mostobriv/herast/blob/main/pictures/collapse_exception_before.png'>
+</p>  
+into
+<p align='center'>
+<img src='https://github.com/mostobriv/herast/blob/main/pictures/collapse_exception_after.png'>
+</p>  
+
 
 # flareon_7_chal
 TODO
