@@ -2,7 +2,7 @@ import idaapi
 
 from herast.tree.patterns.base_pattern import BasePat
 from herast.tree.pattern_context import PatternContext
-from herast.tree.patterns.expressions import ObjPat, AsgPat
+from herast.tree.patterns.expressions import ObjPat, AsgPat, CallPat
 from herast.tree.patterns.instructions import ExprInsPat
 
 class SeqPat(BasePat):
@@ -140,11 +140,11 @@ class StructFieldAccessPat(BasePat):
 
 		return self.struct_type == stype
 
-def CallInsnPat(calling_function, *arguments, ignore_arguments=False, skip_missing=False, **kwargs):
+def CallInsnPat(*args, **kwargs):
 	"""Pseudopattern for quite popular operation of
 	Expression Instruction with Call Expression
 	"""
-	return ExprInsPat(calling_function, *arguments, ignore_arguments=ignore_arguments, skip_missing=skip_missing)
+	return ExprInsPat(CallPat(*args, **kwargs))
 
 def AsgInsnPat(x, y):
 	"""Pseudopattern for quite popular operation of
