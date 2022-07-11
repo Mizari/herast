@@ -9,17 +9,13 @@ TODO
 
 # propagate_error
 Replaces
-```
-if (error_var) {
-	logic_expr;
-} else {
-	error_var = logic_expr;
-}
-```
+<p align='center'>
+<img src='https://github.com/mostobriv/herast/blob/main/pictures/propagate_error_before.png'>
+</p>  
 into
-```
-error_var = __propagate_error(error_var, logic_expr);
-```
+<p align='center'>
+<img src='https://github.com/mostobriv/herast/blob/main/pictures/propagate_error_after.png'>
+</p>  
 
 # sharedptr
 Removes or replaces with simple function call some shared pointer logic of C++
