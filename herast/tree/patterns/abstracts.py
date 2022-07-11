@@ -14,7 +14,6 @@ class AnyPat(BasePat):
 		super().__init__(**kwargs)
 		self.may_be_none = may_be_none
 
-	@BasePat.parent_check
 	def check(self, item, ctx: PatternContext) -> bool:
 		return item is not None or self.may_be_none
 
