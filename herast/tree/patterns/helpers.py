@@ -20,9 +20,7 @@ class SeqPat(BasePat):
 
 		import herast.tree.consts as consts
 		for p in pats:
-			if p.op < 0:
-				continue
-			if consts.cexpr_op2str.get(p.op, None) is not None:
+			if p.op is not None and consts.cinsn_op2str.get(p.op) is None:
 				print("[*] WARNING: SeqPat expects instructions, not expression")
 
 		self.seq = tuple(pats)
