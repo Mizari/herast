@@ -26,7 +26,18 @@ into
 </p>  
 
 # sharedptr
-Removes or replaces with simple function call some shared pointer logic of C++
+Replaces
+<p align='center'>
+<img src='https://github.com/mostobriv/herast/blob/main/pictures/sharedptr_before1.png'>
+</p>  
+and  
+<p align='center'>
+<img src='https://github.com/mostobriv/herast/blob/main/pictures/sharedptr_before2.png'>
+</p>  
+into  
+<p align='center'>
+<img src='https://github.com/mostobriv/herast/blob/main/pictures/sharedptr_after.png'>
+</p>  
 
 # wasm_str_lit_cref_definer
 TODO
