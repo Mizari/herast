@@ -133,14 +133,15 @@ class Matcher:
 		tree_proc = ctx.tree_proc
 		is_tree_modified = False
 		for modified_instr in ctx.modified_instrs():
-			is_tree_modified = True
 			item = modified_instr.item
 			new_item = modified_instr.new_item
 
 			if new_item is None:
-				tree_proc.remove_item(item)
-			else:
-				tree_proc.replace_item(item, new_item)
+				if tree_proc.remove_item(item):
+					is_tree_modified = True
+			elif tree_proc.replace_item(item, new_item):
+				is_tree_modified = True
+
 		return is_tree_modified
 
 	def add_scheme(self, scheme):

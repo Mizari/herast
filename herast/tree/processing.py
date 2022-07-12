@@ -82,7 +82,6 @@ class TreeModificationContext:
 class TreeProcessor:
 	def __init__(self, cfunc):
 		self.cfunc = cfunc
-		self.is_tree_modified = False
 
 	def iterate_subitems(self, root_item):
 		yield from iterate_all_subitems(root_item)
@@ -137,7 +136,7 @@ class TreeProcessor:
 	def remove_item(self, item, is_forced=False):
 		tmc = TreeModificationContext(self, item)
 		if not is_forced and not self.is_removal_possible(tmc):
-			return
+			return False
 
 		parent = tmc.get_parent()
 		saved_lbl = item.label_num
@@ -146,13 +145,12 @@ class TreeProcessor:
 		if not rv:
 			item.label_num = saved_lbl
 			print("[*] Failed to remove item from tree")
-			return
-
-		self.is_tree_modified = True
+			return False
 
 		next_item = tmc.get_next_item()
 		if next_item is not None:
 			next_item.label_num = saved_lbl
+		return True
 	
 	def is_replacing_possible(self, tmc):
 		item = tmc.item
@@ -172,11 +170,11 @@ class TreeProcessor:
 
 		return True
 
-	def replace_item(self, item, new_item, is_forced=False):
+	def replace_item(self, item, new_item, is_forced=False) -> bool:
 		tmc = TreeModificationContext(self, item)
 
 		if not is_forced and not self.is_replacing_possible(tmc):
-			return
+			return False
 
 		if new_item.ea == idaapi.BADADDR and item.ea != idaapi.BADADDR:
 			new_item.ea = item.ea
@@ -186,6 +184,7 @@ class TreeProcessor:
 
 		try:
 			idaapi.qswap(item, new_item)
-			self.is_tree_modified = True
+			return True
 		except Exception as e:
-			print("[!] Got an exception during ctree instr replacing")
+			print("[!] Got an exception during ctree instr replacing", e)
+			return False
