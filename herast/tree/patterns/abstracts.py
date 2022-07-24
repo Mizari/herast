@@ -149,28 +149,6 @@ class LabeledInstructionPat(BasePat):
 		return True
 
 
-class ItemsCollector:
-	def __init__(self, pat: BasePat):
-		self.pat = pat
-		self.collected_items : typing.List = []
-
-	def check_pattern(self, tree_proc, item):
-		ctx = PatternContext(tree_proc)
-		try:
-			if self.pat.check(item, ctx):
-				self.collected_items.append(item)
-		except Exception as e:
-			print("[!] exception happend during collecting pattern in item :%s" % e)
-
-		return False
-
-	def collect_items(self, tree_proc, item):
-		self.collected_items.clear()
-		def processing_callback(tree_proc, item):
-			return self.check_pattern(tree_proc, item)
-		tree_proc.process_all_items(item, processing_callback)
-		return self.collected_items
-
 class RemovePat(BasePat):
 	"""Pattern, that will queue item removal after successful matching."""
 	def __init__(self, pat: BasePat, **kwargs):
