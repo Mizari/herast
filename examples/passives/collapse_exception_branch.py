@@ -41,7 +41,7 @@ class ExceptionBody(BasePat):
 		return True
 
 
-class ExceptionCollapserScheme(SPScheme):
+class ExceptionCollapserScheme(Scheme):
 	def __init__(self):
 		"""
 			pattern looks like this:

@@ -3,7 +3,7 @@ from herapi import *
 from collections import defaultdict
 
 
-class AssignmentCounterScheme(SPScheme):
+class AssignmentCounterScheme(Scheme):
 	def __init__(self, *candidates):
 		self.count = defaultdict(int)
 		obj_pat = MultiObjectPat(*candidates)

@@ -1,7 +1,7 @@
 from herapi import *
 
 
-class ReplacingScheme(SPScheme):
+class ReplacingScheme(Scheme):
 	def __init__(self):
 		"""
 		pattern of form:

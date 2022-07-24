@@ -1,12 +1,15 @@
 from herast.tree.pattern_context import PatternContext
+from herast.tree.patterns.base_pattern import BasePat
 
 class Scheme:
 	"""Class with logic on what to do with successfully found patterns in AST"""
-	def __init__(self, name: str):
+	def __init__(self, name: str, pattern: BasePat):
 		"""Scheme initialization
 
 		:param name: unique identificator for a scheme
+		:param pattern: AST pattern
 		"""
+		self.pattern = pattern
 		self.name = name
 
 	def get_patterns(self):
@@ -20,7 +23,7 @@ class Scheme:
 		:param ctx: matching context
 		:return: is item matched successfully?
 		"""
-		raise NotImplementedError("Virtual function")
+		return self.pattern.check(item, ctx)
 
 	def on_matched_item(self, item, ctx: PatternContext) -> bool:
 		"""Callback for successful match of scheme's patterns on item.

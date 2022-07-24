@@ -15,7 +15,7 @@ from herast.passive_manager import *
 
 from herast.tree.utils import make_call_helper_instr, strip_casts
 from herast.tree.matcher import Matcher
-from herast.schemes.single_pattern_schemes import SPScheme, ItemRemovalScheme
+from herast.tree.scheme import Scheme
 
 
 def herapi_help():

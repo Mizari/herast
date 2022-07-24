@@ -2,7 +2,7 @@ import idaapi, idc
 from herapi import *
 
 
-class ObjectSetterScheme(SPScheme):
+class ObjectSetterScheme(Scheme):
 	def __init__(self, function_address):
 		self.objects = {}
 		call_pattern = CallPat(function_address, NumPat(), NumPat(), AnyPat())

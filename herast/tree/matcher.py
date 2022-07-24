@@ -4,7 +4,7 @@ import idautils
 from herast.tree.patterns.abstracts import BindItemPat, VarBindPat
 from herast.tree.pattern_context import PatternContext
 from herast.tree.processing import TreeProcessor
-from herast.schemes.base_scheme import Scheme
+from herast.tree.scheme import Scheme
 
 
 def get_func_calls_to(fea):

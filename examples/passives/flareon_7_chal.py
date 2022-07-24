@@ -1,5 +1,5 @@
 import struct
-from herapi import SeqPat, ExprInsPat, AsgPat, AnyPat, BindItemPat, ForPat, BlockPat, AsgxorPat, SPScheme, PatternContext, register_storage_scheme
+from herapi import *
 
 
 pattern = SeqPat(
@@ -21,7 +21,7 @@ pattern = SeqPat(
 				)
 		)
 
-class Flareon7ChalScheme(SPScheme):
+class Flareon7ChalScheme(Scheme):
 	def on_matched_item(self, item, ctx: PatternContext):
 		print('%#x' % item.ea)
 		try:

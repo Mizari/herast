@@ -1,7 +1,7 @@
 from herapi import *
 
 
-class VirtualCollector(SPScheme):
+class VirtualCollector(Scheme):
 	def __init__(self, struct_type=None, offset=None):
 		pattern = AsgPat(StructFieldAccessPat(struct_type, offset), AnyPat())
 		super().__init__("virtual_collector", pattern)

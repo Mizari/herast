@@ -10,7 +10,7 @@ def get_unique_name(name_candidate):
 		i += 1
 	return name_candidate + '_' + str(i)
 
-class CallsParser(SPScheme):
+class CallsParser(Scheme):
 	def __init__(self, *function_address):
 		if len(function_address) == 0:
 			raise ValueError("No function address provided")

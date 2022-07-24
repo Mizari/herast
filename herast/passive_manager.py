@@ -1,7 +1,7 @@
 import typing
 
 from herast.schemes_storage import SchemesStorage
-from herast.schemes.base_scheme import Scheme
+from herast.tree.scheme import Scheme
 from herast.tree.matcher import Matcher
 
 import herast.settings.settings_manager as settings_manager

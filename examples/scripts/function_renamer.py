@@ -2,7 +2,7 @@ import idaapi
 from herapi import *
 
 
-class FunctionRenamer(SPScheme):
+class FunctionRenamer(Scheme):
 	def __init__(self, debug_flag):
 		pattern = IfPat(
 			ObjPat(debug_flag),

@@ -19,9 +19,7 @@ idaapi.require('herast.tree.callbacks')
 idaapi.require('herast.tree.actions')
 idaapi.require('herast.tree.selection_factory')
 
-idaapi.require('herast.schemes.base_scheme')
-idaapi.require('herast.schemes.multi_pattern_schemes')
-idaapi.require('herast.schemes.single_pattern_schemes')
+idaapi.require('herast.tree.scheme')
 
 idaapi.require('herast.passive_manager')
 

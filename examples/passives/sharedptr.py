@@ -1,6 +1,6 @@
 from herapi import *
 
-class HelperReplacer(SPScheme):
+class HelperReplacer(Scheme):
 	"""
 		this scheme either removes or replaces one item
 		with helper function of a given name without arguments
@@ -112,6 +112,10 @@ register_storage_scheme(HelperReplacer("shptr_inc", increment_pattern, "__shared
 
 
 
+class ItemRemovalScheme(Scheme):
+	def on_matched_item(self, item, ctx: PatternContext) -> bool:
+		ctx.modify_instr(item, None)
+		return False
 
 """
 	std_release_pattern is for removing this code:
