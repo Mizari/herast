@@ -1,19 +1,24 @@
 import idaapi
 import typing
+import traceback
 from herast.tree.pattern_context import PatternContext
 
 class BasePat:
 	"""Base class for all patterns."""
 	op = None
 
-	def __init__(self, debug=False, skip_casts=True, check_op: typing.Optional[int] = None):
+	def __init__(self, debug=False, debug_msg=None, debug_trace_depth=0, skip_casts=True, check_op: typing.Optional[int] = None):
 		"""
 		:param debug: should provide debug information during matching
+		:param debug_msg: additional message to print on debug
+		:param debug_trace_depth: additional trace information on debug
 		:param skip_casts: should skip type casting
 		:param check_op: what item type to check. skips this check if None
 		"""
 		self.check_op = check_op
 		self.debug = debug
+		self.debug_msg = debug_msg
+		self.debug_trace_depth = debug_trace_depth
 		self.skip_casts = skip_casts
 	
 	def _assert(self, cond, msg=""):
@@ -50,10 +55,22 @@ class BasePat:
 			if self.check_op is not None and item.op != self.check_op:
 				return False
 
-			return func(self, item, *args, **kwargs)
+			rv = func(self, item, *args, **kwargs)
+			if self.debug:
+				if self.debug_msg:
+					print("Debug: value =", rv, ",", self.debug_msg)
+				else:
+					print("Debug: value =", rv)
+
+				if self.debug_trace_depth != 0:
+					print('Debug calltrace, address of item: %#x (%s)' % (item.ea, item.opname))
+					print('---------------------------------')
+					for i in traceback.format_stack()[:self.self.debug_trace_depth]:
+						print(i)
+					print('---------------------------------')
+			return rv
 		return __perform_parent_check
 
 	@property
 	def children(self):
 		raise NotImplementedError("An abstract class doesn't have any children")
-

@@ -146,39 +146,3 @@ class RemovePat(BasePat):
 
 		ctx.modify_instr(item, None)
 		return True
-
-
-class DebugPat(BasePat):
-	"""Debug pattern that will print out callstack of a chosen length."""
-	def __init__(self, return_value=False, call_depth=6, **kwargs):
-		super().__init__(**kwargs)
-		self.call_depth=call_depth
-		self.return_value = return_value
-
-	@BasePat.parent_check
-	def check(self, item, ctx: PatternContext) -> bool:
-		print('Debug calltrace, address of item: %#x (%s)' % (item.ea, item.opname))
-		print('---------------------------------')
-		import traceback
-		for i in traceback.format_stack()[:self.call_depth]:
-			print(i)
-		print('---------------------------------')
-
-		return self.return_value
-		
-
-class DebugWrapperPat(BasePat):
-	"""Useful pattern to determine where big and complex pattern went wrong."""
-	def __init__(self, pat: BasePat, msg=None, **kwargs):
-		super().__init__(**kwargs)
-		self.pat = pat
-		self.msg = msg
-
-	@BasePat.parent_check
-	def check(self, item, ctx: PatternContext) -> bool:
-		rv = self.pat.check(item, ctx)
-		if self.msg is None:
-			print("Debug pattern rv:", rv)
-		else:
-			print("Debug pattern", self.msg, "rv:", rv)
-		return rv
