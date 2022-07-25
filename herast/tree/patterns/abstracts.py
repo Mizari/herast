@@ -61,22 +61,6 @@ class AndPat(BasePat):
 	def children(self):
 		return self.pats
 
-class SkipCastsPat(BasePat):
-	"""Pattern to skip every type cast and check given pattern directly"""
-	def __init__(self, pat: BasePat, **kwargs):
-		super().__init__(**kwargs)
-		self.pat = pat
-
-	@BasePat.parent_check
-	def check(self, item, ctx: PatternContext) -> bool:
-		while item.op == idaapi.cot_cast:
-			item = item.x
-		
-		return self.pat.check(item, ctx)
-
-	@property
-	def children(self):
-		return self.pat
 
 class BindItemPat(BasePat):
 	"""Save item in context after successful matching. If item with given
