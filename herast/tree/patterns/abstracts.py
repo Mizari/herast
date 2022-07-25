@@ -120,19 +120,6 @@ class DeepExprPat(BasePat):
 		return False
 
 
-class LabeledInstructionPat(BasePat):
-	"""Find instruction with a label on it."""
-	def __init__(self, **kwargs):
-		super().__init__(**kwargs)
-
-	@BasePat.parent_check
-	def check(self, item, ctx: PatternContext) -> bool:
-		lbl = item.label_num
-		if lbl == -1:
-			return False
-		return True
-
-
 class RemovePat(BasePat):
 	"""Pattern, that will queue item removal after successful matching."""
 	def __init__(self, pat: BasePat, **kwargs):
