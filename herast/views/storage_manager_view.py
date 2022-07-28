@@ -235,6 +235,7 @@ class StorageManagerModel(QtCore.QAbstractItemModel):
 			storage_path = self.get_storage_path_by_index(qindex)
 			if storage_path is not None:
 				passive_manager.reload_storage(storage_path)
+				self.dataChanged.emit(qindex, qindex)
 
 	# def flags(self, index):
 	# 	if not index.isValid():
