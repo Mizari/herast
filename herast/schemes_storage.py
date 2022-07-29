@@ -15,6 +15,7 @@ class SchemesStorage:
 		self.source = None
 	
 	def unload_module(self):
+		self.source = None
 		self.enabled = False
 		self.module = None
 		self.status_text = "Disabled"
