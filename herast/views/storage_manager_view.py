@@ -83,7 +83,21 @@ class StorageManagerModel(QtCore.QAbstractItemModel):
 		super().__init__()
 		self.root = SchemeStorageTreeItem(["File"])
 
-	def add_folder(self, storage_folder):
+	def add_folder(self, storage_folder: str):
+		parent_item = self.root
+		folder_part = storage_folder
+		while True:
+			for child in parent_item.children:
+				child_data = child.data(SchemeStorageTreeItem.FILENAME_COLUMN)
+				if folder_part.startswith(child_data):
+					parent_item = child
+					break
+			else:
+				child = SchemeStorageTreeItem([folder_part], SchemeStorageTreeItem.TYPE_DIRECTORY, parent=parent_item)
+				parent_item.children.insert(0, child) # keeps directories at the top of view
+				folder_item = child
+				break
+
 		for full_path in glob.iglob(storage_folder + '/**/**.py', recursive=True):
 			storage = passive_manager.get_storage(full_path)
 			if storage is None:
@@ -94,7 +108,7 @@ class StorageManagerModel(QtCore.QAbstractItemModel):
 			basename = splited_path.pop()
 			assert os.path.basename(full_path) == basename, "Extracted basename doesn't match with actual basename"
 
-			parent_item = self.root
+			parent_item = folder_item
 			for part in splited_path:
 				for child in parent_item.children:
 					if part == child.data(SchemeStorageTreeItem.FILENAME_COLUMN):
@@ -287,7 +301,7 @@ class StorageManagerForm(idaapi.PluginForm):
 		btn_expand_all.clicked.connect(storages_list.expandAll)
 		btn_collapse_all.clicked.connect(storages_list.collapseAll)
 
-		storages_list.setMaximumWidth(storages_list.size().width() // 3)
+		storages_list.setMaximumWidth(300)
 		storages_list.setSelectionMode(QtWidgets.QAbstractItemView.SingleSelection)
 
 		storages_list.horizontalScrollBar().setEnabled(True)
