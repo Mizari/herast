@@ -138,5 +138,5 @@ dmypy.json
 cython_debug/
 
 
-# Ready-patterns, as it may contain private data
-herast/ready_patterns/*.py
+# Private passives and scripts
+examples_private
