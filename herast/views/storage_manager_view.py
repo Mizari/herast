@@ -78,15 +78,12 @@ class SchemeStorageTreeItem:
 		else:
 			return False
 
-@singleton
 class StorageManagerModel(QtCore.QAbstractItemModel):
 	def __init__(self):
 		super().__init__()
 		self.root = SchemeStorageTreeItem(["File"])
-		for storage_folder in passive_manager.get_storages_folders():
-			self.__add_folder(storage_folder)
 
-	def __add_folder(self, storage_folder):
+	def add_folder(self, storage_folder):
 		for full_path in glob.iglob(storage_folder + '/**/**.py', recursive=True):
 			storage = passive_manager.get_storage(full_path)
 			if storage is None:
@@ -262,6 +259,9 @@ class StorageManagerForm(idaapi.PluginForm):
 		self.parent = idaapi.PluginForm.FormToPyQtWidget(form)
 		self.init_ui()
 
+		for storage_folder in passive_manager.get_storages_folders():
+			self.model.add_folder(storage_folder)
+
 	def init_ui(self):
 		self.parent.resize(400, 600)
 		self.parent.setWindowTitle("HeRAST Schemes Storages View")
@@ -306,7 +306,7 @@ class StorageManagerForm(idaapi.PluginForm):
 		btn_reload.clicked.connect(lambda: storages_list.model().reload_storage(storages_list.selectedIndexes()))
 
 		storage_source_area = QtWidgets.QTextEdit()
-		# storage_source_area.setTabStopDistance(QtGui.QFontMetricsF(storage_source_area.font()).width(' ') * 4)
+		storage_source_area.setTabStopDistance(QtGui.QFontMetricsF(storage_source_area.font()).width(' ') * 4)
 		storage_source_area.setTabStopWidth(4)
 		storage_source_area.setReadOnly(True)
 
