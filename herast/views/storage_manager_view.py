@@ -292,10 +292,10 @@ class StorageManagerForm(idaapi.PluginForm):
 
 	def OnCreate(self, form):
 		self.parent = idaapi.PluginForm.FormToPyQtWidget(form)
-		model = StorageManagerModel()
-		self.init_ui(model)
+		self.model = StorageManagerModel()
+		self.init_ui(self.model)
 		for storage_folder in passive_manager.get_storages_folders():
-			model.add_folder(storage_folder)
+			self.model.add_folder(storage_folder)
 
 	def init_ui(self, model):
 		self.parent.resize(400, 600)
