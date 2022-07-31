@@ -206,8 +206,7 @@ class StorageManagerModel(QtCore.QAbstractItemModel):
 	
 	def add_folder(self, storage_folder: str = None):
 		if storage_folder is None:
-			print("adding none")
-			return
+			storage_folder = idaapi.ask_text(1024, None, "Enter storages folder")
 
 		if storage_folder in self.folders:
 			return
