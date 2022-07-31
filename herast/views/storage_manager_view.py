@@ -83,46 +83,7 @@ class StorageManagerModel(QtCore.QAbstractItemModel):
 		super().__init__()
 		self.root = SchemeStorageTreeItem(["File"])
 
-	def add_folder(self, storage_folder: str):
-		parent_item = self.root
-		folder_part = storage_folder
-		while True:
-			for child in parent_item.children:
-				child_data = child.data(SchemeStorageTreeItem.FILENAME_COLUMN)
-				if folder_part.startswith(child_data):
-					parent_item = child
-					break
-			else:
-				child = SchemeStorageTreeItem([folder_part], SchemeStorageTreeItem.TYPE_DIRECTORY, parent=parent_item)
-				parent_item.children.insert(0, child) # keeps directories at the top of view
-				folder_item = child
-				break
 
-		for full_path in glob.iglob(storage_folder + '/**/**.py', recursive=True):
-			storage = passive_manager.get_storage(full_path)
-			if storage is None:
-				continue
-
-			relative_path = os.path.relpath(full_path, start=storage_folder)
-			splited_path = relative_path.split(os.sep)
-			basename = splited_path.pop()
-			assert os.path.basename(full_path) == basename, "Extracted basename doesn't match with actual basename"
-
-			parent_item = folder_item
-			for part in splited_path:
-				for child in parent_item.children:
-					if part == child.data(SchemeStorageTreeItem.FILENAME_COLUMN):
-						parent_item = child
-						break
-				else:
-					child = SchemeStorageTreeItem([part], SchemeStorageTreeItem.TYPE_DIRECTORY, parent=parent_item)
-					parent_item.children.insert(0, child) # keeps directories at the top of view
-					parent_item = child
-
-			file_item = SchemeStorageTreeItem([basename], SchemeStorageTreeItem.TYPE_FILE, parent=parent_item)
-			file_item.fullpath = full_path
-			file_item.enabled = storage.enabled
-			parent_item.children.append(file_item)
 
 	def index(self, row, column, parent_index):
 		if not self.hasIndex(row, column, parent_index):
@@ -220,6 +181,66 @@ class StorageManagerModel(QtCore.QAbstractItemModel):
 			return None
 		
 		return item
+	
+	def refresh_all(self, indices):
+		print("refreshing all")
+	
+	def disable_all(self, indices):
+		print("disabling all")
+	
+	def add_folder(self, storage_folder: str = None):
+		if storage_folder is None:
+			print("adding none")
+			return
+
+		parent_item = self.root
+		folder_part = storage_folder
+		while True:
+			for child in parent_item.children:
+				child_data = child.data(SchemeStorageTreeItem.FILENAME_COLUMN)
+				if folder_part.startswith(child_data):
+					parent_item = child
+					break
+			else:
+				child = SchemeStorageTreeItem([folder_part], SchemeStorageTreeItem.TYPE_DIRECTORY, parent=parent_item)
+				parent_item.children.insert(0, child) # keeps directories at the top of view
+				folder_item = child
+				break
+
+		for full_path in glob.iglob(storage_folder + '/**/**.py', recursive=True):
+			storage = passive_manager.get_storage(full_path)
+			if storage is None:
+				continue
+
+			relative_path = os.path.relpath(full_path, start=storage_folder)
+			splited_path = relative_path.split(os.sep)
+			basename = splited_path.pop()
+			assert os.path.basename(full_path) == basename, "Extracted basename doesn't match with actual basename"
+
+			parent_item = folder_item
+			for part in splited_path:
+				for child in parent_item.children:
+					if part == child.data(SchemeStorageTreeItem.FILENAME_COLUMN):
+						parent_item = child
+						break
+				else:
+					child = SchemeStorageTreeItem([part], SchemeStorageTreeItem.TYPE_DIRECTORY, parent=parent_item)
+					parent_item.children.insert(0, child) # keeps directories at the top of view
+					parent_item = child
+
+			file_item = SchemeStorageTreeItem([basename], SchemeStorageTreeItem.TYPE_FILE, parent=parent_item)
+			file_item.fullpath = full_path
+			file_item.enabled = storage.enabled
+			parent_item.children.append(file_item)
+
+	def add_file(self, file: str = None):
+		print("adding file", file)
+	
+	def remove_file(self, indices):
+		print("removing file")
+	
+	def remove_folder(self, indices):
+		print("removing folder")
 
 	def disable_storage(self, indices):
 		for qindex in indices:
@@ -294,6 +315,14 @@ class StorageManagerForm(idaapi.PluginForm):
 		btn_disable = QtWidgets.QPushButton("&Disable")
 		btn_refresh_all = QtWidgets.QPushButton("Refresh all")
 		btn_disable_all = QtWidgets.QPushButton("Disable All")
+		btn_add_file = QtWidgets.QPushButton("Add File")
+		btn_add_folder = QtWidgets.QPushButton("Add Folder")
+		btn_del_file = QtWidgets.QPushButton("Remove File")
+		btn_del_folder = QtWidgets.QPushButton("Remove Folder")
+
+		btn_disable.clicked.connect(lambda: storages_list.model().disable_storage(storages_list.selectedIndexes()))
+		btn_enable.clicked.connect(lambda: storages_list.model().enable_storage(storages_list.selectedIndexes()))
+		btn_reload.clicked.connect(lambda: storages_list.model().reload_storage(storages_list.selectedIndexes()))
 
 		btn_expand_all = QtWidgets.QPushButton("Expand all")
 		btn_collapse_all = QtWidgets.QPushButton("Collapse all")
@@ -310,14 +339,16 @@ class StorageManagerForm(idaapi.PluginForm):
 		bottom_btns_grid_box.addWidget(btn_refresh_all, 0, 0)
 		bottom_btns_grid_box.addWidget(btn_disable_all, 0, 1)
 
+		middle_btns_grid_box = QtWidgets.QGridLayout()
+		middle_btns_grid_box.addWidget(btn_add_file, 0, 0)
+		middle_btns_grid_box.addWidget(btn_add_folder, 0, 1)
+		middle_btns_grid_box.addWidget(btn_del_file, 0, 2)
+		middle_btns_grid_box.addWidget(btn_del_folder, 0, 3)
+
 		top_btns_grid_box = QtWidgets.QGridLayout()
 		top_btns_grid_box.addWidget(btn_disable, 0, 0)
 		top_btns_grid_box.addWidget(btn_enable, 0, 1)
 		top_btns_grid_box.addWidget(btn_reload, 0, 2)
-
-		btn_disable.clicked.connect(lambda: storages_list.model().disable_storage(storages_list.selectedIndexes()))
-		btn_enable.clicked.connect(lambda: storages_list.model().enable_storage(storages_list.selectedIndexes()))
-		btn_reload.clicked.connect(lambda: storages_list.model().reload_storage(storages_list.selectedIndexes()))
 
 		storage_source_area = QtWidgets.QTextEdit()
 		storage_source_area.setTabStopDistance(QtGui.QFontMetricsF(storage_source_area.font()).width(' ') * 4)
@@ -362,6 +393,7 @@ class StorageManagerForm(idaapi.PluginForm):
 		vertical_box.setSpacing(0)
 		vertical_box.addWidget(splitter)
 		vertical_box.addLayout(top_btns_grid_box)
+		vertical_box.addLayout(middle_btns_grid_box)
 		vertical_box.addLayout(bottom_btns_grid_box)
 
 		left_vertical_box = QtWidgets.QVBoxLayout()
