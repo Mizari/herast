@@ -84,6 +84,7 @@ class StorageManagerModel(QtCore.QAbstractItemModel):
 		self.root = SchemeStorageTreeItem(["File"])
 		self.folders = set()
 		self.files = set()
+		self.storages_list = None
 
 	def index(self, row, column, parent_index):
 		if not self.hasIndex(row, column, parent_index):
@@ -198,6 +199,8 @@ class StorageManagerModel(QtCore.QAbstractItemModel):
 		for file in files:
 			self.add_file(file)
 	
+		self.storages_list.reset()
+	
 	def disable_all(self):
 		print("disabling all")
 	
@@ -258,7 +261,24 @@ class StorageManagerModel(QtCore.QAbstractItemModel):
 		print("removing file")
 	
 	def remove_folder(self, indices):
-		print("removing folder")
+		if len(indices) != 1:
+			print("Got weird number of selected folders, returning")
+			return
+
+		qidx = indices[0]
+		item = self.get_item(qidx)
+		if item is None:
+			print("Failed to get tree item, returning")
+			return
+
+		folder_path = item._data[0]
+		if folder_path not in self.folders:
+			print("Selected item is not folder, returning")
+			return
+
+		passive_manager.remove_storage_folder(folder_path)
+		self.folders.remove(folder_path)
+		self.refresh_all()
 
 	def disable_storage(self, indices):
 		for qindex in indices:
@@ -347,6 +367,7 @@ class StorageManagerForm(idaapi.PluginForm):
 		storages_list.selectionModel().currentChanged.connect(lambda cur, prev: update_storage_data(cur))
 		storages_list.model().dataChanged.connect(lambda : update_storage_data())
 		storages_list.setCurrentIndex(storages_list.model().index(0, 0, QtCore.QModelIndex()))
+		model.storages_list = storages_list
 
 		class ModelButton(QtWidgets.QPushButton):
 			def __init__(self, name, callback=None):
