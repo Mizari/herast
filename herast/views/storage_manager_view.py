@@ -1,13 +1,10 @@
 from PyQt5 import QtCore, QtWidgets, QtGui
-from herast.tree.utils import singleton
 
 import idaapi
 import os
 import glob
 
 import herast.passive_manager as passive_manager
-
-from typing import Optional
 
 
 def _color_with_opacity(tone, opacity=160):
@@ -82,8 +79,8 @@ class StorageManagerModel(QtCore.QAbstractItemModel):
 	def __init__(self):
 		super().__init__()
 		self.root = SchemeStorageTreeItem(["File"])
-		self.folders = set()
-		self.files = set()
+		self.folders = []
+		self.files = []
 		self.storages_list = None
 
 	def index(self, row, column, parent_index):
@@ -185,24 +182,27 @@ class StorageManagerModel(QtCore.QAbstractItemModel):
 			return None
 		
 		return item
+
+	def refresh_view(self):
+		self.storages_list.reset()
 	
 	def refresh_all(self):
 		self.root = SchemeStorageTreeItem(["File"])
 		folders = self.folders
 		files = self.files
 
-		self.files = set()
-		self.folders = set()
+		self.files = []
+		self.folders = []
 		for folder in folders:
 			self.add_folder(folder)
 
 		for file in files:
 			self.add_file(file)
 	
-		self.storages_list.reset()
+		self.refresh_view()
 	
 	def disable_all(self):
-		print("disabling all")
+		print("disabling all is not yet implemented")
 	
 	def add_folder(self, storage_folder: str = None):
 		if storage_folder is None:
@@ -211,7 +211,7 @@ class StorageManagerModel(QtCore.QAbstractItemModel):
 		if storage_folder in self.folders:
 			return
 
-		self.folders.add(storage_folder)
+		self.folders.append(storage_folder)
 
 		parent_item = self.root
 		folder_part = storage_folder
@@ -252,13 +252,46 @@ class StorageManagerModel(QtCore.QAbstractItemModel):
 			file_item.fullpath = full_path
 			file_item.enabled = storage.enabled
 			parent_item.children.append(file_item)
+	
+		self.refresh_view()
 
-	def add_file(self, file: str = None):
-		print("adding file", file)
+	def add_file(self, file_path: str = None):
+		if file_path is None:
+			file_path = idaapi.ask_file(False, None, "Enter storage file")
 	
+		if file_path in self.files:
+			print("Already have this file", file_path)
+			return
+
+		passive_manager.add_storage_file(file_path)
+
+		file_item = SchemeStorageTreeItem([file_path], SchemeStorageTreeItem.TYPE_FILE, parent=self.root)
+		file_item.fullpath = file_path
+		file_item.enabled = False
+		self.root.children.append(file_item)
+		self.files.append(file_path)
+		self.refresh_view()
+
 	def remove_file(self, indices):
-		print("removing file")
-	
+		if len(indices) != 1:
+			print("Got weird number of selected files, returning")
+			return
+
+		qidx = indices[0]
+		item = self.get_item(qidx)
+		if item is None:
+			print("Failed to get tree item, returning")
+			return
+
+		file_path = item._data[0]
+		if file_path not in self.files:
+			print("Selected item is not file, returning")
+			return
+
+		passive_manager.remove_storage_file(file_path)
+		self.files.remove(file_path)
+		self.refresh_view()
+
 	def remove_folder(self, indices):
 		if len(indices) != 1:
 			print("Got weird number of selected folders, returning")
@@ -277,7 +310,7 @@ class StorageManagerModel(QtCore.QAbstractItemModel):
 
 		passive_manager.remove_storage_folder(folder_path)
 		self.folders.remove(folder_path)
-		self.refresh_all()
+		self.refresh_view()
 
 	def disable_storage(self, indices):
 		for qindex in indices:
