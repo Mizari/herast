@@ -297,7 +297,7 @@ class StorageManagerForm(idaapi.PluginForm):
 		for storage_folder in passive_manager.get_storages_folders():
 			self.model.add_folder(storage_folder)
 
-	def init_ui(self, model):
+	def init_ui(self, model: StorageManagerModel):
 		self.parent.resize(400, 600)
 		self.parent.setWindowTitle("HeRAST Schemes Storages View")
 
