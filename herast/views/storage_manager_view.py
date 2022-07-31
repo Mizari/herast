@@ -82,8 +82,8 @@ class StorageManagerModel(QtCore.QAbstractItemModel):
 	def __init__(self):
 		super().__init__()
 		self.root = SchemeStorageTreeItem(["File"])
-
-
+		self.folders = set()
+		self.files = set()
 
 	def index(self, row, column, parent_index):
 		if not self.hasIndex(row, column, parent_index):
@@ -129,6 +129,9 @@ class StorageManagerModel(QtCore.QAbstractItemModel):
 
 		child_item = index.internalPointer()
 		parent_item = child_item.parentItem()
+		if parent_item is None:
+			return QtCore.QModelIndex()
+
 		if parent_item == self.root:
 			return QtCore.QModelIndex()
 
@@ -183,7 +186,17 @@ class StorageManagerModel(QtCore.QAbstractItemModel):
 		return item
 	
 	def refresh_all(self):
-		print("refreshing all")
+		self.root = SchemeStorageTreeItem(["File"])
+		folders = self.folders
+		files = self.files
+
+		self.files = set()
+		self.folders = set()
+		for folder in folders:
+			self.add_folder(folder)
+
+		for file in files:
+			self.add_file(file)
 	
 	def disable_all(self):
 		print("disabling all")
@@ -192,6 +205,11 @@ class StorageManagerModel(QtCore.QAbstractItemModel):
 		if storage_folder is None:
 			print("adding none")
 			return
+
+		if storage_folder in self.folders:
+			return
+
+		self.folders.add(storage_folder)
 
 		parent_item = self.root
 		folder_part = storage_folder
