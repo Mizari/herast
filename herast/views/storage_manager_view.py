@@ -182,10 +182,10 @@ class StorageManagerModel(QtCore.QAbstractItemModel):
 		
 		return item
 	
-	def refresh_all(self, indices):
+	def refresh_all(self):
 		print("refreshing all")
 	
-	def disable_all(self, indices):
+	def disable_all(self):
 		print("disabling all")
 	
 	def add_folder(self, storage_folder: str = None):
@@ -292,63 +292,72 @@ class StorageManagerForm(idaapi.PluginForm):
 
 	def OnCreate(self, form):
 		self.parent = idaapi.PluginForm.FormToPyQtWidget(form)
-		self.init_ui()
-
+		model = StorageManagerModel()
+		self.init_ui(model)
 		for storage_folder in passive_manager.get_storages_folders():
-			self.model.add_folder(storage_folder)
+			model.add_folder(storage_folder)
 
-	def init_ui(self):
+	def init_ui(self, model):
 		self.parent.resize(400, 600)
 		self.parent.setWindowTitle("HeRAST Schemes Storages View")
 
-		self.model = StorageManagerModel()
-		# self.model = QtGui.QStandardItemModel()
-		# self.model.setHorizontalHeaderLabels(["Name"])
+		def update_storage_data(idx=None):
+			if idx is None:
+				idxs = storages_list.selectedIndexes()
+				if len(idxs) == 0:
+					return
+				idx = idxs[0]
+
+			storage = model.get_storage_by_index(idx)
+			if storage is None: return
+
+			source_text = storage.get_source()
+			if source_text is None:
+				source_text = "Failed to read source text"
+
+			status_text = storage.get_status()
+			storage_source_area.setPlainText(source_text)
+			loading_log_area.setPlainText(status_text)
 
 		storages_list = QtWidgets.QTreeView()
-		storages_list.setModel(self.model)
+		storages_list.setModel(model)
 		storages_list.setItemDelegate(BoldDelegate())
-		# self.tree_view.setSortingEnabled(True)
-
-		btn_reload = QtWidgets.QPushButton("&Reload")
-		btn_enable = QtWidgets.QPushButton("&Enable")
-		btn_disable = QtWidgets.QPushButton("&Disable")
-		btn_refresh_all = QtWidgets.QPushButton("Refresh all")
-		btn_disable_all = QtWidgets.QPushButton("Disable All")
-		btn_add_file = QtWidgets.QPushButton("Add File")
-		btn_add_folder = QtWidgets.QPushButton("Add Folder")
-		btn_del_file = QtWidgets.QPushButton("Remove File")
-		btn_del_folder = QtWidgets.QPushButton("Remove Folder")
-
-		btn_disable.clicked.connect(lambda: storages_list.model().disable_storage(storages_list.selectedIndexes()))
-		btn_enable.clicked.connect(lambda: storages_list.model().enable_storage(storages_list.selectedIndexes()))
-		btn_reload.clicked.connect(lambda: storages_list.model().reload_storage(storages_list.selectedIndexes()))
-
-		btn_expand_all = QtWidgets.QPushButton("Expand all")
-		btn_collapse_all = QtWidgets.QPushButton("Collapse all")
-
-		btn_expand_all.clicked.connect(storages_list.expandAll)
-		btn_collapse_all.clicked.connect(storages_list.collapseAll)
-
 		storages_list.setMaximumWidth(300)
 		storages_list.setSelectionMode(QtWidgets.QAbstractItemView.SingleSelection)
-
 		storages_list.horizontalScrollBar().setEnabled(True)
+		# self.tree_view.setSortingEnabled(True)
+		storages_list.selectionModel().currentChanged.connect(lambda cur, prev: update_storage_data(cur))
+		storages_list.model().dataChanged.connect(lambda : update_storage_data())
+		storages_list.setCurrentIndex(storages_list.model().index(0, 0, QtCore.QModelIndex()))
 
-		bottom_btns_grid_box = QtWidgets.QGridLayout()
-		bottom_btns_grid_box.addWidget(btn_refresh_all, 0, 0)
-		bottom_btns_grid_box.addWidget(btn_disable_all, 0, 1)
+		class ModelButton(QtWidgets.QPushButton):
+			def __init__(self, name, callback=None):
+				super().__init__(name)
+				if callback is not None:
+					self.clicked.connect(callback)
 
-		middle_btns_grid_box = QtWidgets.QGridLayout()
-		middle_btns_grid_box.addWidget(btn_add_file, 0, 0)
-		middle_btns_grid_box.addWidget(btn_add_folder, 0, 1)
-		middle_btns_grid_box.addWidget(btn_del_file, 0, 2)
-		middle_btns_grid_box.addWidget(btn_del_folder, 0, 3)
+		btn_reload       = ModelButton("&Reload",       lambda: model.disable_storage(storages_list.selectedIndexes()))
+		btn_enable       = ModelButton("&Enable",       lambda: model.enable_storage(storages_list.selectedIndexes()))
+		btn_disable      = ModelButton("&Disable",      lambda: model.disable_storage(storages_list.selectedIndexes()))
+		btn_refresh_all  = ModelButton("Refresh all",   lambda: model.refresh_all())
+		btn_disable_all  = ModelButton("Disable All",   lambda: model.disable_all())
+		btn_add_file     = ModelButton("Add File",      lambda: model.add_file())
+		btn_add_folder   = ModelButton("Add Folder",    lambda: model.add_folder())
+		btn_del_file     = ModelButton("Remove File",   lambda: model.remove_file(storages_list.selectedIndexes()))
+		btn_del_folder   = ModelButton("Remove Folder", lambda: model.remove_folder(storages_list.selectedIndexes()))
+		btn_expand_all   = ModelButton("Expand all",   storages_list.expandAll)
+		btn_collapse_all = ModelButton("Collapse all", storages_list.collapseAll)
 
-		top_btns_grid_box = QtWidgets.QGridLayout()
-		top_btns_grid_box.addWidget(btn_disable, 0, 0)
-		top_btns_grid_box.addWidget(btn_enable, 0, 1)
-		top_btns_grid_box.addWidget(btn_reload, 0, 2)
+		class GridLayout(QtWidgets.QGridLayout):
+			def __init__(self, *buttons):
+				super().__init__()
+				for b_id, b in enumerate(buttons):
+					self.addWidget(b, 0, b_id)
+
+		bottom_btns_grid_box = GridLayout(btn_refresh_all, btn_disable_all)
+		middle_btns_grid_box = GridLayout(btn_add_file, btn_add_folder, btn_del_file, btn_del_folder)
+		top_btns_grid_box    = GridLayout(btn_disable, btn_enable, btn_reload)
+		left_btns_grid_box   = GridLayout(btn_expand_all, btn_collapse_all)
 
 		storage_source_area = QtWidgets.QTextEdit()
 		storage_source_area.setTabStopDistance(QtGui.QFontMetricsF(storage_source_area.font()).width(' ') * 4)
@@ -363,43 +372,16 @@ class StorageManagerForm(idaapi.PluginForm):
 		splitter.addWidget(storage_source_area)
 		splitter.addWidget(loading_log_area)
 
-		def update_storage_data(idx=None):
-			if idx is None:
-				idxs = storages_list.selectedIndexes()
-				if len(idxs) == 0:
-					return
-				idx = idxs[0]
+		class VboxLayout(QtWidgets.QVBoxLayout):
+			def __init__(self, widget, *layouts) -> None:
+				super().__init__()
+				self.setSpacing(0)
+				self.addWidget(widget)
+				for l in layouts:
+					self.addLayout(l)
 
-			storage = self.model.get_storage_by_index(idx)
-			if storage is None: return
-
-			source_text = storage.get_source()
-			if source_text is None:
-				source_text = "Failed to read source text"
-
-			status_text = storage.get_status()
-			storage_source_area.setPlainText(source_text)
-			loading_log_area.setPlainText(status_text)
-
-		storages_list.selectionModel().currentChanged.connect(lambda cur, prev: update_storage_data(cur))
-		storages_list.model().dataChanged.connect(lambda : update_storage_data())
-		storages_list.setCurrentIndex(storages_list.model().index(0, 0, QtCore.QModelIndex()))
-
-		left_btns_grid_box = QtWidgets.QGridLayout()
-		left_btns_grid_box.addWidget(btn_expand_all, 0, 0)
-		left_btns_grid_box.addWidget(btn_collapse_all, 0, 1)
-
-		vertical_box = QtWidgets.QVBoxLayout()
-		vertical_box.setSpacing(0)
-		vertical_box.addWidget(splitter)
-		vertical_box.addLayout(top_btns_grid_box)
-		vertical_box.addLayout(middle_btns_grid_box)
-		vertical_box.addLayout(bottom_btns_grid_box)
-
-		left_vertical_box = QtWidgets.QVBoxLayout()
-		left_vertical_box.setSpacing(0)
-		left_vertical_box.addWidget(storages_list)
-		left_vertical_box.addLayout(left_btns_grid_box)
+		vertical_box = VboxLayout(splitter, top_btns_grid_box, middle_btns_grid_box, bottom_btns_grid_box)
+		left_vertical_box = VboxLayout(storages_list, left_btns_grid_box)
 
 		horizontal_box = QtWidgets.QBoxLayout(QtWidgets.QBoxLayout.LeftToRight)
 		# horizontal_box.addWidget(patterns_list)
