@@ -202,7 +202,16 @@ class StorageManagerModel(QtCore.QAbstractItemModel):
 		self.refresh_view()
 	
 	def disable_all(self):
-		print("disabling all is not yet implemented")
+		nodes = [self.root]
+		for node in nodes:
+			for c in node.children:
+				if c.type == SchemeStorageTreeItem.TYPE_FILE:
+					if c.enabled:
+						passive_manager.disable_storage(c.fullpath)
+						c.disable()
+				else:
+					nodes.append(c)
+		self.refresh_view()
 	
 	def add_folder(self, storage_folder: str = None):
 		if storage_folder is None:
