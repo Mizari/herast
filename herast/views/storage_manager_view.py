@@ -1,3 +1,4 @@
+from genericpath import isdir, isfile
 from PyQt5 import QtCore, QtWidgets, QtGui
 
 import idaapi
@@ -217,8 +218,19 @@ class StorageManagerModel(QtCore.QAbstractItemModel):
 		if storage_folder is None:
 			storage_folder = idaapi.ask_text(1024, None, "Enter storages folder")
 
-		if storage_folder in self.folders:
+		if not os.path.exists(storage_folder):
+			print("No such folder exists", storage_folder)
 			return
+
+		if not os.path.isdir(storage_folder):
+			print(storage_folder, "is not a directory")
+			return
+
+		if storage_folder in self.folders:
+			print("Folder already added")
+			return
+	
+		passive_manager.add_storage_folder(storage_folder)
 
 		self.folders.append(storage_folder)
 
@@ -267,6 +279,14 @@ class StorageManagerModel(QtCore.QAbstractItemModel):
 	def add_file(self, file_path: str = None):
 		if file_path is None:
 			file_path = idaapi.ask_file(False, None, "Enter storage file")
+	
+		if not os.path.exists(file_path):
+			print("No such file exists", file_path)
+			return
+
+		if not os.path.isfile(file_path):
+			print(file_path, "is not a file")
+			return
 	
 		if file_path in self.files:
 			print("Already have this file", file_path)
