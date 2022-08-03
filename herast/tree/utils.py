@@ -118,6 +118,17 @@ def make_block_insn(instructions, address, label_num=-1):
 
 	return insn
 
+def make_if_instr(cond, ithen, ielse=None):
+	cif = idaapi.cif_t()
+	cif.expr = cond
+	cif.ithen = ithen
+	cif.ielse = ielse
+	instr = idaapi.cinsn_t()
+	instr.op = idaapi.cit_if
+	instr.cif = cif
+	instr.label_num = -1
+	return instr
+
 def make_expr_instr(expr):
 	new_item = idaapi.cinsn_t()
 	new_item.op = idaapi.cit_expr
