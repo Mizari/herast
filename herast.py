@@ -2,6 +2,7 @@ import time
 import idaapi
 import ida_hexrays
 
+def reload_modules():
 # order of requires (from imported to importers) is most likely important
 idaapi.require('herast.settings.base_settings')
 idaapi.require('herast.settings.idb_settings')
@@ -29,6 +30,7 @@ idaapi.require('herast.passive_manager')
 idaapi.require('herast.views.storage_manager_view')
 
 idaapi.require('herapi')
+reload_modules()
 
 
 from herast.views.storage_manager_view import ShowScriptManager
