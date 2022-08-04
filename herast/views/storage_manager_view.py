@@ -219,7 +219,8 @@ class StorageManagerModel(QtCore.QAbstractItemModel):
 			print("Folder already added")
 			return
 	
-		passive_manager.add_storage_folder(storage_folder)
+		if not passive_manager.add_storage_folder(storage_folder):
+			return
 
 		self.add_existing_folder(storage_folder)
 	
@@ -279,7 +280,8 @@ class StorageManagerModel(QtCore.QAbstractItemModel):
 			print("Already have this file", file_path)
 			return
 
-		passive_manager.add_storage_file(file_path)
+		if not passive_manager.add_storage_file(file_path):
+			return
 		
 		self.add_existing_file(file_path)
 	
