@@ -195,10 +195,10 @@ class StorageManagerModel(QtCore.QAbstractItemModel):
 		self.files = []
 		self.folders = []
 		for folder in folders:
-			self.add_folder(folder)
+			self.add_existing_folder(folder)
 
 		for file in files:
-			self.add_file(file)
+			self.add_existing_file(file)
 	
 		self.refresh_view()
 	
@@ -214,23 +214,18 @@ class StorageManagerModel(QtCore.QAbstractItemModel):
 					nodes.append(c)
 		self.refresh_view()
 	
-	def add_folder(self, storage_folder: str = None):
-		if storage_folder is None:
-			storage_folder = idaapi.ask_text(1024, None, "Enter storages folder")
-
-		if not os.path.exists(storage_folder):
-			print("No such folder exists", storage_folder)
-			return
-
-		if not os.path.isdir(storage_folder):
-			print(storage_folder, "is not a directory")
-			return
-
+	def add_new_folder(self, storage_folder: str = None):
 		if storage_folder in self.folders:
 			print("Folder already added")
 			return
 	
 		passive_manager.add_storage_folder(storage_folder)
+
+		self.add_existing_folder(storage_folder)
+	
+	def add_existing_folder(self, storage_folder: str = None):
+		if storage_folder is None:
+			storage_folder = idaapi.ask_text(1024, None, "Enter storages folder")
 
 		self.folders.append(storage_folder)
 
@@ -280,20 +275,15 @@ class StorageManagerModel(QtCore.QAbstractItemModel):
 		if file_path is None:
 			file_path = idaapi.ask_file(False, None, "Enter storage file")
 	
-		if not os.path.exists(file_path):
-			print("No such file exists", file_path)
-			return
-
-		if not os.path.isfile(file_path):
-			print(file_path, "is not a file")
-			return
-	
 		if file_path in self.files:
 			print("Already have this file", file_path)
 			return
 
 		passive_manager.add_storage_file(file_path)
-
+		
+		self.add_existing_file(file_path)
+	
+	def add_existing_file(self, file_path: str = None):
 		file_item = SchemeStorageTreeItem([file_path], SchemeStorageTreeItem.TYPE_FILE, parent=self.root)
 		file_item.fullpath = file_path
 		file_item.enabled = False
@@ -394,7 +384,7 @@ class StorageManagerForm(idaapi.PluginForm):
 		self.model = StorageManagerModel()
 		self.init_ui(self.model)
 		for storage_folder in passive_manager.get_storages_folders():
-			self.model.add_folder(storage_folder)
+			self.model.add_existing_folder(storage_folder)
 
 	def init_ui(self, model: StorageManagerModel):
 		self.parent.resize(400, 600)
@@ -442,7 +432,7 @@ class StorageManagerForm(idaapi.PluginForm):
 		btn_refresh_all  = ModelButton("Refresh all",   lambda: model.refresh_all())
 		btn_disable_all  = ModelButton("Disable All",   lambda: model.disable_all())
 		btn_add_file     = ModelButton("Add File",      lambda: model.add_file())
-		btn_add_folder   = ModelButton("Add Folder",    lambda: model.add_folder())
+		btn_add_folder   = ModelButton("Add Folder",    lambda: model.add_new_folder())
 		btn_del_file     = ModelButton("Remove File",   lambda: model.remove_file(storages_list.selectedIndexes()))
 		btn_del_folder   = ModelButton("Remove Folder", lambda: model.remove_folder(storages_list.selectedIndexes()))
 		btn_expand_all   = ModelButton("Expand all",   storages_list.expandAll)
