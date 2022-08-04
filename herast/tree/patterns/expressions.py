@@ -277,6 +277,10 @@ class AsgPat(ExpressionPat):
 			return False
 		return self.rhs.check(item.y, ctx)
 
+import sys
+# print("name", __name__)
+# print("vars0", vars(sys.modules[__name__]))
+
 
 def __generate_expression_patterns():
 	import sys
@@ -284,12 +288,24 @@ def __generate_expression_patterns():
 	from herast.tree.consts import binary_expressions_ops, unary_expressions_ops, op2str
 
 	for op in unary_expressions_ops:
+		# skip reference, because it is explicitly defined for easier coding
+		if op == idaapi.cot_ref: continue
+
 		name = '%sPat' % op2str[op].replace('cot_', '').capitalize()
+		if name in vars(module):
+			print("duplicate unary", name, "skipping")
+			continue
 		vars(module)[name] = type(name, (AbstractUnaryOpPat,), {'op': op})
+	
+	# print("vars", vars(module))
 
 	for op in binary_expressions_ops:
 		# skip assignment, because it is explicitly defined for easier coding
 		if op == idaapi.cot_asg: continue
+
 		name = '%sPat' % op2str[op].replace('cot_', '').capitalize()
+		if name in vars(module):
+			print("duplicate binary", name, "skipping")
+			continue
 		vars(module)[name] = type(name, (AbstractBinaryOpPat,), {'op': op})
 __generate_expression_patterns()
