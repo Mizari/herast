@@ -5,7 +5,7 @@ from .tree.utils import load_python_module_from_file
 
 
 class SchemesStorage:
-	def __init__(self, path, module, enabled, error=False):
+	def __init__(self, path, module=None, enabled=False, error=False):
 		self.path = path
 		self.filename = os.path.basename(path)
 		self.module = module
@@ -13,6 +13,9 @@ class SchemesStorage:
 		self.error = error
 		self.status_text = None
 		self.source = None
+
+	def is_loaded(self):
+		return self.module is not None
 	
 	def unload_module(self):
 		self.source = None
@@ -41,7 +44,7 @@ class SchemesStorage:
 		if module is None:
 			return None
 
-		return cls(file_path, module, False)
+		return cls(file_path, module)
 
 	def get_status(self):
 		if self.status_text is not None:
