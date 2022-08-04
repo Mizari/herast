@@ -135,5 +135,21 @@ def main():
 	hx_callback_manager.initialize()
 
 
+class NoPlugin(idaapi.plugin_t):
+	flags = 0
+	wanted_name = "skipped"
+
+	def init(self):
+		return idaapi.PLUGIN_SKIP
+	
+	def run(self, arg):
+		return
+
+	def term(self):
+		return
+
+def PLUGIN_ENTRY():
+	return NoPlugin()
+
 main()
 # if __name__ == '__plugins__herast':
