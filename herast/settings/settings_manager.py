@@ -1,8 +1,20 @@
 import typing
+import herast
 from herast.settings.base_settings import BaseSettings
 
+import herast.settings.idb_settings as idb_settings
+import herast.settings.global_settings as global_settings
 from herast.settings.idb_settings import settings_instance as __idb_settings
 from herast.settings.global_settings import settings_instance as __global_settings
+
+def reload_settings():
+	"""Reloads plugin settings file and IDB setting nodes"""
+	idb_settings.reload_settings()
+	global_settings.reload_settings()
+	global __idb_settings
+	__idb_settings = idb_settings.settings_instance
+	global __global_settings
+	__global_settings = global_settings.settings_instance
 
 
 # By default settings getters return global settings overwritten by idb settings

@@ -27,3 +27,7 @@ class HerastSettings(BaseSettings):
 			return f.read()
 
 settings_instance = HerastSettings.create()
+
+def reload_settings():
+	global settings_instance
+	settings_instance = HerastSettings.create()

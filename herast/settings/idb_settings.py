@@ -46,3 +46,7 @@ class IdbSettings(BaseSettings):
 		return x
 
 settings_instance = IdbSettings.create()
+
+def reload_settings():
+	global settings_instance
+	settings_instance = IdbSettings.create()

@@ -113,6 +113,9 @@ def __register_action(action):
 def main():
 	if not idaapi.init_hexrays_plugin():
 		return
+	
+	# first import before IDB got loaded does not correctly loads settings
+	settings_manager.reload_settings()
 
 	__register_action(smanager_view.ShowScriptManager())
 	# dummy way to register action to unload hexrays-callback, thus it won't be triggered multiple times at once
