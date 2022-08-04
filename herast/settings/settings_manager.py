@@ -56,7 +56,7 @@ def get_storages_files(in_idb=False, globally=False) -> typing.List[str]:
 	if globally:
 		return list(__global_settings.storages_files)
 
-	return __idb_settings.storages_files + __idb_settings.storages_files
+	return __global_settings.storages_files + __idb_settings.storages_files
 
 def get_time_matching(in_idb=False, globally=False) -> bool:
 	"""Get a bool whether herast should calculate time spent on matching.
