@@ -18,7 +18,6 @@ class HerastSettings(BaseSettings):
 	@classmethod
 	def load_json_str(cls):
 		if not os.path.exists(cls.path):
-			print("[!] WARNING: plugin settings file does not exist, creating empty one")
 			json_str = "{}"
 			cls.save_json_str(json_str)
 			return json_str

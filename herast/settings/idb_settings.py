@@ -41,7 +41,6 @@ class IdbSettings(BaseSettings):
 		x = load_long_str_from_idb(cls.array_name)
 		if x is None:
 			x = '{' + '}'
-			print("[!] WARNING: IDB settings does not exist, creating empty one")
 			cls.save_json_str(x)
 		return x
 
