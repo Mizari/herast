@@ -5,7 +5,6 @@ from herast.settings.base_settings import BaseSettings
 def load_long_str_from_idb(array_name):
 	id = idc.get_array_id(array_name)
 	if id == -1:
-		print("Failed to get array id with name", array_name)
 		return None
 
 	max_idx = idc.get_last_index(idc.AR_STR, id)
