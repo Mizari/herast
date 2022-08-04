@@ -92,6 +92,10 @@ def get_enabled_storages() -> typing.List[SchemesStorage]:
 	"""Get only enabled storages."""
 	return [s for s in __schemes_storages.values() if s.enabled]
 
+def get_schemes():
+	"""Get dict {scheme_name -> scheme)"""
+	return dict(__schemes)
+
 def enable_scheme(scheme_name: str):
 	"""Change status of scheme to activate it in passive matching."""
 	if scheme_name in __enabled_schemes:
