@@ -11,15 +11,18 @@ idaapi.require('herast.tree.consts')
 idaapi.require('herast.tree.utils')
 idaapi.require('herast.tree.pattern_context')
 idaapi.require('herast.tree.processing')
+idaapi.require('herast.tree.patterns.base_pattern')
 idaapi.require('herast.tree.patterns.abstracts')
 idaapi.require('herast.tree.patterns.instructions')
 idaapi.require('herast.tree.patterns.expressions')
+idaapi.require('herast.tree.patterns.helpers')
 idaapi.require('herast.tree.matcher')
 idaapi.require('herast.tree.callbacks')
 idaapi.require('herast.tree.actions')
 idaapi.require('herast.tree.selection_factory')
 
 idaapi.require('herast.tree.scheme')
+idaapi.require('herast.schemes_storage')
 
 idaapi.require('herast.passive_manager')
 
