@@ -35,6 +35,11 @@ class IdbSettings(BaseSettings):
 
 	@classmethod
 	def load_json_str(cls):
-		return load_long_str_from_idb(cls.array_name) or '{}'
+		x = load_long_str_from_idb(cls.array_name)
+		if x is None:
+			x = {}
+			print("[!] WARNING: IDB settings does not exist, creating empty one")
+			cls.save_json_str("{}")
+		return x
 
 settings_instance = IdbSettings.create()
