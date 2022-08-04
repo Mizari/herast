@@ -30,7 +30,6 @@ def reload_modules():
 	idaapi.require('herast.views.storage_manager_view')
 
 	idaapi.require('herapi')
-reload_modules()
 
 
 import herast.views.storage_manager_view as smanager_view
@@ -150,3 +149,5 @@ def PLUGIN_ENTRY():
 
 main()
 # if __name__ == '__plugins__herast':
+if __name__ == "__main__":
+	reload_modules()
