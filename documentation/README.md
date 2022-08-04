@@ -10,7 +10,7 @@
 ## herapi
 
 herapi is designed for safe "import * from herapi". In order to get more information for herapi entries use help(herapi.FUNCTION_OR_CLASS).
- Use herapi.herapi_help() instead of help(herapi), since herapi only imports from others.  
+ Use herapi.herapi_help() or heraip.herapi_help_patterns() instead of help(herapi), since herapi only imports from others.  
 
 ## Schemes Storages View
 
