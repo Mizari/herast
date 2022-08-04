@@ -3,37 +3,37 @@ import idaapi
 import ida_hexrays
 
 def reload_modules():
-# order of requires (from imported to importers) is most likely important
-idaapi.require('herast.settings.base_settings')
-idaapi.require('herast.settings.idb_settings')
-idaapi.require('herast.settings.global_settings')
-idaapi.require('herast.settings.settings_manager')
-idaapi.require('herast.tree.consts')
-idaapi.require('herast.tree.utils')
-idaapi.require('herast.tree.pattern_context')
-idaapi.require('herast.tree.processing')
-idaapi.require('herast.tree.patterns.base_pattern')
-idaapi.require('herast.tree.patterns.abstracts')
-idaapi.require('herast.tree.patterns.instructions')
-idaapi.require('herast.tree.patterns.expressions')
-idaapi.require('herast.tree.patterns.helpers')
-idaapi.require('herast.tree.matcher')
-idaapi.require('herast.tree.callbacks')
-idaapi.require('herast.tree.actions')
-idaapi.require('herast.tree.selection_factory')
+	# order of requires (from imported to importers) is most likely important
+	idaapi.require('herast.settings.base_settings')
+	idaapi.require('herast.settings.idb_settings')
+	idaapi.require('herast.settings.global_settings')
+	idaapi.require('herast.settings.settings_manager')
+	idaapi.require('herast.tree.consts')
+	idaapi.require('herast.tree.utils')
+	idaapi.require('herast.tree.pattern_context')
+	idaapi.require('herast.tree.processing')
+	idaapi.require('herast.tree.patterns.base_pattern')
+	idaapi.require('herast.tree.patterns.abstracts')
+	idaapi.require('herast.tree.patterns.instructions')
+	idaapi.require('herast.tree.patterns.expressions')
+	idaapi.require('herast.tree.patterns.helpers')
+	idaapi.require('herast.tree.matcher')
+	idaapi.require('herast.tree.callbacks')
+	idaapi.require('herast.tree.actions')
+	idaapi.require('herast.tree.selection_factory')
 
-idaapi.require('herast.tree.scheme')
-idaapi.require('herast.schemes_storage')
+	idaapi.require('herast.tree.scheme')
+	idaapi.require('herast.schemes_storage')
 
-idaapi.require('herast.passive_manager')
+	idaapi.require('herast.passive_manager')
 
-idaapi.require('herast.views.storage_manager_view')
+	idaapi.require('herast.views.storage_manager_view')
 
-idaapi.require('herapi')
+	idaapi.require('herapi')
 reload_modules()
 
 
-from herast.views.storage_manager_view import ShowScriptManager
+import herast.views.storage_manager_view as smanager_view
 import herast.passive_manager as passive_manager
 import herast.settings.settings_manager as settings_manager
 
@@ -105,31 +105,26 @@ herast_callback.__reload_helper = True
 
 
 def __register_action(action):
-		result = idaapi.register_action(
+		idaapi.register_action(
 			idaapi.action_desc_t(action.name, action.description, action, action.hotkey)
 		)
-		print("Registered %s with status(%x)" % (action.name, result))
+		# print("Registered %s with status(%x)" % (action.name, result))
 
 
 def main():
-	# dummy way to register action to unload hexrays-callback, thus it won't be triggered multiple times at once
-	# 
-	__register_action(UnloadCallbackAction())
-	# __register_action(ReloadScripts())
-
 	if not idaapi.init_hexrays_plugin():
-		print("Failed to initialize Hex-Rays SDK")
 		return
 
-	action = ShowScriptManager()
-	idaapi.register_action(idaapi.action_desc_t(action.name, action.description, action, action.hotkey))  
+	__register_action(smanager_view.ShowScriptManager())
+	# dummy way to register action to unload hexrays-callback, thus it won't be triggered multiple times at once
+	__register_action(UnloadCallbackAction())
+	# __register_action(ReloadScripts())
 
 	for cb in ida_hexrays.__cbhooks_t.instances:
 		callback = cb.callback
 		if callback.__dict__.get("__reload_helper", False):
 			idaapi.remove_hexrays_callback(callback)
 
-	print('Hooking for HexRays events')
 	idaapi.install_hexrays_callback(herast_callback)
 
 	passive_manager.__initialize()

@@ -567,39 +567,3 @@ class ShowScriptManager(idaapi.action_handler_t):
 	@property
 	def name(self):
 		return 'test:' + type(self).__name__ 
-
-# m = PatternStorageModel()
-# action = ShowScriptManager(m)
-# idaapi.register_action(idaapi.action_desc_t(action.name, action.description, action, action.hotkey))    
-
-def __register_action(action):
-		result = idaapi.register_action(
-			idaapi.action_desc_t(action.name, action.description, action, action.hotkey)
-		)
-		print("Registered %s with status(%x)" % (action.name, result))
-
-
-class UnregisterAction(idaapi.action_handler_t):
-	description = "test"
-	hotkey = 'Ctrl+Shift+E'
-
-	def __init__(self, action):
-		super(UnregisterAction, self).__init__()
-		self.target_name = action.name
-
-	def update(self, ctx):
-		return True
-
-	def activate(self, ctx):
-		print("[*] Unregistered %s with status(%x)" % (self.target_name, idaapi.unregister_action(self.target_name)))
-
-	@property
-	def name(self):
-		return 'test:' + type(self).__name__ 
-
-
-def main():
-	__register_action(ShowScriptManager())
-	__register_action(UnregisterAction(ShowScriptManager()))
-
-main()
