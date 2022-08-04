@@ -80,9 +80,13 @@ def get_storages() -> typing.List[SchemesStorage]:
 	"""Get all storages."""
 	return [s for s in __schemes_storages.values()]
 
-def get_storages_folders() -> typing.List[str]:
-	"""Get all storages folders."""
-	return settings_manager.get_storages_folders()
+def get_storages_folders(in_idb=False, globally=False) -> typing.List[str]:
+	"""Get all storages folders.
+
+	:param in_idb: get only IDB storages folders
+	:param globally: get only global storages folders
+	"""
+	return settings_manager.get_storages_folders(in_idb=in_idb, globally=globally)
 
 def get_enabled_storages() -> typing.List[SchemesStorage]:
 	"""Get only enabled storages."""
