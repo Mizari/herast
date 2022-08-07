@@ -428,7 +428,7 @@ class StorageManagerForm(idaapi.PluginForm):
 				if callback is not None:
 					self.clicked.connect(callback)
 
-		btn_reload       = ModelButton("&Reload",       lambda: model.disable_storage(storages_list.selectedIndexes()))
+		btn_reload       = ModelButton("&Reload",       lambda: model.reload_storage(storages_list.selectedIndexes()))
 		btn_enable       = ModelButton("&Enable",       lambda: model.enable_storage(storages_list.selectedIndexes()))
 		btn_disable      = ModelButton("&Disable",      lambda: model.disable_storage(storages_list.selectedIndexes()))
 		btn_refresh_all  = ModelButton("Refresh all",   lambda: model.refresh_all())
