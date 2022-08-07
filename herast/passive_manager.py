@@ -49,15 +49,6 @@ def __get_storage_status_text(storage_path: str) -> str:
 		status = "Disabled"
 	return status
 
-def __discard_storage_schemes(storage_path: str):
-	for scheme_name in __storage2schemes.get(storage_path, []):
-		__enabled_schemes.discard(scheme_name)
-	__rebuild_passive_matcher()
-
-def __update_storage_schemes(storage_path: str):
-	__enabled_schemes.update(__storage2schemes[storage_path])
-	__rebuild_passive_matcher()
-
 def __add_storages_folder(storages_folder_path: str, rebuild_passive_matcher=True):
 	for file_path in __find_python_files_in_folder(storages_folder_path):
 		add_storage_file(file_path)
@@ -162,13 +153,9 @@ def disable_storage(storage_path: str) -> bool:
 
 	storage.enabled = False
 	settings_manager.disable_storage(storage_path)
-	__discard_storage_schemes(storage_path)
-	del __schemes_storages[storage_path]
+
 	for scheme_name in __storage2schemes[storage_path]:
-		del __schemes[scheme_name]
 		__enabled_schemes.discard(scheme_name)
-		del __scheme2storage[scheme_name]
-	del __storage2schemes[storage_path]
 	storage.status_text = __get_storage_status_text(storage.path)
 	__rebuild_passive_matcher()
 	return True
@@ -188,15 +175,15 @@ def enable_storage(storage_path: str) -> bool:
 		print(storage_path, "is errored, reload first")
 		return False
 
-	if storage.module is None:
-		if storage.load_module():
-			__enabled_schemes.update(__storage2schemes[storage.path])
-		else:
-			return False
+	if not storage.is_loaded() and not storage.load_module():
+		print("Failed to load module while enabling", storage_path)
+		return False
 
 	storage.enabled = True
 	settings_manager.enable_storage(storage_path)
-	__update_storage_schemes(storage_path)
+	__enabled_schemes.update(__storage2schemes[storage_path])
+	__rebuild_passive_matcher()
+
 	storage.status_text = __get_storage_status_text(storage.path)
 	return True
 
@@ -276,7 +263,7 @@ def load_storage(storage_path: str) -> bool:
 	if storage.is_loaded():
 		print("Storage is already loaded", storage_path)
 		return False
-	
+
 	if not storage.load_module():
 		print("Failed to load storage", storage_path)
 		return False
@@ -293,7 +280,7 @@ def unload_storage(storage_path: str) -> bool:
 	if not storage.is_loaded():
 		print("Storage is already unloaded", storage_path)
 		return True
-	
+
 	if storage.enabled and not disable_storage(storage_path):
 		print("Failed to disable storage before unloading", storage_path)
 		return False
@@ -301,6 +288,10 @@ def unload_storage(storage_path: str) -> bool:
 	if not storage.unload_module():
 		print("Failed to unload storage", storage_path)
 		return False
+
+	for scheme_name in __storage2schemes[storage_path]:
+		del __scheme2storage[scheme_name]
+	del __storage2schemes[storage_path]
 
 	return True
 
@@ -310,14 +301,18 @@ def reload_storage(storage_path: str) -> bool:
 	if storage is None:
 		print("No such storage", storage_path)
 		return False
-	
+
 	should_enable_later = False
 	if storage.enabled:
 		should_enable_later = True
+		disable_storage(storage_path)
 
-	if storage.is_loaded() and not storage.unload_module():
-		print("Failed to unload storage on reloading", storage_path)
-		return False
+	if storage.is_loaded():
+		storage.unload_module()
+
+	for scheme_name in __storage2schemes.pop(storage_path):
+		del __scheme2storage[scheme_name]
+		del __schemes[scheme_name]
 
 	if not load_storage(storage_path):
 		print("Failed to load storage on reloading", storage_path)
