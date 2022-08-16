@@ -1,7 +1,27 @@
 import os
+import sys
 import traceback
+import importlib
+import importlib.util
 
-from .tree.utils import load_python_module_from_file
+def load_python_module_from_file(module_path:str):
+	if not os.path.exists(module_path):
+		print("[!] Trying to load non existing file", module_path)
+		return None
+
+	module_name = os.path.basename(module_path)
+	module_folder = os.path.dirname(module_path)
+	if module_folder not in sys.path:
+		sys.path.append(module_folder)
+	try:
+		spec = importlib.util.spec_from_file_location(module_name, module_path, submodule_search_locations=[module_folder])
+		module = importlib.util.module_from_spec(spec)
+		spec.loader.exec_module(module)
+	except Exception as e:
+		print("[!] Exception happened during loading module from file %s: %s" % (module_path, e))
+		return None
+	return module
+
 
 
 class SchemesStorage:

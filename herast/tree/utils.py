@@ -1,8 +1,6 @@
 import idaapi
 import idc
 import idautils
-import importlib
-import importlib.util
 
 
 def _resolve_obj_address(obj):
@@ -163,16 +161,6 @@ def strip_casts(expr):
 	if expr.op == idaapi.cot_cast:
 		return expr.x
 	return expr
-
-def load_python_module_from_file(path):
-	try:
-		spec = importlib.util.spec_from_file_location("module", path)
-		module = importlib.util.module_from_spec(spec)
-		spec.loader.exec_module(module)
-	except Exception as e:
-		print("[!] Exception happened during loading module from file %s: %s" % (path, e))
-		return None
-	return module
 
 def singleton(cls):
 	instances = {}
