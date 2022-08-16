@@ -76,6 +76,11 @@ def get_passive_matcher() -> Matcher:
 
 def register_storage_scheme(scheme: Scheme):
 	"""API for storages to export their schemes."""
+
+	if scheme.name in __schemes:
+		print(scheme.name, "scheme already exists, skipping")
+		return
+
 	import inspect
 	storage_path = inspect.stack()[1].filename
 	__storage2schemes[storage_path].append(scheme.name)
