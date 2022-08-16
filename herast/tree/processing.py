@@ -86,6 +86,9 @@ class TreeProcessor:
 	def iterate_subitems(self, root_item):
 		yield from iterate_all_subitems(root_item)
 
+	def iterate_subinstrs(self, root_item):
+		yield from iterate_all_subinstrs(root_item)
+
 	def get_parent_block(self, item):
 		parent = self.cfunc.body.find_parent_of(item)
 		if parent is None or parent.op != idaapi.cit_block:

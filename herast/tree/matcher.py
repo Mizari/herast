@@ -66,17 +66,36 @@ class Matcher:
 				continue
 			self.match_cfunc(cfunc)
 
+	def match_everywhere(self):
+		for func_ea in idautils.Functions(0, idaapi.BADADDR):
+			self.match(func_ea)
+
+	def match_instruction(self, instr_addr):
+		func_addr = get_func_start(instr_addr)
+		cfunc = get_cfunc(func_addr)
+		if cfunc is None: return
+
+		tree_processor = TreeProcessor(cfunc)
+		for subitem in tree_processor.iterate_subinstrs(cfunc.body):
+			if subitem.ea == instr_addr:
+				self.match_ast_tree(tree_processor, subitem)
+				break
+
 	def match_cfunc(self, cfunc):
 		"""Match schemes in decompiled function."""
-		tp = TreeProcessor(cfunc)
+		tree_processor = TreeProcessor(cfunc)
+		ast_tree = cfunc.body
+		self.match_ast_tree(tree_processor, ast_tree)
+
+	def match_ast_tree(self, tree_processor: TreeProcessor, ast_tree):
 		while True:
-			contexts = {s.name: PatternContext(tp) for s in self.schemes}
+			contexts = {s.name: PatternContext(tree_processor) for s in self.schemes}
 			for scheme in self.schemes:
 				scheme.on_tree_iteration_start(contexts[scheme.name])
 
 			is_tree_modified = False
-			for subitem in tp.iterate_subitems(cfunc.body):
-				is_tree_modified = self.check_schemes(tp, subitem)
+			for subitem in tree_processor.iterate_subitems(ast_tree):
+				is_tree_modified = self.check_schemes(tree_processor, subitem)
 				if is_tree_modified:
 					break
 
