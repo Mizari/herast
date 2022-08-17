@@ -315,7 +315,7 @@ def reload_storage(storage_path: str) -> bool:
 	if storage.is_loaded():
 		storage.unload_module()
 
-	for scheme_name in __storage2schemes.pop(storage_path):
+	for scheme_name in __storage2schemes.pop(storage_path, []):
 		del __scheme2storage[scheme_name]
 		del __schemes[scheme_name]
 
