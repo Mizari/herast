@@ -9,7 +9,6 @@ import herast.settings.settings_manager as settings_manager
 
 __schemes_storages : typing.Dict[str, SchemesStorage] = {}
 __schemes : typing.Dict[str, Scheme] = {}
-__enabled_schemes : typing.Set[Scheme] = set()
 from collections import defaultdict as __defaultdict
 __storage2schemes : typing.Dict[str, typing.List[str]]= __defaultdict(list)
 __scheme2storage = {}
@@ -34,8 +33,7 @@ def __rebuild_passive_matcher():
 	global __passive_matcher
 	__passive_matcher.schemes.clear()
 	for s in __schemes.values():
-		if s.name in __enabled_schemes:
-			__passive_matcher.add_scheme(s)
+		__passive_matcher.add_scheme(s)
 
 def __get_storage_status_text(storage_path: str) -> str:
 	globally = settings_manager.get_storage_status(storage_path, globally=True) == "enabled"
@@ -113,38 +111,6 @@ def get_schemes():
 	"""Get dict {scheme_name -> scheme)"""
 	return dict(__schemes)
 
-def enable_scheme(scheme_name: str) -> bool:
-	"""Change status of scheme to activate it in passive matching."""
-
-	if scheme_name not in __schemes:
-		print("No such scheme", scheme_name)
-		return False
-
-	if scheme_name in __enabled_schemes:
-		print(scheme_name, "is already enabled")
-		return False
-
-	__enabled_schemes.add(scheme_name)
-	settings_manager.enable_scheme(scheme_name)
-
-	__rebuild_passive_matcher()
-	return True
-
-def disable_scheme(scheme_name: str) -> bool:
-	"""Change status of scheme to deactivate it in passive matching."""
-	if scheme_name not in __schemes:
-		print("No such scheme", scheme_name)
-		return False
-
-	if scheme_name not in __enabled_schemes:
-		print(scheme_name, "is not yet enabled")
-		return False
-
-	__enabled_schemes.discard(scheme_name)
-	settings_manager.disable_scheme(scheme_name)
-
-	__rebuild_passive_matcher()
-	return True
 
 def disable_storage(storage_path: str) -> bool:
 	"""Change status of a storage to not export schemes to passive matcher."""
@@ -160,8 +126,6 @@ def disable_storage(storage_path: str) -> bool:
 	storage.enabled = False
 	settings_manager.disable_storage(storage_path)
 
-	for scheme_name in __storage2schemes[storage_path]:
-		__enabled_schemes.discard(scheme_name)
 	storage.status_text = __get_storage_status_text(storage.path)
 	__rebuild_passive_matcher()
 	return True
@@ -187,7 +151,6 @@ def enable_storage(storage_path: str) -> bool:
 
 	storage.enabled = True
 	settings_manager.enable_storage(storage_path)
-	__enabled_schemes.update(__storage2schemes[storage_path])
 	__rebuild_passive_matcher()
 
 	storage.status_text = __get_storage_status_text(storage.path)
