@@ -13,13 +13,9 @@ def load_python_module_from_file(module_path:str):
 	module_folder = os.path.dirname(module_path)
 	if module_folder not in sys.path:
 		sys.path.append(module_folder)
-	try:
-		spec = importlib.util.spec_from_file_location(module_name, module_path, submodule_search_locations=[module_folder])
-		module = importlib.util.module_from_spec(spec)
-		spec.loader.exec_module(module)
-	except Exception as e:
-		print("[!] Exception happened during loading module from file %s: %s" % (module_path, e))
-		return None
+	spec = importlib.util.spec_from_file_location(module_name, module_path, submodule_search_locations=[module_folder])
+	module = importlib.util.module_from_spec(spec)
+	spec.loader.exec_module(module)
 	return module
 
 
@@ -45,26 +41,23 @@ class SchemesStorage:
 		self.error = False
 
 	def load_module(self):
-		self.module = load_python_module_from_file(self.path)
-		if self.module is None:
+		if self.is_loaded():
+			print("[!] WARNING: loading module, that is not unloaded")
+			self.module = None
+
+		try:
+			self.module = load_python_module_from_file(self.path)
+			self.status_text = None
+			self.error = False
+			return True
+
+		except Exception as e:
+			print("[!] Exception happened during loading module from file %s: %s" % (self.path, e))
 			self.status_text = traceback.format_exc()
 			self.error = True
 			self.enabled = False
 			self.module = None
 			return False
-
-		else:
-			self.status_text = None
-			self.error = False
-			return True
-
-	@classmethod
-	def from_file(cls, file_path):
-		module = load_python_module_from_file(file_path)
-		if module is None:
-			return None
-
-		return cls(file_path, module)
 
 	def get_status(self):
 		if self.status_text is not None:
