@@ -326,5 +326,6 @@ def reload_storage(storage_path: str) -> bool:
 	if should_enable_later and not enable_storage(storage_path):
 		print("Failed to reenable storage", storage_path, "but reloaded successfully")
 
+	storage.status_text = __get_storage_status_text(storage_path)
 	__rebuild_passive_matcher()
 	return True
