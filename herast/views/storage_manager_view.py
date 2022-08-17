@@ -1,4 +1,3 @@
-from genericpath import isdir, isfile
 from PyQt5 import QtCore, QtWidgets, QtGui
 
 import idaapi
@@ -293,13 +292,13 @@ class StorageManagerModel(QtCore.QAbstractItemModel):
 		self.files.append(file_path)
 		self.refresh_view()
 
-	def remove_file(self, indices):
+	def __get_single_item(self, indices):
 		if len(indices) != 1:
-			print("Got weird number of selected files, returning")
-			return
+			print("Got weird number of selected files", len(indices))
+		return self.get_item(indices[0])
 
-		qidx = indices[0]
-		item = self.get_item(qidx)
+	def remove_file(self, indices):
+		item = self.__get_single_item(indices)
 		if item is None:
 			print("Failed to get tree item, returning")
 			return
@@ -314,12 +313,7 @@ class StorageManagerModel(QtCore.QAbstractItemModel):
 		self.refresh_view()
 
 	def remove_folder(self, indices):
-		if len(indices) != 1:
-			print("Got weird number of selected folders, returning")
-			return
-
-		qidx = indices[0]
-		item = self.get_item(qidx)
+		item = self.__get_single_item(indices)
 		if item is None:
 			print("Failed to get tree item, returning")
 			return
@@ -335,30 +329,33 @@ class StorageManagerModel(QtCore.QAbstractItemModel):
 
 	def disable_storage(self, indices):
 		for qindex in indices:
-			storage_path = self.get_storage_path_by_index(qindex)
-			if storage_path is not None:
-				passive_manager.disable_storage(storage_path)
-				item = self._get_file_item_by_index(qindex)
-				if item is not None:
-					item.disable()
-					self.dataChanged.emit(qindex, qindex)
+			item = self._get_file_item_by_index(qindex)
+			if item is None: continue
+			passive_manager.disable_storage(item.fullpath)
+			item.disable()
+			self.dataChanged.emit(qindex, qindex)
 
 	def enable_storage(self, indices):
 		for qindex in indices:
-			storage_path = self.get_storage_path_by_index(qindex)
-			if storage_path is not None:
-				passive_manager.enable_storage(storage_path)
-				item = self._get_file_item_by_index(qindex)
-				if item is not None:
-					item.enable()
-					self.dataChanged.emit(qindex, qindex)
+			item = self._get_file_item_by_index(qindex)
+			if item is None: continue
+			passive_manager.enable_storage(item.fullpath)
+			item.enable()
+			self.dataChanged.emit(qindex, qindex)
 
 	def reload_storage(self, indices):
 		for qindex in indices:
-			storage_path = self.get_storage_path_by_index(qindex)
-			if storage_path is not None:
-				passive_manager.reload_storage(storage_path)
-				self.dataChanged.emit(qindex, qindex)
+			item = self._get_file_item_by_index(qindex)
+			if item is None: continue
+			if not passive_manager.reload_storage(item.fullpath):
+				continue
+
+			storage = passive_manager.get_storage(item.fullpath)
+			if not storage.enabled:
+				item.disable()
+			else:
+				item.enable()
+			self.dataChanged.emit(qindex, qindex)
 
 	# def flags(self, index):
 	# 	if not index.isValid():
