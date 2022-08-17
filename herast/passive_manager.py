@@ -21,11 +21,12 @@ def __find_python_files_in_folder(folder: str):
 		yield file_path
 
 def __initialize():
-	for storage_path in settings_manager.get_storages_files():
-		__add_storage_file(storage_path, rebuild_passive_matcher=False)
-
+	storage_files = set(settings_manager.get_storages_files())
 	for folder in settings_manager.get_storages_folders():
-		__add_storages_folder(folder, rebuild_passive_matcher=False)
+		storage_files.update(__find_python_files_in_folder(folder))
+
+	for storage_path in storage_files:
+		__add_storage_file(storage_path, rebuild_passive_matcher=False)
 
 	__rebuild_passive_matcher()
 
@@ -51,8 +52,8 @@ def __get_storage_status_text(storage_path: str) -> str:
 
 def __add_storages_folder(storages_folder_path: str, rebuild_passive_matcher=True):
 	for file_path in __find_python_files_in_folder(storages_folder_path):
-		add_storage_file(file_path)
-	
+		__add_storage_file(file_path, rebuild_passive_matcher=False)
+
 	if rebuild_passive_matcher:
 		__rebuild_passive_matcher()
 
