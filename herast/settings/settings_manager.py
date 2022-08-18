@@ -1,5 +1,4 @@
-import typing
-import herast
+from __future__ import annotations
 from herast.settings.base_settings import BaseSettings
 
 import herast.settings.idb_settings as idb_settings
@@ -19,7 +18,7 @@ def reload_settings():
 
 # By default settings getters return global settings overwritten by idb settings
 
-def get_storages_statuses(in_idb=False, globally=False) -> typing.Dict[str, str]:
+def get_storages_statuses(in_idb=False, globally=False) -> dict[str, str]:
 	"""Get enabled/disabled statuses for selected storages.
 	
 	:param in_idb: get only IDB storages statuses
@@ -44,7 +43,7 @@ def get_storage_status(storage_path: str, in_idb=False, globally=False) -> str:
 	d = get_storages_statuses(in_idb=in_idb, globally=globally)
 	return d.get(storage_path, "disabled")
 
-def get_storages_folders(in_idb=False, globally=False) -> typing.List[str]:
+def get_storages_folders(in_idb=False, globally=False) -> list[str]:
 	"""Get a list of storages folders. 
 
 	:param in_idb: get only IDB storages folders
@@ -57,7 +56,7 @@ def get_storages_folders(in_idb=False, globally=False) -> typing.List[str]:
 
 	return __idb_settings.storages_folders + __global_settings.storages_folders
 
-def get_storages_files(in_idb=False, globally=False) -> typing.List[str]:
+def get_storages_files(in_idb=False, globally=False) -> list[str]:
 	"""Get a list of storages files. Does not include storages files found in storages folders.
 
 	:param in_idb: get only IDB storages files
