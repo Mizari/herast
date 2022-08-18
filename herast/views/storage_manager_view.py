@@ -95,7 +95,7 @@ class StorageManagerModel(QtCore.QAbstractItemModel):
 			return self.createIndex(row, column, child_item)
 
 		return QtCore.QModelIndex()
-	
+
 	def get_item(self, index):
 		return index.internalPointer()
 
@@ -108,7 +108,7 @@ class StorageManagerModel(QtCore.QAbstractItemModel):
 			item = self.get_item(index)
 			if item is None or item.is_directory():
 				return QtCore.QVariant()
-		
+
 			if item.is_file() and item.is_enabled():
 				return _color_with_opacity(QtCore.Qt.green)
 			else:
@@ -180,12 +180,12 @@ class StorageManagerModel(QtCore.QAbstractItemModel):
 		item = self._get_item_by_index(idx)
 		if item is None or not item.is_file():
 			return None
-		
+
 		return item
 
 	def refresh_view(self):
 		self.storages_list.reset()
-	
+
 	def refresh_all(self):
 		self.root = SchemeStorageTreeItem(["File"])
 		folders = self.folders
@@ -198,9 +198,9 @@ class StorageManagerModel(QtCore.QAbstractItemModel):
 
 		for file in files:
 			self.add_existing_file(file)
-	
+
 		self.refresh_view()
-	
+
 	def disable_all(self):
 		nodes = [self.root]
 		for node in nodes:
@@ -212,17 +212,17 @@ class StorageManagerModel(QtCore.QAbstractItemModel):
 				else:
 					nodes.append(c)
 		self.refresh_view()
-	
+
 	def add_new_folder(self, storage_folder: str = None):
 		if storage_folder in self.folders:
 			print("Folder already added")
 			return
-	
+
 		if not passive_manager.add_storage_folder(storage_folder):
 			return
 
 		self.add_existing_folder(storage_folder)
-	
+
 	def add_existing_folder(self, storage_folder: str = None):
 		if storage_folder is None:
 			storage_folder = idaapi.ask_text(1024, None, "Enter storages folder")
@@ -243,11 +243,7 @@ class StorageManagerModel(QtCore.QAbstractItemModel):
 				folder_item = child
 				break
 
-		for full_path in glob.iglob(storage_folder + '/**/**.py', recursive=True):
-			storage = passive_manager.get_storage(full_path)
-			if storage is None:
-				continue
-
+		for full_path in passive_manager.get_storages_files_from_folder(storage_folder):
 			relative_path = os.path.relpath(full_path, start=storage_folder)
 			splited_path = relative_path.split(os.sep)
 			basename = splited_path.pop()
@@ -266,15 +262,15 @@ class StorageManagerModel(QtCore.QAbstractItemModel):
 
 			file_item = SchemeStorageTreeItem([basename], SchemeStorageTreeItem.TYPE_FILE, parent=parent_item)
 			file_item.fullpath = full_path
-			file_item.enabled = storage.enabled
+			file_item.enabled = passive_manager.is_storage_enabled(full_path)
 			parent_item.children.append(file_item)
-	
+
 		self.refresh_view()
 
 	def add_file(self, file_path: str = None):
 		if file_path is None:
 			file_path = idaapi.ask_file(False, None, "Enter storage file")
-	
+
 		if file_path in self.files:
 			print("Already have this file", file_path)
 			return
@@ -283,7 +279,7 @@ class StorageManagerModel(QtCore.QAbstractItemModel):
 			return
 		
 		self.add_existing_file(file_path)
-	
+
 	def add_existing_file(self, file_path: str = None):
 		file_item = SchemeStorageTreeItem([file_path], SchemeStorageTreeItem.TYPE_FILE, parent=self.root)
 		file_item.fullpath = file_path

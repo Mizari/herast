@@ -103,6 +103,31 @@ def get_storages_folders(in_idb=False, globally=False) -> typing.List[str]:
 	"""
 	return settings_manager.get_storages_folders(in_idb=in_idb, globally=globally)
 
+def get_storages_files_from_folder(folder:str ) -> typing.List[str]:
+	"""
+	"""
+
+	if folder not in settings_manager.get_storages_folders():
+		print("No such folder in settings")
+		return []
+
+	storages_filenames = []
+	for file_path in __find_python_files_in_folder(folder):
+		if get_storage(file_path) is not None:
+			storages_filenames.append(file_path)
+	return storages_filenames
+
+def is_storage_enabled(storage_path: str) -> bool:
+	"""
+	"""
+
+	storage = get_storage(storage_path)
+	if storage is None:
+		print("No such storage", storage_path)
+		return False
+
+	return storage.enabled
+
 def get_enabled_storages() -> typing.List[SchemesStorage]:
 	"""Get only enabled storages."""
 	return [s for s in __schemes_storages.values() if s.enabled]
