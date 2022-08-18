@@ -54,7 +54,7 @@ def get_storages_folders(in_idb=False, globally=False) -> list[str]:
 	if globally:
 		return list(__global_settings.storages_folders)
 
-	return __idb_settings.storages_folders + __global_settings.storages_folders
+	return list(set(__idb_settings.storages_folders + __global_settings.storages_folders))
 
 def get_storages_files(in_idb=False, globally=False) -> list[str]:
 	"""Get a list of storages files. Does not include storages files found in storages folders.
@@ -67,7 +67,7 @@ def get_storages_files(in_idb=False, globally=False) -> list[str]:
 	if globally:
 		return list(__global_settings.storages_files)
 
-	return __global_settings.storages_files + __idb_settings.storages_files
+	return list(set(__global_settings.storages_files + __idb_settings.storages_files))
 
 def get_time_matching(in_idb=False, globally=False) -> bool:
 	"""Get a bool whether herast should calculate time spent on matching.
