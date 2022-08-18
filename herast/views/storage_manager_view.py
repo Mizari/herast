@@ -2,7 +2,6 @@ from PyQt5 import QtCore, QtWidgets, QtGui
 
 import idaapi
 import os
-import glob
 
 import herast.passive_manager as passive_manager
 

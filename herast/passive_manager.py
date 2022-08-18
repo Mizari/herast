@@ -1,4 +1,4 @@
-import typing
+from __future__ import annotations
 import os
 
 from herast.schemes_storage import SchemesStorage
@@ -7,10 +7,10 @@ from herast.tree.matcher import Matcher
 
 import herast.settings.settings_manager as settings_manager
 
-__schemes_storages : typing.Dict[str, SchemesStorage] = {}
-__schemes : typing.Dict[str, Scheme] = {}
+__schemes_storages : dict[str, SchemesStorage] = {}
+__schemes : dict[str, Scheme] = {}
 from collections import defaultdict as __defaultdict
-__storage2schemes : typing.Dict[str, typing.List[str]]= __defaultdict(list)
+__storage2schemes : dict[str, list[str]]= __defaultdict(list)
 __scheme2storage = {}
 __passive_matcher = Matcher()
 
@@ -87,15 +87,15 @@ def register_storage_scheme(scheme: Scheme):
 
 	__schemes[scheme.name] = scheme
 
-def get_storage(filename: str) -> typing.Optional[SchemesStorage]:
+def get_storage(filename: str) -> SchemesStorage|None:
 	"""Get storage by its path."""
 	return __schemes_storages.get(filename)
 
-def get_storages() -> typing.List[SchemesStorage]:
+def get_storages() -> list[SchemesStorage]:
 	"""Get all storages."""
 	return [s for s in __schemes_storages.values()]
 
-def get_storages_folders(in_idb=False, globally=False) -> typing.List[str]:
+def get_storages_folders(in_idb=False, globally=False) -> list[str]:
 	"""Get all storages folders.
 
 	:param in_idb: get only IDB storages folders
@@ -103,7 +103,7 @@ def get_storages_folders(in_idb=False, globally=False) -> typing.List[str]:
 	"""
 	return settings_manager.get_storages_folders(in_idb=in_idb, globally=globally)
 
-def get_storages_files_from_folder(folder:str ) -> typing.List[str]:
+def get_storages_files_from_folder(folder:str ) -> list[str]:
 	"""
 	"""
 
@@ -128,7 +128,7 @@ def is_storage_enabled(storage_path: str) -> bool:
 
 	return storage.enabled
 
-def get_enabled_storages() -> typing.List[SchemesStorage]:
+def get_enabled_storages() -> list[SchemesStorage]:
 	"""Get only enabled storages."""
 	return [s for s in __schemes_storages.values() if s.enabled]
 
