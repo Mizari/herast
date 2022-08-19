@@ -163,8 +163,14 @@ class Matcher:
 
 		return is_tree_modified
 
+	def get_scheme(self, scheme_name: str):
+		return self.schemes.get(scheme_name)
+
 	def add_scheme(self, scheme: Scheme):
 		self.schemes[scheme.name] = scheme
+
+	def remove_scheme(self, scheme_name: str):
+		self.schemes.pop(scheme_name, None)
 
 	def expressions_traversal_is_needed(self):
 		abstract_expression_patterns = (VarBindPat, BindItemPat)
