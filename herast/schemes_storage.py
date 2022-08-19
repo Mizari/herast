@@ -49,6 +49,7 @@ class SchemesStorage:
 		return self.module is not None
 	
 	def unload_module(self):
+		self.schemes.clear()
 		self.source = None
 		self.enabled = False
 		self.module = None
@@ -70,6 +71,7 @@ class SchemesStorage:
 			print("[!] Exception happened during loading module from file %s: %s" % (self.path, e))
 			self.status_text = traceback.format_exc()
 			self.error = True
+			self.schemes.clear()
 			self.enabled = False
 			self.module = None
 			return False
