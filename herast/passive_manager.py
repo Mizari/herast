@@ -51,10 +51,10 @@ def __unload_storage(storage: SchemesStorage) -> bool:
 	return storage.unload_module()
 
 def __load_storage(storage: SchemesStorage) -> bool:
-	if not storage.load_module():
-		return False
-
 	if settings_manager.get_storage_status(storage.path) == "enabled":
+		if not storage.load_module():
+			return False
+
 		storage.enabled = True
 		storage.status_text = __get_storage_status_text(storage.path)
 		for scheme in storage.get_schemes():
