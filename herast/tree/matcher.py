@@ -89,7 +89,7 @@ class Matcher:
 
 	def match_ast_tree(self, tree_processor: TreeProcessor, ast_tree):
 		while True:
-			contexts = {s.name: PatternContext(tree_processor) for s in self.schemes.keys()}
+			contexts = {s.name: PatternContext(tree_processor) for s in self.schemes.values()}
 			for scheme_name, scheme in self.schemes.items():
 				scheme.on_tree_iteration_start(contexts[scheme_name])
 
