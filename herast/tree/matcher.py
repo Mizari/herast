@@ -32,7 +32,7 @@ def get_cfunc(func_ea):
 
 class Matcher:
 	def __init__(self, *schemes):
-		self.schemes : list[Scheme] = list(schemes)
+		self.schemes : dict[str, Scheme] = {s.name: s for s in schemes}
 
 	def match(self, func):
 		"""Match schemes for function body.
@@ -89,9 +89,9 @@ class Matcher:
 
 	def match_ast_tree(self, tree_processor: TreeProcessor, ast_tree):
 		while True:
-			contexts = {s.name: PatternContext(tree_processor) for s in self.schemes}
-			for scheme in self.schemes:
-				scheme.on_tree_iteration_start(contexts[scheme.name])
+			contexts = {s.name: PatternContext(tree_processor) for s in self.schemes.keys()}
+			for scheme_name, scheme in self.schemes.items():
+				scheme.on_tree_iteration_start(contexts[scheme_name])
 
 			is_tree_modified = False
 			for subitem in tree_processor.iterate_subitems(ast_tree):
@@ -102,8 +102,8 @@ class Matcher:
 			if not is_tree_modified:
 				break
 
-			for scheme in self.schemes:
-				scheme.on_tree_iteration_end(contexts[scheme.name])
+			for scheme_name, scheme in self.schemes.items():
+				scheme.on_tree_iteration_end(contexts[scheme_name])
 
 	def check_schemes(self, tree_processor: TreeProcessor, item: idaapi.citem_t) -> bool:
 		"""Match item in schemes.
@@ -114,7 +114,7 @@ class Matcher:
 		"""
 		item_ctx = PatternContext(tree_processor)
 
-		for scheme in self.schemes:
+		for scheme in self.schemes.values():
 			if self.check_scheme(scheme, item, item_ctx):
 				return True
 
@@ -163,12 +163,12 @@ class Matcher:
 
 		return is_tree_modified
 
-	def add_scheme(self, scheme):
-		self.schemes.append(scheme)
+	def add_scheme(self, scheme: Scheme):
+		self.schemes[scheme.name] = scheme
 
 	def expressions_traversal_is_needed(self):
 		abstract_expression_patterns = (VarBindPat, BindItemPat)
-		for s in self.schemes:
+		for s in self.schemes.values():
 			for p in s.get_patterns():
 				if p.op >= 0 and p.op < idaapi.cit_empty or isinstance(p, abstract_expression_patterns):
 					return True
