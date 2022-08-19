@@ -10,8 +10,7 @@ import herast.settings.settings_manager as settings_manager
 __schemes_storages : dict[str, SchemesStorage] = {}
 __schemes : dict[str, Scheme] = {}
 from collections import defaultdict as __defaultdict
-__storage2schemes : dict[str, list[str]]= __defaultdict(list)
-__scheme2storage = {}
+__storage2schemes : dict[str, list[Scheme]]= __defaultdict(list)
 __passive_matcher = Matcher()
 
 def __find_python_files_in_folder(folder: str):
@@ -69,19 +68,20 @@ def __unload_storage(storage: SchemesStorage) -> bool:
 	if not storage.unload_module():
 		return False
 
-	storage_path = storage.path
-	for scheme_name in __storage2schemes.pop(storage_path, []):
-		del __scheme2storage[scheme_name]
-		del __schemes[scheme_name]
+	__discard_storage_schemes(storage)
 	return True
 
 def __load_storage(storage: SchemesStorage) -> bool:
-	storage_path = storage.path
-	if not storage.load_module():
-		return False
+	rv = storage.load_module()
+	if not rv:
+		# in case exception happened somewhere in between
+		# and something got added
+		__discard_storage_schemes(storage)
+	return rv
 
-	return True
-
+def __discard_storage_schemes(storage: SchemesStorage):
+	for scheme in __storage2schemes.pop(storage.path, []):
+		__schemes.pop(scheme.name, None)
 
 
 
@@ -100,8 +100,7 @@ def register_storage_scheme(scheme: Scheme):
 
 	import inspect
 	storage_path = inspect.stack()[1].filename
-	__storage2schemes[storage_path].append(scheme.name)
-	__scheme2storage[scheme.name] = storage_path
+	__storage2schemes[storage_path].append(scheme)
 
 	__schemes[scheme.name] = scheme
 
@@ -168,6 +167,8 @@ def disable_storage(storage_path: str) -> bool:
 
 	storage.enabled = False
 	settings_manager.disable_storage(storage_path)
+	for scheme in __storage2schemes.get(storage_path, []):
+		__schemes.pop(scheme.name, None)
 
 	storage.status_text = __get_storage_status_text(storage.path)
 	__rebuild_passive_matcher()
@@ -194,6 +195,8 @@ def enable_storage(storage_path: str) -> bool:
 
 	storage.enabled = True
 	settings_manager.enable_storage(storage_path)
+	for scheme in __storage2schemes.get(storage_path, []):
+		__schemes[scheme.name] = scheme
 	__rebuild_passive_matcher()
 
 	storage.status_text = __get_storage_status_text(storage.path)
@@ -262,10 +265,10 @@ def remove_storage_file(storage_path: str, global_settings=False) -> bool:
 
 	settings_manager.remove_storage_file(storage_path, global_settings)
 	storage = get_storage(storage_path)
-	__unload_storage(storage)
+	if storage.is_loaded():
+		__unload_storage(storage)
 	del __schemes_storages[storage_path]
 	return True
-
 
 def reload_storage(storage_path: str) -> bool:
 	"""Reload storage module."""
@@ -274,10 +277,7 @@ def reload_storage(storage_path: str) -> bool:
 		print("No such storage", storage_path)
 		return False
 
-	should_enable_later = False
-	if storage.enabled:
-		should_enable_later = True
-		disable_storage(storage_path)
+	should_enable_later = storage.enabled
 
 	if storage.is_loaded() and not __unload_storage(storage):
 		print("Failed to unload storage in reloading", storage_path)
