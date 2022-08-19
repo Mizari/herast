@@ -1,8 +1,12 @@
+from __future__ import annotations
+
 import os
 import sys
 import traceback
 import importlib
 import importlib.util
+
+from herast.tree.scheme import Scheme
 
 def load_python_module_from_file(module_path:str):
 	if not os.path.exists(module_path):
@@ -29,6 +33,17 @@ class SchemesStorage:
 		self.error = error
 		self.status_text = None
 		self.source = None
+		self.schemes : dict[str, Scheme] = {}
+
+	def add_scheme(self, scheme):
+		self.schemes[scheme.name] = scheme
+
+	def clear_schemes(self):
+		self.schemes.clear()
+
+	def get_schemes(self):
+		for s in self.schemes.values():
+			yield s
 
 	def is_loaded(self):
 		return self.module is not None

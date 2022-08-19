@@ -10,7 +10,6 @@ import herast.settings.settings_manager as settings_manager
 __schemes_storages : dict[str, SchemesStorage] = {}
 __schemes : dict[str, Scheme] = {}
 from collections import defaultdict as __defaultdict
-__storage2schemes : dict[str, list[Scheme]]= __defaultdict(list)
 __passive_matcher = Matcher()
 
 def __find_python_files_in_folder(folder: str):
@@ -80,8 +79,9 @@ def __load_storage(storage: SchemesStorage) -> bool:
 	return rv
 
 def __discard_storage_schemes(storage: SchemesStorage):
-	for scheme in __storage2schemes.pop(storage.path, []):
+	for scheme in storage.get_schemes():
 		__schemes.pop(scheme.name, None)
+	storage.clear_schemes()
 
 
 
@@ -100,7 +100,12 @@ def register_storage_scheme(scheme: Scheme):
 
 	import inspect
 	storage_path = inspect.stack()[1].filename
-	__storage2schemes[storage_path].append(scheme)
+	storage = get_storage(storage_path)
+	if storage is None:
+		print("Internal error, failed to find storage when registering new scheme")
+		return
+
+	storage.add_scheme(scheme)
 
 	__schemes[scheme.name] = scheme
 
@@ -167,7 +172,7 @@ def disable_storage(storage_path: str) -> bool:
 
 	storage.enabled = False
 	settings_manager.disable_storage(storage_path)
-	for scheme in __storage2schemes.get(storage_path, []):
+	for scheme in storage.get_schemes():
 		__schemes.pop(scheme.name, None)
 
 	storage.status_text = __get_storage_status_text(storage.path)
@@ -195,7 +200,7 @@ def enable_storage(storage_path: str) -> bool:
 
 	storage.enabled = True
 	settings_manager.enable_storage(storage_path)
-	for scheme in __storage2schemes.get(storage_path, []):
+	for scheme in storage.get_schemes():
 		__schemes[scheme.name] = scheme
 	__rebuild_passive_matcher()
 
