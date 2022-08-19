@@ -45,10 +45,10 @@ def __add_storage_file(storage_path: str):
 	__schemes_storages[storage_path] = new_storage
 	__load_storage(new_storage)
 
-def __unload_storage(storage: SchemesStorage) -> bool:
+def __unload_storage(storage: SchemesStorage):
 	for scheme in storage.get_schemes():
 		__passive_matcher.remove_scheme(scheme.name)
-	return storage.unload_module()
+	storage.unload_module()
 
 def __load_storage(storage: SchemesStorage) -> bool:
 	if settings_manager.get_storage_status(storage.path) == "enabled":
@@ -256,9 +256,8 @@ def reload_storage(storage_path: str) -> bool:
 		print("No such storage", storage_path)
 		return False
 
-	if storage.is_loaded() and not __unload_storage(storage):
-		print("Failed to unload storage in reloading", storage_path)
-		return False
+	if storage.is_loaded():
+		__unload_storage(storage)
 
 	if not __load_storage(storage):
 		print("Failed to load storage on reloading", storage_path)
