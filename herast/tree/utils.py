@@ -127,6 +127,12 @@ def make_if_instr(cond, ithen, ielse=None):
 	instr.label_num = -1
 	return instr
 
+def make_obj(obj_ea):
+	new_obj = idaapi.cexpr_t()
+	new_obj.op = idaapi.cot_obj
+	new_obj.obj_ea = obj_ea
+	return new_obj
+
 def make_expr_instr(expr):
 	new_item = idaapi.cinsn_t()
 	new_item.op = idaapi.cit_expr
