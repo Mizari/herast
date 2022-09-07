@@ -54,14 +54,14 @@ class MultiObjectPat(BasePat):
 	def __init__(self, *objects, **kwargs):
 		super().__init__(**kwargs)
 		self.objects = [ObjPat(o) for o in objects]
- 
+
 	@BasePat.parent_check
 	def check(self, item, ctx: PatternContext) -> bool:
 		if item.op != idaapi.cot_obj:
 			return False
 
 		for o in self.objects:
-			if o.check(item):
+			if o.check(item, ctx):
 				return True
 		return False
 
