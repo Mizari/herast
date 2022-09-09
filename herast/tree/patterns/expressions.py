@@ -8,8 +8,8 @@ class ExpressionPat(BasePat):
 	"""Base class for expression items patterns."""
 	op = None
 
-	def __init__(self, debug=False, skip_casts=True, check_op=None):
-		super().__init__(debug, skip_casts, check_op=self.op)
+	def __init__(self, check_op=None, **kwargs):
+		super().__init__(check_op=self.op, **kwargs)
 
 	@staticmethod
 	def parent_check(func):
