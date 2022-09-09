@@ -14,7 +14,7 @@ from herast.settings.settings_manager import *
 from herast.passive_manager import *
 
 from herast.tree.utils import *
-from herast.tree.matcher import Matcher
+from herast.tree.matcher import Matcher, get_cfunc
 from herast.tree.scheme import Scheme
 
 def __print_padded(*args, padlen=0):
