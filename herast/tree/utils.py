@@ -1,6 +1,5 @@
 import idaapi
 import idc
-import idautils
 
 def get_following_instr(parent_block, item):
 	container = parent_block.cinsn.cblock
@@ -13,12 +12,6 @@ def get_following_instr(parent_block, item):
 
 def resolve_name_address(name):
 	return idc.get_name_ea_simple(name)
-
-def resolve_addresses_by_prefix(prefix):
-	return [resolve_name_address(name) for name in idautils.Names() if name.startswith(prefix)]
-
-def resolve_addresses_by_suffix(suffix):
-	return [resolve_name_address(name) for name in idautils.Names() if name.startswith(suffix)]
 
 def remove_instruction_from_ast(unwanted_ins, parent):
 	assert type(unwanted_ins) is idaapi.cinsn_t, "Removing item must be an instruction (cinsn_t)"
@@ -47,12 +40,10 @@ def remove_instruction_from_ast(unwanted_ins, parent):
 		print('Got an exception %s while trying to remove instruction from block' % e)
 		return False
 
-
 def make_cblock(instructions):
 	block = idaapi.cblock_t()
 	for i in instructions:
 		block.push_back(i)
-	
 	return block
 
 def make_block_insn(instructions, address, label_num=-1):
