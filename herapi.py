@@ -13,7 +13,7 @@ from herast.tree.patterns.helpers import *
 from herast.settings.settings_manager import *
 from herast.passive_manager import *
 
-from herast.tree.utils import make_call_helper_instr, strip_casts
+from herast.tree.utils import *
 from herast.tree.matcher import Matcher
 from herast.tree.scheme import Scheme
 
