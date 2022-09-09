@@ -172,11 +172,3 @@ def strip_casts(expr):
 	if expr.op == idaapi.cot_cast:
 		return expr.x
 	return expr
-
-def singleton(cls):
-	instances = {}
-	def getinstance(*args, **kwargs):
-		if cls not in instances:
-			instances[cls] = cls(*args, **kwargs)
-		return instances[cls]
-	return getinstance
