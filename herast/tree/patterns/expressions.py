@@ -98,6 +98,19 @@ class NumPat(ExpressionPat):
 		return self.num == expr.n._value
 
 
+class CastPat(ExpressionPat):
+	"""Pattern for implicit cast matching"""
+	op = idaapi.cot_cast
+
+	def __init__(self, pat, skip_casts=False):
+		super().__init__(skip_casts=False)
+		self.pat = pat
+
+	@ExpressionPat.parent_check
+	def check(self, item, ctx: PatternContext, *args, **kwargs) -> bool:
+		return self.pat.check(item.x, ctx)
+
+
 class ObjPat(ExpressionPat):
 	"""Pattern for matching objects with addresses."""
 	op = idaapi.cot_obj
