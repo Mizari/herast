@@ -2,17 +2,6 @@ import idaapi
 import idc
 import idautils
 
-
-def get_obj_from_call_node(call_node):
-	node = call_node
-	while node.x.op == idaapi.cot_cast:
-		node = node.x
-
-	if node.x.op == idaapi.cot_obj:
-		return node.x
-
-	return None
-
 def get_following_instr(parent_block, item):
 	container = parent_block.cinsn.cblock
 	item_idx = container.index(item)
