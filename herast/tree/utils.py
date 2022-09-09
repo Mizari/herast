@@ -6,7 +6,7 @@ import idautils
 def _resolve_obj_address(obj):
 	if obj.op != idaapi.cot_obj:
 		return None
-	
+
 	if obj.obj_ea != idaapi.BADADDR and obj.obj_ea is not None:
 		return obj.obj_ea
 
@@ -52,7 +52,7 @@ def get_following_instr(parent_block, item):
 	if item_idx == len(container) - 1:
 		return None
 	return container[item_idx + 1]
-	
+
 def resolve_name_address(name):
 	return idc.get_name_ea_simple(name)
 
@@ -61,7 +61,6 @@ def resolve_addresses_by_prefix(prefix):
 
 def resolve_addresses_by_suffix(suffix):
 	return [resolve_name_address(name) for name in idautils.Names() if name.startswith(suffix)]
-			
 
 def remove_instruction_from_ast(unwanted_ins, parent):
 	assert type(unwanted_ins) is idaapi.cinsn_t, "Removing item must be an instruction (cinsn_t)"
@@ -106,7 +105,7 @@ def make_block_insn(instructions, address, label_num=-1):
 		block = make_cblock(instructions)
 	else:
 		raise TypeError("Trying to make cblock instruicton neither of cblock_t or list|tuple")
-	
+
 	insn = idaapi.cinsn_t()
 	insn.ea = address
 	insn.op = idaapi.cit_block
@@ -126,6 +125,12 @@ def make_if_instr(cond, ithen, ielse=None):
 	instr.cif = cif
 	instr.label_num = -1
 	return instr
+
+def make_cast(x):
+	new_obj = idaapi.cexpr_t()
+	new_obj.op = idaapi.cot_cast
+	new_obj.x = x
+	return new_obj
 
 def make_obj(obj_ea):
 	new_obj = idaapi.cexpr_t()
