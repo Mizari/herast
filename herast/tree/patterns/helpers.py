@@ -119,7 +119,7 @@ class StructFieldAccessPat(BasePat):
 
 	@BasePat.parent_check
 	def check(self, item, ctx: PatternContext) -> bool:
-		if item.op != idaapi.cot_memptr or item.op != idaapi.cot_memref:
+		if item.op != idaapi.cot_memptr and item.op != idaapi.cot_memref:
 			return False
 
 		stype = item.x.type
