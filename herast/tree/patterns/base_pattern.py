@@ -47,7 +47,7 @@ class BasePat:
 		"""Decorator for child classes instead of inheritance, since
 		before and after calls are needed.
 		"""
-		def __perform_parent_check(self, item, *args, **kwargs):
+		def __perform_parent_check(self:BasePat, item, *args, **kwargs):
 			if item is None:
 				return False
 
@@ -102,7 +102,7 @@ class BasePat:
 				if self.debug_trace_depth != 0:
 					print('Debug calltrace, address of item: %#x (%s)' % (item.ea, item.opname))
 					print('---------------------------------')
-					for i in traceback.format_stack()[:self.self.debug_trace_depth]:
+					for i in traceback.format_stack()[:self.debug_trace_depth]:
 						print(i)
 					print('---------------------------------')
 			return rv
