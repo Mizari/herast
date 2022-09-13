@@ -123,7 +123,9 @@ class StructFieldAccessPat(BasePat):
 			return False
 
 		stype = item.x.type
-		stype = stype.get_pointed_object()
+		if stype.is_ptr():
+			stype = stype.get_pointed_object()
+
 		if not stype.is_struct():
 			return False
 
