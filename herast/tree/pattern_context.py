@@ -1,4 +1,5 @@
 import typing
+import idaapi
 from herast.tree.processing import TreeProcessor
 
 class InstrModification:
@@ -20,6 +21,9 @@ class PatternContext:
 	def get_func_ea(self):
 		"""Get address of matched function."""
 		return self.tree_proc.cfunc.entry_ea
+
+	def get_func_name(self):
+		return idaapi.get_name(self.get_func_ea())
 
 	def get_var(self, name: str):
 		return self.variables.get(name, None)
