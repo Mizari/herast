@@ -1,4 +1,4 @@
-import typing
+from __future__ import annotations
 import idaapi
 from herast.tree.processing import TreeProcessor
 
@@ -14,9 +14,9 @@ class PatternContext:
 	"""
 	def __init__(self, tree_proc: TreeProcessor):
 		self.tree_proc = tree_proc
-		self.expressions : typing.Dict[str, int] = dict()
-		self.variables : typing.Dict = dict()
-		self.instrs_to_modify : typing.List = []
+		self.expressions : dict[str, int] = dict()
+		self.variables : dict = dict()
+		self.instrs_to_modify : list = []
 
 	def get_func_ea(self):
 		"""Get address of matched function."""
