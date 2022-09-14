@@ -1,3 +1,4 @@
+import sys
 import idaapi
 
 from herast.tree.patterns.base_pattern import BasePat
@@ -277,8 +278,8 @@ class AbstractBinaryOpPat(ExpressionPat):
 
 class AsgPat(ExpressionPat):
 	"""Class for assignment expression."""
-
 	op = idaapi.cot_asg
+
 	def __init__(self, lhs, rhs, **kwargs):
 		super().__init__(**kwargs)
 		self.lhs = lhs
@@ -290,35 +291,22 @@ class AsgPat(ExpressionPat):
 			return False
 		return self.rhs.check(item.y, ctx)
 
-import sys
-# print("name", __name__)
-# print("vars0", vars(sys.modules[__name__]))
-
 
 def __generate_expression_patterns():
-	import sys
 	module = sys.modules[__name__]
 	from herast.tree.consts import binary_expressions_ops, unary_expressions_ops, op2str
 
 	for op in unary_expressions_ops:
-		# skip reference, because it is explicitly defined for easier coding
-		if op == idaapi.cot_ref: continue
-
 		name = '%sPat' % op2str[op].replace('cot_', '').capitalize()
+		# pattern was already added explicitly
 		if name in vars(module):
-			print("duplicate unary", name, "skipping")
 			continue
 		vars(module)[name] = type(name, (AbstractUnaryOpPat,), {'op': op})
-	
-	# print("vars", vars(module))
 
 	for op in binary_expressions_ops:
-		# skip assignment, because it is explicitly defined for easier coding
-		if op == idaapi.cot_asg: continue
-
 		name = '%sPat' % op2str[op].replace('cot_', '').capitalize()
+		# pattern was already added explicitly
 		if name in vars(module):
-			print("duplicate binary", name, "skipping")
 			continue
 		vars(module)[name] = type(name, (AbstractBinaryOpPat,), {'op': op})
 __generate_expression_patterns()
