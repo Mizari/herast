@@ -99,11 +99,12 @@ class Matcher:
 				if is_tree_modified:
 					break
 
-			if not is_tree_modified:
-				break
+			if is_tree_modified:
+				continue
 
 			for scheme_name, scheme in self.schemes.items():
 				scheme.on_tree_iteration_end(contexts[scheme_name])
+			break
 
 	def check_schemes(self, tree_processor: TreeProcessor, item: idaapi.citem_t) -> bool:
 		"""Match item in schemes.
