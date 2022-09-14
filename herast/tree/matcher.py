@@ -67,7 +67,7 @@ class Matcher:
 			self.match_cfunc(cfunc)
 
 	def match_everywhere(self):
-		for func_ea in idautils.Functions(0, idaapi.BADADDR):
+		for func_ea in idautils.Functions():
 			self.match(func_ea)
 
 	def match_instruction(self, instr_addr):
