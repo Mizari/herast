@@ -21,10 +21,6 @@ class ExceptionBody(BasePat):
 			return False
 
 		if not self.first_call.check(block[0], ctx):
-			b0 = block[0]
-			if b0.op == idaapi.cit_if: return False
-			c = b0.cexpr
-			if c.y.op != idaapi.cot_call: return False
 			return False
 
 		if not self.last_call.check(block[len(block) - 1], ctx):
