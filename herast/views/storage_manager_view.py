@@ -444,7 +444,8 @@ class StorageManagerForm(idaapi.PluginForm):
 		left_btns_grid_box   = GridLayout(btn_expand_all, btn_collapse_all)
 
 		storage_source_area = QtWidgets.QTextEdit()
-		storage_source_area.setTabStopDistance(QtGui.QFontMetricsF(storage_source_area.font()).width(' ') * 4)
+		if idaapi.IDA_SDK_VERSION >= 770:
+			storage_source_area.setTabStopDistance(QtGui.QFontMetricsF(storage_source_area.font()).width(' ') * 4)
 		storage_source_area.setTabStopWidth(4)
 		storage_source_area.setReadOnly(True)
 
