@@ -7,8 +7,8 @@ from herast.tree.pattern_context import PatternContext
 
 class InstructionPat(BasePat):
 	"""Base pattern for instructions patterns."""
-	def __init__(self, debug=False, skip_casts=True, check_op=None):
-		super().__init__(debug, skip_casts, check_op=self.op)
+	def __init__(self, debug=False, skip_casts=True, check_op=None, **kwargs):
+		super().__init__(debug, skip_casts, check_op=self.op, **kwargs)
 
 
 class BlockPat(InstructionPat):
