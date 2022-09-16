@@ -14,7 +14,7 @@ class PatternContext:
 	"""
 	def __init__(self, tree_proc: TreeProcessor):
 		self.tree_proc = tree_proc
-		self.expressions : dict[str, int] = dict()
+		self.expressions : dict[str, idaapi.cexpr_t] = dict()
 		self.variables : dict = dict()
 		self.instrs_to_modify : list = []
 
