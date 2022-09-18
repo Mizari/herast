@@ -72,6 +72,10 @@ def get_passive_matcher() -> Matcher:
 def register_storage_scheme(scheme: Scheme):
 	"""API for storages to export their schemes."""
 
+	if not isinstance(scheme, Scheme):
+		print(scheme, "is not insance of Scheme")
+		return False
+
 	if __passive_matcher.get_scheme(scheme.name) is not None:
 		print(scheme.name, "scheme already exists, skipping")
 		return
