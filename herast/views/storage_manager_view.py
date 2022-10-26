@@ -190,13 +190,13 @@ class StorageManagerModel(QtCore.QAbstractItemModel):
 		folders = self.folders
 		files = self.files
 
-		self.files = []
-		self.folders = []
+		self.clear_model_files()
+		self.clear_model_folders()
 		for folder in folders:
-			self.add_existing_folder(folder)
+			self.add_model_folder(folder)
 
 		for file in files:
-			self.add_existing_file(file)
+			self.add_model_file(file)
 
 		self.refresh_view()
 
@@ -213,6 +213,9 @@ class StorageManagerModel(QtCore.QAbstractItemModel):
 		self.refresh_view()
 
 	def add_new_folder(self, storage_folder: str = None):
+		if storage_folder is None:
+			storage_folder = idaapi.ask_text(1024, None, "Enter storages folder")
+
 		if storage_folder in self.folders:
 			print("Folder already added")
 			return
@@ -220,12 +223,12 @@ class StorageManagerModel(QtCore.QAbstractItemModel):
 		if not passive_manager.add_storage_folder(storage_folder):
 			return
 
-		self.add_existing_folder(storage_folder)
+		self.add_model_folder(storage_folder)
 
-	def add_existing_folder(self, storage_folder: str = None):
-		if storage_folder is None:
-			storage_folder = idaapi.ask_text(1024, None, "Enter storages folder")
+	def clear_model_folders(self):
+		self.folders.clear()
 
+	def add_model_folder(self, storage_folder: str):
 		self.folders.append(storage_folder)
 
 		parent_item = self.root
@@ -277,9 +280,12 @@ class StorageManagerModel(QtCore.QAbstractItemModel):
 		if not passive_manager.add_storage_file(file_path):
 			return
 		
-		self.add_existing_file(file_path)
+		self.add_model_file(file_path)
 
-	def add_existing_file(self, file_path: str = None):
+	def clear_model_files(self):
+		self.files.clear()
+
+	def add_model_file(self, file_path: str = None):
 		file_item = SchemeStorageTreeItem([file_path], SchemeStorageTreeItem.TYPE_FILE, parent=self.root)
 		file_item.fullpath = file_path
 		file_item.enabled = False
@@ -378,7 +384,7 @@ class StorageManagerForm(idaapi.PluginForm):
 		self.model = StorageManagerModel()
 		self.init_ui(self.model)
 		for storage_folder in passive_manager.get_storages_folders():
-			self.model.add_existing_folder(storage_folder)
+			self.model.add_model_folder(storage_folder)
 
 	def init_ui(self, model: StorageManagerModel):
 		self.parent.resize(400, 600)
