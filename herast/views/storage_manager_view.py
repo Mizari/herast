@@ -214,7 +214,7 @@ class StorageManagerModel(QtCore.QAbstractItemModel):
 
 	def add_new_folder(self, storage_folder: str = None):
 		if storage_folder is None:
-			storage_folder = idaapi.ask_text(1024, None, "Enter storages folder")
+			storage_folder = ask_folder("Choose storages folder")
 
 		if storage_folder in self.folders:
 			print("Folder already added")
@@ -558,3 +558,15 @@ class ShowScriptManager(idaapi.action_handler_t):
 	@property
 	def name(self):
 		return 'test:' + type(self).__name__ 
+
+
+def ask_folder(title):
+	TWidgetToPyQtWidget = idaapi.PluginForm.TWidgetToPyQtWidget # because idk how else to get fucking shortcut
+	path = QtWidgets.QFileDialog.getExistingDirectory(
+		TWidgetToPyQtWidget(idaapi.get_current_widget()),
+		title,
+		"",
+		QtWidgets.QFileDialog.ShowDirsOnly | QtWidgets.QFileDialog.DontResolveSymlinks
+	)
+
+	return path
