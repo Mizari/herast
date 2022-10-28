@@ -215,6 +215,8 @@ class StorageManagerModel(QtCore.QAbstractItemModel):
 	def add_new_folder(self, storage_folder: str = None):
 		if storage_folder is None:
 			storage_folder = ask_folder("Choose storages folder")
+			if storage_folder is None or storage_folder == "":
+				return
 
 		if storage_folder in self.folders:
 			print("Folder already added")
@@ -272,6 +274,8 @@ class StorageManagerModel(QtCore.QAbstractItemModel):
 	def add_file(self, file_path: str = None):
 		if file_path is None:
 			file_path = idaapi.ask_file(False, None, "Enter storage file")
+			if file_path is None or file_path == "":
+				return
 
 		if file_path in self.files:
 			print("Already have this file", file_path)
