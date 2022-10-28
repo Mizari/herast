@@ -187,8 +187,8 @@ class StorageManagerModel(QtCore.QAbstractItemModel):
 
 	def refresh_all(self):
 		self.root = SchemeStorageTreeItem(["File"])
-		folders = self.folders
-		files = self.files
+		folders = self.folders.copy()
+		files = self.files.copy()
 
 		self.clear_model_files()
 		self.clear_model_folders()
