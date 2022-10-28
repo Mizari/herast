@@ -182,9 +182,6 @@ class StorageManagerModel(QtCore.QAbstractItemModel):
 
 		return item
 
-	def refresh_view(self):
-		self.storages_list.reset()
-
 	def refresh_all(self):
 		self.root = SchemeStorageTreeItem(["File"])
 		folders = self.folders.copy()
@@ -198,7 +195,7 @@ class StorageManagerModel(QtCore.QAbstractItemModel):
 		for file in files:
 			self.add_model_file(file)
 
-		self.refresh_view()
+		self.storages_list.reset()
 
 	def disable_all(self):
 		nodes = [self.root]
@@ -210,7 +207,7 @@ class StorageManagerModel(QtCore.QAbstractItemModel):
 						c.disable()
 				else:
 					nodes.append(c)
-		self.refresh_view()
+		self.refresh_all()
 
 	def add_new_folder(self, storage_folder: str = None):
 		if storage_folder is None:
@@ -226,6 +223,7 @@ class StorageManagerModel(QtCore.QAbstractItemModel):
 			return
 
 		self.add_model_folder(storage_folder)
+		self.refresh_all()
 
 	def clear_model_folders(self):
 		self.folders.clear()
@@ -269,8 +267,6 @@ class StorageManagerModel(QtCore.QAbstractItemModel):
 			file_item.enabled = passive_manager.is_storage_enabled(full_path)
 			parent_item.children.append(file_item)
 
-		self.refresh_view()
-
 	def add_file(self, file_path: str = None):
 		if file_path is None:
 			file_path = idaapi.ask_file(False, None, "Enter storage file")
@@ -285,6 +281,7 @@ class StorageManagerModel(QtCore.QAbstractItemModel):
 			return
 		
 		self.add_model_file(file_path)
+		self.refresh_all()
 
 	def clear_model_files(self):
 		self.files.clear()
@@ -295,7 +292,6 @@ class StorageManagerModel(QtCore.QAbstractItemModel):
 		file_item.enabled = False
 		self.root.children.append(file_item)
 		self.files.append(file_path)
-		self.refresh_view()
 
 	def __get_single_item(self, indices):
 		if len(indices) != 1:
@@ -315,7 +311,7 @@ class StorageManagerModel(QtCore.QAbstractItemModel):
 
 		passive_manager.remove_storage_file(file_path)
 		self.files.remove(file_path)
-		self.refresh_view()
+		self.refresh_all()
 
 	def remove_folder(self, indices):
 		item = self.__get_single_item(indices)
@@ -330,7 +326,7 @@ class StorageManagerModel(QtCore.QAbstractItemModel):
 
 		passive_manager.remove_storage_folder(folder_path)
 		self.folders.remove(folder_path)
-		self.refresh_view()
+		self.refresh_all()
 
 	def disable_storage(self, indices):
 		for qindex in indices:
@@ -389,6 +385,7 @@ class StorageManagerForm(idaapi.PluginForm):
 		self.init_ui(self.model)
 		for storage_folder in passive_manager.get_storages_folders():
 			self.model.add_model_folder(storage_folder)
+		self.model.refresh_all()
 
 	def init_ui(self, model: StorageManagerModel):
 		self.parent.resize(400, 600)
