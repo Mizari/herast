@@ -210,6 +210,21 @@ class MemptrPat(ExpressionPat):
 			self.field.check(expression.m, ctx)
 
 
+class IdxPat(ExpressionPat):
+	op = idaapi.cot_idx
+
+	def __init__(self, pointed_object, indx, **kwargs):
+		super().__init__(**kwargs)
+		self.pointed_object = pointed_object
+		if isinstance(indx, int): indx = NumPat(indx)
+		self.indx = indx
+
+	@ExpressionPat.parent_check
+	def check(self, expression, ctx: PatternContext) -> bool:
+		return self.pointed_object.check(expression.x, ctx) and \
+			self.indx.check(expression.y, ctx)
+
+
 class TernaryPat(ExpressionPat):
 	"""Pattern for C's ternary operator."""
 	op = idaapi.cot_tern
