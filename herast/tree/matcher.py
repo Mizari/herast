@@ -1,5 +1,6 @@
 import idaapi
 import idautils
+import idc
 
 from herast.tree.patterns.abstracts import BindItemPat, VarBindPat
 from herast.tree.pattern_context import PatternContext
@@ -17,6 +18,9 @@ def get_func_start(addr):
 	if func is None:
 		return idaapi.BADADDR
 	return func.start_ea
+
+def is_func_start(addr):
+	return addr == get_func_start(addr)
 
 def get_cfunc(func_ea):
 	try:
@@ -55,8 +59,16 @@ class Matcher:
 	def match_objects_xrefs(self, *objects):
 		"""Match objects' xrefs in functions. Might decompile a lot of functions"""
 		cfuncs_eas = set()
-		for func_ea in objects:
+		for obj in objects:
+			if isinstance(obj, int):
+				func_ea = obj
+			elif isinstance(obj, str):
+				func_ea = idc.get_name_ea_simple(obj)
+			else:
+				raise TypeError("Object is of unknown type, should be int|str")
+
 			calls = get_func_calls_to(func_ea)
+			calls = [c for c in calls if is_func_start(c)]
 			cfuncs_eas.update(calls)
 
 		print("need to decompile {} cfuncs".format(len(cfuncs_eas)))
