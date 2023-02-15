@@ -105,7 +105,7 @@ class StringPat(BasePat):
 		name = idaapi.str2user(name)
 
 		if self.str_value is None:
-			return len(name) == self.minlen
+			return len(name) >= self.minlen
 		else:
 			return self.str_value == name
 
