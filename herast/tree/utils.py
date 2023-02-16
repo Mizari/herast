@@ -94,10 +94,7 @@ def make_expr_instr(expr):
 	new_item.thisown = False
 	return new_item
 
-def make_call_helper_expr(name, *args, retval=None):
-	if retval is None:
-		retval = idaapi.get_unk_type(8)
-
+def make_arglist(*args):
 	arglist = idaapi.carglist_t()
 	for arg in args:
 		if arg is None:
@@ -110,7 +107,13 @@ def make_call_helper_expr(name, *args, retval=None):
 			narg = idaapi.carg_t()
 			narg.assign(arg)
 			arglist.push_back(narg)
+	return arglist
 
+def make_call_helper_expr(name, *args, retval=None):
+	if retval is None:
+		retval = idaapi.get_unk_type(8)
+
+	arglist = make_arglist(*args)
 	return idaapi.call_helper(retval, arglist, name)
 
 def make_call_helper_instr(name, *args):
