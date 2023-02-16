@@ -109,6 +109,13 @@ def make_arglist(*args):
 			arglist.push_back(narg)
 	return arglist
 
+def make_call(call, *args):
+	call_expr = idaapi.cexpr_t()
+	call_expr.op = idaapi.cot_call
+	call_expr.x = call
+	call_expr.a = make_arglist(*args)
+	return call_expr
+
 def make_call_helper_expr(name, *args, retval=None):
 	if retval is None:
 		retval = idaapi.get_unk_type(8)
