@@ -126,8 +126,8 @@ class ObjPat(ExpressionPat):
 
 		if isinstance(obj_info, int):
 			self.ea = obj_info
-			if not idaapi.is_loaded(self.ea):
-				print("[!] WARNING: object with address", hex(self.ea), "is not loaded. Will still try to match it")
+			if not idaapi.is_mapped(self.ea):
+				print("[!] WARNING: object with address", hex(self.ea), "is not mapped. Will still try to match it")
 			else:
 				self.name = idaapi.get_name(self.ea)
 				if self.name == '': self.name = None
