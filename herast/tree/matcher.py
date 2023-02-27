@@ -72,10 +72,7 @@ class Matcher:
 			cfuncs_eas.update(calls)
 
 		for func_ea in sorted(cfuncs_eas):
-			cfunc = get_cfunc(func_ea)
-			if cfunc is None:
-				continue
-			self.match_cfunc(cfunc)
+			self.match(func_ea)
 
 	def match_everywhere(self):
 		for func_ea in idautils.Functions():
