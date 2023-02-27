@@ -6,6 +6,7 @@ from herast.tree.patterns.abstracts import BindItemPat, VarBindPat
 from herast.tree.pattern_context import PatternContext
 from herast.tree.processing import TreeProcessor
 from herast.tree.scheme import Scheme
+from herast.settings import runtime_settings
 
 
 def get_func_calls_to(fea):
@@ -133,29 +134,44 @@ class Matcher:
 		return False
 
 	def check_scheme(self, scheme: Scheme, item: idaapi.citem_t, item_ctx: PatternContext):
-		try:
+		if runtime_settings.CATCH_DURING_MATCHING:
+			try:
+				item_ctx.cleanup()
+			except Exception as e:
+				print('[!] Got an exception during context cleanup: %s' % e)
+				return False
+		else:
 			item_ctx.cleanup()
-		except Exception as e:
-			print('[!] Got an exception during context cleanup: %s' % e)
-			return False
 
-		try:
+		if runtime_settings.CATCH_DURING_MATCHING:
+			try:
+				if not scheme.on_new_item(item, item_ctx):
+					return False
+			except Exception as e:
+				print('[!] Got an exception during pattern matching: %s' % e)
+				return False
+		else:
 			if not scheme.on_new_item(item, item_ctx):
 				return False
-		except Exception as e:
-			print('[!] Got an exception during pattern matching: %s' % e)
-			return False
 
-		try:
+		if runtime_settings.CATCH_DURING_MATCHING:
+			try:
+				is_tree_modified = scheme.on_matched_item(item, item_ctx)
+				if not isinstance(is_tree_modified, bool):
+					raise Exception("Handler return invalid return type, should be bool")
+
+				if is_tree_modified:
+					return True
+			except Exception as e:
+				print('[!] Got an exception during pattern handling: %s' % e)
+				return False
+		else:
 			is_tree_modified = scheme.on_matched_item(item, item_ctx)
 			if not isinstance(is_tree_modified, bool):
 				raise Exception("Handler return invalid return type, should be bool")
 
 			if is_tree_modified:
 				return True
-		except Exception as e:
-			print('[!] Got an exception during pattern handling: %s' % e)
-			return False
 
 	def finalize_item_context(self, ctx: PatternContext):
 		tree_proc = ctx.tree_proc

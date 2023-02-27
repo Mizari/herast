@@ -16,6 +16,7 @@ from herast.passive_manager import *
 from herast.tree.utils import *
 from herast.tree.matcher import Matcher, get_cfunc
 from herast.tree.scheme import Scheme
+from herast.settings import runtime_settings
 
 def __print_padded(*args, padlen=0):
 	padlen -= 1
