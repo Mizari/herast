@@ -195,6 +195,18 @@ class MemrefPat(ExpressionPat):
 			self.field.check(expression.m, ctx)
 
 
+class PtrPat(ExpressionPat):
+	op = idaapi.cot_ptr
+
+	def __init__(self, pointed_object, **kwargs):
+		super().__init__(**kwargs)
+		self.pointed_object = pointed_object
+
+	@ExpressionPat.parent_check
+	def check(self, expression, ctx:PatternContext) -> bool:
+		return self.pointed_object.check(expression.x, ctx)
+
+
 class MemptrPat(ExpressionPat):
 	"""Pattern for matching memory pointers."""
 	op = idaapi.cot_memptr
