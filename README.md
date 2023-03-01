@@ -12,9 +12,11 @@ Herast helps with finding AST subtrees and with following work with found items.
 
 ## Installation
 
-- Place `herast/` to `$IDA_DIR/python/3/` directory
-- Place `herapi.py` to `$IDA_DIR/python/3/` directory
-- Place `herast.py` to `$IDA_DIR/plugins` directory
+\$IDAUSR is "%APPDATA%/Hex-Rays/IDA Pro" on windows and "$HOME/.idapro" on linux and mac
+
+- Place `herast/` to `$IDAUSR/python/3/` directory
+- Place `herapi.py` to `$IDAUSR/python/3/` directory
+- Place `herast.py` to `$IDAUSR/plugins` directory
 
 ## Use already written AST handlers
 
