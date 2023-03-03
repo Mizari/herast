@@ -68,7 +68,7 @@ class IfPat(InstructionPat):
 			if pat is None:
 				return AnyPat()
 
-			if not should_wrap_in_block:
+			if not should_wrap_in_block or isinstance(pat, AnyPat):
 				return pat
 
 			if pat.op == idaapi.cit_block:

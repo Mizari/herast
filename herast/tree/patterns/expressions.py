@@ -184,15 +184,15 @@ class MemrefPat(ExpressionPat):
 	"""Pattern for matching memory references."""
 	op = idaapi.cot_memref
 
-	def __init__(self, referenced_object, field, **kwargs):
+	def __init__(self, referenced_object, field=None, **kwargs):
 		super().__init__(**kwargs)
 		self.referenced_object = referenced_object
 		self.field = field
 
 	@ExpressionPat.parent_check
 	def check(self, expression, ctx: PatternContext) -> bool:
-		return self.referenced_object.check(expression.x, ctx) and \
-			self.field.check(expression.m, ctx)
+		return (self.field is None or self.field == expression.m) and \
+			self.referenced_object.check(expression.x, ctx)
 
 
 class PtrPat(ExpressionPat):
@@ -211,15 +211,15 @@ class MemptrPat(ExpressionPat):
 	"""Pattern for matching memory pointers."""
 	op = idaapi.cot_memptr
 
-	def __init__(self, pointed_object, field, **kwargs):
+	def __init__(self, pointed_object, field=None, **kwargs):
 		super().__init__(**kwargs)
 		self.pointed_object = pointed_object
 		self.field = field
 
 	@ExpressionPat.parent_check
 	def check(self, expression, ctx: PatternContext) -> bool:
-		return self.pointed_object.check(expression.x, ctx) and \
-			self.field.check(expression.m, ctx)
+		return (self.field is None or self.field == expression.m) and \
+			self.pointed_object.check(expression.x, ctx)
 
 
 class IdxPat(ExpressionPat):
