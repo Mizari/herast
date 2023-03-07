@@ -35,15 +35,15 @@ class SchemesStorage:
 		self.source = None
 		self.schemes : dict[str, Scheme] = {}
 
-	def add_scheme(self, scheme):
-		self.schemes[scheme.name] = scheme
+	def add_scheme(self, name:str, scheme:Scheme):
+		self.schemes[name] = scheme
 
 	def clear_schemes(self):
 		self.schemes.clear()
 
 	def get_schemes(self):
-		for s in self.schemes.values():
-			yield s
+		for n, s in self.schemes.items():
+			yield n, s
 
 	def is_loaded(self):
 		return self.module is not None

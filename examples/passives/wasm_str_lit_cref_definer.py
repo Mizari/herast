@@ -11,4 +11,4 @@ class DrefingScheme(Scheme):
 
 
 pattern = ExprInsPat(DeepExprPat(BindItemPat('xref_me', ObjPat())))
-register_storage_scheme(DrefingScheme("drefing", pattern))
+register_storage_scheme("drefing", DrefingScheme(pattern))

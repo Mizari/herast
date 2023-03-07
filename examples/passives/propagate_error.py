@@ -18,8 +18,7 @@ class ReplacingScheme(Scheme):
 			ExprInsPat(BindItemPat("logic_expr")),
 			AsgInsnPat(VarBindPat("error_var"), BindItemPat("logic_expr"))
 		)
-		name = "propagate_erro"
-		super().__init__(name, pattern)
+		super().__init__(pattern)
 
 	def on_matched_item(self, item, ctx: PatternContext):
 		error_var = ctx.get_var("error_var")
@@ -34,4 +33,4 @@ class ReplacingScheme(Scheme):
 		ctx.modify_instr(item, new_item)
 		return False
 
-register_storage_scheme(ReplacingScheme())
+register_storage_scheme("propagate_error", ReplacingScheme())

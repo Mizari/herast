@@ -5,10 +5,10 @@ class HelperReplacer(Scheme):
 		this scheme either removes or replaces one item
 		with helper function of a given name without arguments
 	"""
-	def __init__(self, name, pattern, helper_name, should_remove=False):
+	def __init__(self, pattern, helper_name, should_remove=False):
 		self.helper_name = helper_name
 		self.should_remove = should_remove
-		super().__init__(name, pattern)
+		super().__init__(pattern)
 
 	def on_matched_item(self, item, ctx: PatternContext):
 		if self.should_remove:
@@ -81,7 +81,7 @@ release_pattern = \
 	second one will be deleted via Remove Pattern
 """
 release_pattern = SeqPat(AsgInsnPat(VarPat(), AnyPat()), RemovePat(release_pattern))
-register_storage_scheme(HelperReplacer("shptr_release", release_pattern, "__sharedptr::release"))
+register_storage_scheme("shptr_release", HelperReplacer(release_pattern, "__sharedptr::release"))
 
 def cond_insn(pat):
 	"""
@@ -108,7 +108,7 @@ increment_pattern = cond_insn(IfPat(
 	ExprInsPat(),
 ))
 
-register_storage_scheme(HelperReplacer("shptr_inc", increment_pattern, "__sharedptr::increment"))
+register_storage_scheme("shptr_inc", HelperReplacer(increment_pattern, "__sharedptr::increment"))
 
 
 
@@ -129,4 +129,4 @@ std_release_pattern = cond_insn(CallInsnPat(
 									"std::_Sp_counted_base::_M_release",
 									ignore_arguments=True
 								))
-register_storage_scheme(ItemRemovalScheme("shptr_release_remover", RemovePat(std_release_pattern)))
+register_storage_scheme("shptr_release_remover", ItemRemovalScheme(RemovePat(std_release_pattern)))

@@ -37,7 +37,7 @@ def get_cfunc(func_ea):
 
 class Matcher:
 	def __init__(self, *schemes):
-		self.schemes : dict[str, Scheme] = {s.name: s for s in schemes}
+		self.schemes : dict[str, Scheme] = {"scheme" + str(i): s for i, s in enumerate(schemes)}
 
 	def match(self, func):
 		"""Match schemes for function body.
@@ -98,7 +98,7 @@ class Matcher:
 
 	def match_ast_tree(self, tree_processor: TreeProcessor, ast_tree):
 		while True:
-			contexts = {s.name: PatternContext(tree_processor) for s in self.schemes.values()}
+			contexts = {n: PatternContext(tree_processor) for n, s in self.schemes.items()}
 			for scheme_name, scheme in self.schemes.items():
 				scheme.on_tree_iteration_start(contexts[scheme_name])
 
@@ -191,8 +191,8 @@ class Matcher:
 	def get_scheme(self, scheme_name: str):
 		return self.schemes.get(scheme_name)
 
-	def add_scheme(self, scheme: Scheme):
-		self.schemes[scheme.name] = scheme
+	def add_scheme(self, name:str, scheme:Scheme):
+		self.schemes[name] = scheme
 
 	def remove_scheme(self, scheme_name: str):
 		self.schemes.pop(scheme_name, None)

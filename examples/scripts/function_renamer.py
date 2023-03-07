@@ -3,13 +3,13 @@ from herapi import *
 
 
 class FunctionRenamer(Scheme):
-	def __init__(self, debug_flag):
+	def __init__(self, debug_flag:int):
 		pattern = IfPat(
-			ObjPat(debug_flag),
+			debug_flag,
 			DeepExprPat(CallPat("printf", ignore_arguments=True), bind_name="debug_print"),
 			should_wrap_in_block=False, # if to not wrap in block, because we want to search inside block's instructions
 		)
-		super().__init__("function_renamer", pattern)
+		super().__init__(pattern)
 		self.renamings = {}
 		self.conflicts = {}
 

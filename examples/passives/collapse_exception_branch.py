@@ -59,8 +59,7 @@ class ExceptionCollapserScheme(Scheme):
 			should_wrap_in_block=False,
 		)
 
-		name = "exception_collapser"
-		super().__init__(name, pattern)
+		super().__init__(pattern)
 
 	def on_matched_item(self, item, ctx: PatternContext) -> bool:
 		"""
@@ -78,4 +77,4 @@ class ExceptionCollapserScheme(Scheme):
 
 		return False
 
-register_storage_scheme(ExceptionCollapserScheme())
+register_storage_scheme("exception_collapser", ExceptionCollapserScheme())

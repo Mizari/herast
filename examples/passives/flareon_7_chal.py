@@ -47,4 +47,4 @@ class Flareon7ChalScheme(Scheme):
 		return False
 
 
-register_storage_scheme(Flareon7ChalScheme("flareon7chal", pattern))
+register_storage_scheme("flareon7chal", Flareon7ChalScheme(pattern))

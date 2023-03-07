@@ -46,8 +46,8 @@ def __add_storage_file(storage_path: str):
 	__load_storage(new_storage)
 
 def __unload_storage(storage: SchemesStorage):
-	for scheme in storage.get_schemes():
-		__passive_matcher.remove_scheme(scheme.name)
+	for name, _ in storage.get_schemes():
+		__passive_matcher.remove_scheme(name)
 	storage.unload_module()
 
 def __load_storage(storage: SchemesStorage) -> bool:
@@ -57,8 +57,8 @@ def __load_storage(storage: SchemesStorage) -> bool:
 
 		storage.enabled = True
 		storage.status_text = __get_storage_status_text(storage.path)
-		for scheme in storage.get_schemes():
-			__passive_matcher.add_scheme(scheme)
+		for name, scheme in storage.get_schemes():
+			__passive_matcher.add_scheme(name, scheme)
 	return True
 
 
@@ -69,26 +69,31 @@ def get_passive_matcher() -> Matcher:
 	"""Get matcher, that automatically matches in every decompilation."""
 	return __passive_matcher
 
-def register_storage_scheme(scheme: Scheme):
-	"""API for storages to export their schemes."""
+def register_storage_scheme(name:str, scheme:Scheme):
+	"""API for storages to export their schemes.
+
+	:param name: unique identificator for a scheme
+	:return: call status
+	"""
 
 	if not isinstance(scheme, Scheme):
 		print(scheme, "is not insance of Scheme")
 		return False
 
-	if __passive_matcher.get_scheme(scheme.name) is not None:
-		print(scheme.name, "scheme already exists, skipping")
-		return
+	if __passive_matcher.get_scheme(name) is not None:
+		print(name, "scheme already exists, skipping")
+		return False
 
 	import inspect
 	storage_path = inspect.stack()[1].filename
 	storage = get_storage(storage_path)
 	if storage is None:
 		print("Internal error, failed to find storage when registering new scheme")
-		return
+		return False
 
-	storage.add_scheme(scheme)
-	__passive_matcher.add_scheme(scheme)
+	storage.add_scheme(name, scheme)
+	__passive_matcher.add_scheme(name, scheme)
+	return True
 
 def get_storage(filename: str) -> SchemesStorage|None:
 	"""Get storage by its path."""
@@ -153,8 +158,8 @@ def disable_storage(storage_path: str) -> bool:
 
 	storage.enabled = False
 	settings_manager.disable_storage(storage_path)
-	for scheme in storage.get_schemes():
-		__passive_matcher.remove_scheme(scheme.name)
+	for name, _ in storage.get_schemes():
+		__passive_matcher.remove_scheme(name)
 
 	storage.status_text = __get_storage_status_text(storage.path)
 	return True
@@ -180,8 +185,8 @@ def enable_storage(storage_path: str) -> bool:
 
 	storage.enabled = True
 	settings_manager.enable_storage(storage_path)
-	for scheme in storage.get_schemes():
-		__passive_matcher.add_scheme(scheme)
+	for name, scheme in storage.get_schemes():
+		__passive_matcher.add_scheme(name, scheme)
 
 	storage.status_text = __get_storage_status_text(storage.path)
 	return True

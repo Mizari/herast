@@ -7,4 +7,4 @@ class ItemRemovalScheme(Scheme):
 		ctx.modify_instr(item, None)
 		return False
 
-register_storage_scheme(ItemRemovalScheme("remove_objc_release", test_pattern))
+register_storage_scheme("remove_objc_release", ItemRemovalScheme(test_pattern))

@@ -3,14 +3,12 @@ from herast.tree.patterns.base_pattern import BasePat
 
 class Scheme:
 	"""Class with logic on what to do with successfully found patterns in AST"""
-	def __init__(self, name: str, pattern: BasePat):
+	def __init__(self, pattern: BasePat):
 		"""Scheme initialization
 
-		:param name: unique identificator for a scheme
 		:param pattern: AST pattern
 		"""
 		self.pattern = pattern
-		self.name = name
 
 	def get_patterns(self):
 		"""Get a list of patterns"""

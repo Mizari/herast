@@ -79,8 +79,7 @@ class StringDtorScheme(Scheme):
 						)
 					)
 				)
-		name = "string_dtor"
-		super().__init__(name, pattern)
+		super().__init__(pattern)
 
 	def on_matched_item(self, item, ctx: PatternContext):
 		str_as_str = ctx.get_var("str_as_str")
@@ -99,4 +98,4 @@ class StringDtorScheme(Scheme):
 		return False
 
 
-register_storage_scheme(StringDtorScheme())
+register_storage_scheme("string_dtor", StringDtorScheme())

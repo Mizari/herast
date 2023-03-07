@@ -17,7 +17,7 @@ class CallsParser(Scheme):
 
 		obj_pat = MultiObjectPat(*function_address)
 		pattern = CallPat(obj_pat, ObjPat(), RefPat(ObjPat()), skip_missing=True)
-		super().__init__("calls_parser", pattern)
+		super().__init__(pattern)
 
 	def on_matched_item(self, item, ctx: PatternContext) -> bool:
 		arg0 = item.a[0]
