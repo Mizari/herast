@@ -97,10 +97,11 @@ class Matcher:
 		self.match_ast_tree(tree_processor, ast_tree)
 
 	def match_ast_tree(self, tree_processor: TreeProcessor, ast_tree):
+		schemes = [s for s in self.schemes.values()]
 		while True:
-			contexts = {n: PatternContext(tree_processor) for n, s in self.schemes.items()}
-			for scheme_name, scheme in self.schemes.items():
-				scheme.on_tree_iteration_start(contexts[scheme_name])
+			contexts = [PatternContext(tree_processor) for _ in schemes]
+			for i, scheme in enumerate(schemes):
+				scheme.on_tree_iteration_start(contexts[i])
 
 			is_tree_modified = False
 			for subitem in tree_processor.iterate_subitems(ast_tree):
@@ -111,8 +112,8 @@ class Matcher:
 			if is_tree_modified:
 				continue
 
-			for scheme_name, scheme in self.schemes.items():
-				scheme.on_tree_iteration_end(contexts[scheme_name])
+			for i, scheme in enumerate(schemes):
+				scheme.on_tree_iteration_end(contexts[i])
 			break
 
 	def check_schemes(self, tree_processor: TreeProcessor, item: idaapi.citem_t) -> bool:
