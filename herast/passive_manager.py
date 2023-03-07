@@ -253,6 +253,10 @@ def remove_storage_file(storage_path: str, global_settings=False) -> bool:
 
 	settings_manager.remove_storage_file(storage_path, global_settings)
 	storage = get_storage(storage_path)
+	if storage is None:
+		print("No such storage", storage_path)
+		return False
+
 	if storage.is_loaded():
 		__unload_storage(storage)
 	del __schemes_storages[storage_path]
