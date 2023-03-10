@@ -1,38 +1,12 @@
 import idaapi
-import idautils
 import idc
 
+import herast.tree.utils as utils
 from herast.tree.patterns.abstracts import BindItemPat, VarBindPat
 from herast.tree.pattern_context import PatternContext
 from herast.tree.processing import TreeProcessor
 from herast.tree.scheme import Scheme
 from herast.settings import runtime_settings
-
-
-def get_func_calls_to(fea):
-	rv = filter(None, [get_func_start(x.frm) for x in idautils.XrefsTo(fea)])
-	rv = filter(lambda x: x != idaapi.BADADDR, rv)
-	return list(rv)
-
-def get_func_start(addr):
-	func = idaapi.get_func(addr)
-	if func is None:
-		return idaapi.BADADDR
-	return func.start_ea
-
-def is_func_start(addr):
-	return addr == get_func_start(addr)
-
-def get_cfunc(func_ea):
-	try:
-		cfunc = idaapi.decompile(func_ea)
-	except idaapi.DecompilationFailure:
-		print("Error: failed to decompile function {}".format(hex(func_ea)))
-		return None
-
-	if cfunc is None:
-		print("Error: failed to decompile function {}".format(hex(func_ea)))
-	return cfunc
 
 
 class Matcher:
@@ -48,7 +22,7 @@ class Matcher:
 				self.match_cfunc(func)
 
 			elif isinstance(func, int):
-				cfunc = get_cfunc(func)
+				cfunc = utils.get_cfunc(func)
 				if cfunc is None:
 					continue
 				self.match_cfunc(cfunc)
@@ -67,16 +41,16 @@ class Matcher:
 			else:
 				raise TypeError("Object is of unknown type, should be int|str")
 
-			calls = get_func_calls_to(func_ea)
-			calls = [c for c in calls if is_func_start(c)]
+			calls = utils.get_func_calls_to(func_ea)
+			calls = [c for c in calls if utils.is_func_start(c)]
 			cfuncs_eas.update(calls)
 
 		for func_ea in sorted(cfuncs_eas):
 			self.match(func_ea)
 
 	def match_instruction(self, instr_addr):
-		func_addr = get_func_start(instr_addr)
-		cfunc = get_cfunc(func_addr)
+		func_addr = utils.get_func_start(instr_addr)
+		cfunc = utils.get_cfunc(func_addr)
 		if cfunc is None: return
 
 		tree_processor = TreeProcessor(cfunc)

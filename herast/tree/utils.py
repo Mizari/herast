@@ -1,5 +1,33 @@
+from __future__ import annotations
 import idaapi
 import idc
+import idautils
+
+
+def get_func_calls_to(fea:int) -> list[int]:
+	rv = filter(None, [get_func_start(x.frm) for x in idautils.XrefsTo(fea)])
+	rv = filter(lambda x: x != idaapi.BADADDR, rv)
+	return list(rv)
+
+def get_func_start(addr:int) -> int:
+	func = idaapi.get_func(addr)
+	if func is None:
+		return idaapi.BADADDR
+	return func.start_ea
+
+def is_func_start(addr:int) -> bool:
+	return addr == get_func_start(addr)
+
+def get_cfunc(func_ea:int) -> idaapi.cfunc_t:
+	try:
+		cfunc = idaapi.decompile(func_ea)
+	except idaapi.DecompilationFailure:
+		print("Error: failed to decompile function {}".format(hex(func_ea)))
+		return None
+
+	if cfunc is None:
+		print("Error: failed to decompile function {}".format(hex(func_ea)))
+	return cfunc
 
 def get_following_instr(parent_block, item):
 	container = parent_block.cinsn.cblock
