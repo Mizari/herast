@@ -8,7 +8,7 @@ class AssignmentCounterScheme(Scheme):
 		self.count = defaultdict(int)
 		obj_pat = MultiObjectPat(*candidates)
 		pattern = AsgPat(AnyPat(), CallPat(obj_pat))
-		super().__init__("assignment_counter", pattern)
+		super().__init__(pattern)
 
 	def on_matched_item(self, item, ctx: PatternContext) -> bool:
 		func_ea = strip_casts(item.y).x.obj_ea
