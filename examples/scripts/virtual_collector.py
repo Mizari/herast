@@ -17,9 +17,7 @@ class VirtualCollector(Scheme):
 
 def collect_virtual_properties(*functions, struct_type=None, offset=None):
 	scheme = VirtualCollector(struct_type, offset)
-	matcher = Matcher(scheme)
-	for f in functions:
-		matcher.match(f)
+	match(scheme, *functions)
 
 	for func_ea, struct_type, offset, value in scheme.collection:
 		yield func_ea, struct_type, offset, value
