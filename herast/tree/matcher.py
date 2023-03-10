@@ -39,23 +39,22 @@ class Matcher:
 	def __init__(self, *schemes):
 		self.schemes : dict[str, Scheme] = {"scheme" + str(i): s for i, s in enumerate(schemes)}
 
-	def match(self, func):
+	def match(self, *functions):
 		"""Match schemes for function body.
 
-		:param func: matched function. Can be decompiled or just function address"""
-		if func is None:
-			return
+		:param functions: matched functions. Can be decompiled cfuncs or just function addresses"""
+		for func in functions:
+			if isinstance(func, idaapi.cfunc_t):
+				self.match_cfunc(func)
 
-		if isinstance(func, idaapi.cfunc_t):
-			return self.match_cfunc(func)
+			elif isinstance(func, int):
+				cfunc = get_cfunc(func)
+				if cfunc is None:
+					continue
+				self.match_cfunc(cfunc)
 
-		if isinstance(func, int):
-			cfunc = get_cfunc(func)
-			if cfunc is None:
-				return
-			return self.match_cfunc(cfunc)
-
-		raise Exception("Invalid function type")
+			else:
+				raise TypeError("Invalid function type")
 
 	def match_objects_xrefs(self, *objects):
 		"""Match objects' xrefs in functions. Might decompile a lot of functions"""
@@ -73,10 +72,6 @@ class Matcher:
 			cfuncs_eas.update(calls)
 
 		for func_ea in sorted(cfuncs_eas):
-			self.match(func_ea)
-
-	def match_everywhere(self):
-		for func_ea in idautils.Functions():
 			self.match(func_ea)
 
 	def match_instruction(self, instr_addr):
