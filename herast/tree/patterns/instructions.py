@@ -1,5 +1,4 @@
 import idaapi
-import typing
 from .abstracts import AnyPat
 from herast.tree.patterns.base_pattern import BasePat
 from herast.tree.pattern_context import PatternContext
@@ -83,7 +82,7 @@ class IfPat(InstructionPat):
 
 			return BlockPat(pat)
 
-		self.condition   = condition
+		self.condition   = wrap_pattern(condition)
 		self.then_branch = wrap_pattern(then_branch)
 		self.else_branch = wrap_pattern(else_branch)
 
@@ -101,7 +100,7 @@ class IfPat(InstructionPat):
 
 	@property
 	def children(self):
-		return (self.expr, self.body)
+		return (self.condition, self.then_branch, self.else_branch)
 
 
 class ForPat(InstructionPat):
