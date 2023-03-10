@@ -116,55 +116,54 @@ class ObjPat(ExpressionPat):
 	"""Pattern for matching objects with addresses."""
 	op = idaapi.cot_obj
 
-	def __init__(self, obj_info=None, **kwargs):
+	def __init__(self, *objects, **kwargs):
 		"""
 		:param obj_info: information for construction object. will try to get int address from it
 		"""
 		super().__init__(**kwargs)
-		self.ea = None
-		self.name = None
+		self.addrs = set()
+		self.names = set()
 
-		if isinstance(obj_info, int):
-			self.ea = obj_info
-			if not idaapi.is_mapped(self.ea):
-				print("[!] WARNING: object with address", hex(self.ea), "is not mapped. Will still try to match it")
+		for obj_info in objects:
+			if isinstance(obj_info, int):
+				self.addrs.add(obj_info)
+				if not idaapi.is_mapped(obj_info):
+					print("[!] WARNING: object with address", hex(obj_info), "is not mapped. Will still try to match it")
+					continue 
+				name = idaapi.get_name(self.addrs)
+				if name != '':
+					self.names.add(name)
+
+			elif isinstance(obj_info, str):
+				self.names.add(obj_info)
+				from herast.tree.utils import resolve_name_address
+				addr = resolve_name_address(obj_info)
+				if addr == idaapi.BADADDR:
+					print("[!] WARNING: object with name", obj_info, "does not exist. Will still try to match it")
+					continue
+				self.addrs.add(addr)
+
 			else:
-				self.name = idaapi.get_name(self.ea)
-				if self.name == '': self.name = None
-
-		elif isinstance(obj_info, str):
-			from herast.tree.utils import resolve_name_address
-			self.name = obj_info
-			ea = resolve_name_address(self.name)
-			if ea == idaapi.BADADDR:
-				print("[!] WARNING: object with name", self.name, "does not exist. Will still try to match it")
-			else:
-				self.ea = ea
-
-		elif obj_info is None:
-			# simply match idaapi.cot_obj
-			pass
-
-		else:
-			raise TypeError("Object info should be int|str|None")
+				raise TypeError("Object info should be int|str")
 
 	@ExpressionPat.expr_check
 	def check(self, expression, ctx: PatternContext) -> bool:
-		if self.ea is None and self.name is None:
+		# if no object was given aka any object, that passes expr_check
+		if len(self.addrs) == 0 and len(self.names) == 0:
 			return True
 
-		if self.ea is not None and self.ea == expression.obj_ea:
+		if len(self.addrs) != 0 and expression.obj_ea in self.addrs:
 			return True
 
-		if self.name is None:
+		if len(self.names) == 0:
 			return False
 
 		ea_name = idaapi.get_name(expression.obj_ea)
-		if self.name == ea_name:
+		if ea_name in self.names:
 			return True
 
 		demangled_ea_name = idaapi.demangle_name(ea_name, idaapi.MNG_NODEFINIT | idaapi.MNG_NORETTYPE)
-		return demangled_ea_name == self.name
+		return demangled_ea_name in self.names
 
 
 class RefPat(ExpressionPat):

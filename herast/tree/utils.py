@@ -10,7 +10,7 @@ def get_following_instr(parent_block, item):
 		return None
 	return container[item_idx + 1]
 
-def resolve_name_address(name):
+def resolve_name_address(name:str) -> int:
 	return idc.get_name_ea_simple(name)
 
 def remove_instruction_from_ast(unwanted_ins, parent):

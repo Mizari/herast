@@ -2,7 +2,7 @@ import idaapi
 
 from herast.tree.patterns.base_pattern import BasePat
 from herast.tree.pattern_context import PatternContext
-from herast.tree.patterns.expressions import ObjPat, AsgPat, CallPat
+from herast.tree.patterns.expressions import AsgPat, CallPat
 from herast.tree.patterns.instructions import ExprInsPat
 
 class SeqPat(BasePat):
@@ -48,22 +48,6 @@ class SeqPat(BasePat):
 	@property
 	def children(self):
 		return tuple(self.seq)
-
-class MultiObjectPat(BasePat):
-	"""Pattern for expression, that is allowed to be one of multiple objects"""
-	def __init__(self, *objects, **kwargs):
-		super().__init__(**kwargs)
-		self.objects = [ObjPat(o) for o in objects]
-
-	@BasePat.base_check
-	def check(self, item, ctx: PatternContext) -> bool:
-		if item.op != idaapi.cot_obj:
-			return False
-
-		for o in self.objects:
-			if o.check(item, ctx):
-				return True
-		return False
 
 
 class IntPat(BasePat):

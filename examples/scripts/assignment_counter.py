@@ -6,7 +6,7 @@ from collections import defaultdict
 class AssignmentCounterScheme(Scheme):
 	def __init__(self, *candidates):
 		self.count = defaultdict(int)
-		obj_pat = MultiObjectPat(*candidates)
+		obj_pat = ObjPat(*candidates)
 		pattern = AsgPat(AnyPat(), CallPat(obj_pat))
 		super().__init__(pattern)
 
