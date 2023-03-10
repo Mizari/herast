@@ -13,7 +13,7 @@ class ExceptionBody(BasePat):
 		self.excstr_getter = excstr_getter
 		super().__init__(check_op=idaapi.cit_block, **kwargs)
 
-	@BasePat.parent_check
+	@BasePat.base_check
 	def check(self, item, ctx):
 		block = item.cblock
 
