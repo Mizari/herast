@@ -166,12 +166,3 @@ class Matcher:
 
 	def remove_scheme(self, scheme_name: str):
 		self.schemes.pop(scheme_name, None)
-
-	def expressions_traversal_is_needed(self):
-		abstract_expression_patterns = (VarBindPat, BindItemPat)
-		for s in self.schemes.values():
-			for p in s.get_patterns():
-				if p.op >= 0 and p.op < idaapi.cit_empty or isinstance(p, abstract_expression_patterns):
-					return True
-
-		return False
