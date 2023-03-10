@@ -47,7 +47,7 @@ class SeqPat(BasePat):
 
 	@property
 	def children(self):
-		return tuple(self.pats)
+		return tuple(self.seq)
 
 class MultiObjectPat(BasePat):
 	"""Pattern for expression, that is allowed to be one of multiple objects"""
