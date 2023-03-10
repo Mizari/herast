@@ -53,7 +53,6 @@ class FunctionRenamer(Scheme):
 
 def do_renames(debug_flag: int):
 	scheme = FunctionRenamer(debug_flag)
-	matcher = Matcher(scheme)
-	matcher.match_objects_xrefs(debug_flag)
+	match_objects_xrefs(scheme, debug_flag)
 	scheme.apply_renamings()
 	scheme.print_conflicts()

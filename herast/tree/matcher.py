@@ -1,8 +1,6 @@
 import idaapi
-import idc
 
 import herast.tree.utils as utils
-from herast.tree.patterns.abstracts import BindItemPat, VarBindPat
 from herast.tree.pattern_context import PatternContext
 from herast.tree.processing import TreeProcessor
 from herast.tree.scheme import Scheme
@@ -29,24 +27,6 @@ class Matcher:
 
 			else:
 				raise TypeError("Invalid function type")
-
-	def match_objects_xrefs(self, *objects):
-		"""Match objects' xrefs in functions. Might decompile a lot of functions"""
-		cfuncs_eas = set()
-		for obj in objects:
-			if isinstance(obj, int):
-				func_ea = obj
-			elif isinstance(obj, str):
-				func_ea = idc.get_name_ea_simple(obj)
-			else:
-				raise TypeError("Object is of unknown type, should be int|str")
-
-			calls = utils.get_func_calls_to(func_ea)
-			calls = [c for c in calls if utils.is_func_start(c)]
-			cfuncs_eas.update(calls)
-
-		for func_ea in sorted(cfuncs_eas):
-			self.match(func_ea)
 
 	def match_instruction(self, instr_addr):
 		func_addr = utils.get_func_start(instr_addr)

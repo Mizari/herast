@@ -33,5 +33,4 @@ class CallsParser(Scheme):
 
 def find_calls(*functions):
 	scheme = CallsParser(*functions)
-	matcher = Matcher(scheme)
-	matcher.match_objects_xrefs(*functions)
+	match_objects_xrefs(scheme, *functions)

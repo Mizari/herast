@@ -52,6 +52,5 @@ class ObjectSetterScheme(Scheme):
 
 def collect_objects(function_address, default_type=None):
 	scheme = ObjectSetterScheme(function_address)
-	matcher = Matcher(scheme)
-	matcher.match_objects_xrefs(function_address)
+	match_objects_xrefs(scheme, function_address)
 	scheme.apply_new_info(default_type)

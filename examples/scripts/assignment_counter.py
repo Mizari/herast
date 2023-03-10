@@ -34,8 +34,7 @@ def count_assignments(*functions, assignments_amount_threshold=15):
 	functions = [f for f in functions if count_xrefs_to(f) > assignments_amount_threshold]
 
 	scheme = AssignmentCounterScheme(*functions)
-	matcher = Matcher(scheme)
-	matcher.match_objects_xrefs(*functions)
+	match_objects_xrefs(scheme, *functions)
 
 	scheme.trim_assignments(assignments_amount_threshold)
 	scheme.show_stats()

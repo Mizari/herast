@@ -20,10 +20,36 @@ from herast.tree.scheme import Scheme
 from herast.settings import runtime_settings
 
 
+def match(*schemes_and_objects):
+	schemes = [s for s in schemes_and_objects if isinstance(s, Scheme)]
+	objects = [o for o in schemes_and_objects if not isinstance(o, Scheme)]
+	matcher = Matcher(*schemes)
+	matcher.match(objects)
+
 def match_everywhere(*schemes):
 	matcher = Matcher(*schemes)
 	for func_ea in idautils.Functions():
 		matcher.match(func_ea)
+
+def match_objects_xrefs(*schemes_and_objects):
+	"""Match objects' xrefs in functions. Might decompile a lot of functions"""
+	objects = [o for o in schemes_and_objects if not isinstance(o, Scheme)]
+	cfuncs_eas = set()
+	for obj in objects:
+		if isinstance(obj, int):
+			func_ea = obj
+		elif isinstance(obj, str):
+			func_ea = idc.get_name_ea_simple(obj)
+		else:
+			raise TypeError("Object is of unknown type, should be int|str")
+
+		calls = get_func_calls_to(func_ea)
+		calls = [c for c in calls if is_func_start(c)]
+		cfuncs_eas.update(calls)
+
+	schemes = [s for s in schemes_and_objects if isinstance(s, Scheme)]
+	matcher = Matcher(*schemes)
+	matcher.match(*sorted(cfuncs_eas))
 
 def __print_padded(*args, padlen=0):
 	padlen -= 1
