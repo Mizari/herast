@@ -1,6 +1,7 @@
 """Aggregator module for all underlying herapi API"""
 
 import sys
+import idautils
 
 # forward imports for herast usage
 from herast.tree.patterns.abstracts import *
@@ -17,6 +18,12 @@ from herast.tree.utils import *
 from herast.tree.matcher import Matcher, get_cfunc
 from herast.tree.scheme import Scheme
 from herast.settings import runtime_settings
+
+
+def match_everywhere(*schemes):
+	matcher = Matcher(*schemes)
+	for func_ea in idautils.Functions():
+		matcher.match(func_ea)
 
 def __print_padded(*args, padlen=0):
 	padlen -= 1
