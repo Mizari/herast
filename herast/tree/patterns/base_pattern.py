@@ -43,11 +43,11 @@ class BasePat:
 		return consts.op2str.get(cls.op, None)
 
 	@staticmethod
-	def parent_check(func):
+	def base_check(func):
 		"""Decorator for child classes instead of inheritance, since
 		before and after calls are needed.
 		"""
-		def __perform_parent_check(self:BasePat, item, *args, **kwargs):
+		def __perform_base_check(self:BasePat, item, *args, **kwargs):
 			if item is None:
 				return False
 
@@ -106,7 +106,7 @@ class BasePat:
 						print(i)
 					print('---------------------------------')
 			return rv
-		return __perform_parent_check
+		return __perform_base_check
 
 	@property
 	def children(self):

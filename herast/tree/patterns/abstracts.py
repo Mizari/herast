@@ -29,7 +29,7 @@ class OrPat(BasePat):
 			print("[*] WARNING: OrPat expects at least two patterns")
 		self.pats = tuple(pats)
 
-	@BasePat.parent_check
+	@BasePat.base_check
 	def check(self, item, ctx: PatternContext) -> bool:
 		for p in self.pats:
 			if p.check(item, ctx):
@@ -49,7 +49,7 @@ class AndPat(BasePat):
 			print("[*] WARNING: one or less patterns to AndPat is useless")
 		self.pats = tuple(pats)
 
-	@BasePat.parent_check
+	@BasePat.base_check
 	def check(self, item, ctx: PatternContext) -> bool:
 		for p in self.pats:
 			if not p.check(item, ctx):
@@ -70,7 +70,7 @@ class BindItemPat(BasePat):
 		self.pat = pat or AnyPat()
 		self.name = name
 
-	@BasePat.parent_check
+	@BasePat.base_check
 	def check(self, item, ctx: PatternContext) -> bool:
 		if self.pat.check(item, ctx):
 			current_expr = ctx.get_expr(self.name)
@@ -89,7 +89,7 @@ class VarBindPat(BasePat):
 		super().__init__(**kwargs)
 		self.name = name
 
-	@BasePat.parent_check
+	@BasePat.base_check
 	def check(self, expr, ctx: PatternContext) -> bool:
 		if expr.op != idaapi.cot_var:
 			return False
@@ -109,7 +109,7 @@ class DeepExprPat(BasePat):
 		self.pat = pat
 		self.bind_name = bind_name
 
-	@BasePat.parent_check
+	@BasePat.base_check
 	def check(self, expr, ctx: PatternContext) -> bool:
 		for item in ctx.tree_proc.iterate_subitems(expr):
 			if not self.pat.check(item, ctx):
@@ -126,7 +126,7 @@ class RemovePat(BasePat):
 		super().__init__(**kwargs)
 		self.pat = pat
 
-	@BasePat.parent_check
+	@BasePat.base_check
 	def check(self, item, ctx: PatternContext) -> bool:
 		if not self.pat.check(item, ctx):
 			return False

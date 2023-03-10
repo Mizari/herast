@@ -10,6 +10,13 @@ class InstructionPat(BasePat):
 	def __init__(self, check_op=None, **kwargs):
 		super().__init__(check_op=self.op, **kwargs)
 
+	@staticmethod
+	def instr_check(func):
+		base_check = BasePat.base_check(func)
+		def __perform_expr_check(self, item, *args, **kwargs):
+			return base_check(self, item, *args, **kwargs)
+		return __perform_expr_check
+
 
 class BlockPat(InstructionPat):
 	"""Pattern for block instruction aka curly braces."""
@@ -19,7 +26,7 @@ class BlockPat(InstructionPat):
 		super().__init__(**kwargs)
 		self.sequence = patterns
 
-	@InstructionPat.parent_check
+	@InstructionPat.instr_check
 	def check(self, instruction, ctx: PatternContext) -> bool:
 		block = instruction.cblock
 		if len(block) != len(self.sequence):
@@ -43,7 +50,7 @@ class ExprInsPat(InstructionPat):
 		super().__init__(**kwargs)
 		self.expr = expr or AnyPat()
 
-	@InstructionPat.parent_check
+	@InstructionPat.instr_check
 	def check(self, instruction, ctx: PatternContext) -> bool:
 		return self.expr.check(instruction.cexpr, ctx)
 
@@ -80,7 +87,7 @@ class IfPat(InstructionPat):
 		self.then_branch = wrap_pattern(then_branch)
 		self.else_branch = wrap_pattern(else_branch)
 
-	@InstructionPat.parent_check
+	@InstructionPat.instr_check
 	def check(self, instruction, ctx: PatternContext) -> bool:
 		cif = instruction.cif
 
@@ -108,7 +115,7 @@ class ForPat(InstructionPat):
 		self.step = step or AnyPat()
 		self.body = body or AnyPat()
 
-	@InstructionPat.parent_check
+	@InstructionPat.instr_check
 	def check(self, instruction, ctx: PatternContext) -> bool:
 		cfor = instruction.cfor
 
@@ -130,7 +137,7 @@ class RetPat(InstructionPat):
 		super().__init__(**kwargs)
 		self.expr = expr or AnyPat()
 
-	@InstructionPat.parent_check
+	@InstructionPat.instr_check
 	def check(self, instruction, ctx: PatternContext) -> bool:
 		creturn = instruction.creturn
 
@@ -150,7 +157,7 @@ class WhilePat(InstructionPat):
 		self.expr = expr or AnyPat()
 		self.body = body or AnyPat()
 
-	@InstructionPat.parent_check
+	@InstructionPat.instr_check
 	def check(self, instruction, ctx: PatternContext) -> bool:
 		cwhile = instruction.cwhile
 
@@ -171,7 +178,7 @@ class DoPat(InstructionPat):
 		self.expr = expr or AnyPat()
 		self.body = body or AnyPat()
 
-	@InstructionPat.parent_check
+	@InstructionPat.instr_check
 	def check(self, instruction, ctx: PatternContext) -> bool:
 		cdo = instruction.cdo
 
@@ -190,6 +197,6 @@ class GotoPat(InstructionPat):
 	def __init__(self, **kwargs):
 		super().__init__(**kwargs)
 
-	@InstructionPat.parent_check
+	@InstructionPat.instr_check
 	def check(self, item, ctx: PatternContext) -> bool:
 		return True

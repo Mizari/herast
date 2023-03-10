@@ -26,7 +26,7 @@ class SeqPat(BasePat):
 		self.seq = tuple(pats)
 		self.length = len(pats)
 
-	@BasePat.parent_check
+	@BasePat.base_check
 	def check(self, instruction, ctx: PatternContext) -> bool:
 		parent = ctx.get_parent_block(instruction)
 		if parent is None:
@@ -55,7 +55,7 @@ class MultiObjectPat(BasePat):
 		super().__init__(**kwargs)
 		self.objects = [ObjPat(o) for o in objects]
 
-	@BasePat.parent_check
+	@BasePat.base_check
 	def check(self, item, ctx: PatternContext) -> bool:
 		if item.op != idaapi.cot_obj:
 			return False
@@ -72,7 +72,7 @@ class IntPat(BasePat):
 		super().__init__(**kwargs)
 		self.value = value
 
-	@BasePat.parent_check
+	@BasePat.base_check
 	def check(self, item, ctx: PatternContext) -> bool:
 		if item.op not in (idaapi.cot_num, idaapi.cot_obj):
 			return False
@@ -94,7 +94,7 @@ class StringPat(BasePat):
 		self.str_value = str_value
 		self.minlen = minlen
 
-	@BasePat.parent_check
+	@BasePat.base_check
 	def check(self, item, ctx: PatternContext) -> bool:
 		if item.op != idaapi.cot_obj:
 			return False
@@ -117,7 +117,7 @@ class StructFieldAccessPat(BasePat):
 		self.struct_type = struct_type
 		self.member_offset = member_offset
 
-	@BasePat.parent_check
+	@BasePat.base_check
 	def check(self, item, ctx: PatternContext) -> bool:
 		if item.op != idaapi.cot_memptr and item.op != idaapi.cot_memref:
 			return False

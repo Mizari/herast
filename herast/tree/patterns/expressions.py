@@ -13,10 +13,10 @@ class ExpressionPat(BasePat):
 		super().__init__(check_op=self.op, **kwargs)
 
 	@staticmethod
-	def parent_check(func):
-		func = BasePat.parent_check(func)
+	def expr_check(func):
+		base_check = BasePat.base_check(func)
 		def __perform_parent_check(self, item, *args, **kwargs):
-			return func(self, item, *args, **kwargs)
+			return base_check(self, item, *args, **kwargs)
 		return __perform_parent_check
 
 
@@ -43,7 +43,7 @@ class CallPat(ExpressionPat):
 		self.ignore_arguments = ignore_arguments
 		self.skip_missing = skip_missing
 
-	@ExpressionPat.parent_check
+	@ExpressionPat.expr_check
 	def check(self, expression, ctx: PatternContext) -> bool:
 		if self.calling_function is not None and not self.calling_function.check(expression.x, ctx):
 			return False
@@ -74,7 +74,7 @@ class HelperPat(ExpressionPat):
 		super().__init__(**kwargs)
 		self.helper_name = helper_name
 
-	@ExpressionPat.parent_check
+	@ExpressionPat.expr_check
 	def check(self, expression, ctx: PatternContext) -> bool:
 		return self.helper_name == expression.helper if self.helper_name is not None else True
 
@@ -91,7 +91,7 @@ class NumPat(ExpressionPat):
 		super().__init__(**kwargs)
 		self.num = num
 
-	@ExpressionPat.parent_check
+	@ExpressionPat.expr_check
 	def check(self, expr, ctx: PatternContext) -> bool:
 		if self.num is None:
 			return True
@@ -107,7 +107,7 @@ class CastPat(ExpressionPat):
 		super().__init__(skip_casts=False)
 		self.pat = pat
 
-	@ExpressionPat.parent_check
+	@ExpressionPat.expr_check
 	def check(self, item, ctx: PatternContext, *args, **kwargs) -> bool:
 		return self.pat.check(item.x, ctx)
 
@@ -148,7 +148,7 @@ class ObjPat(ExpressionPat):
 		else:
 			raise TypeError("Object info should be int|str|None")
 
-	@ExpressionPat.parent_check
+	@ExpressionPat.expr_check
 	def check(self, expression, ctx: PatternContext) -> bool:
 		if self.ea is None and self.name is None:
 			return True
@@ -175,7 +175,7 @@ class RefPat(ExpressionPat):
 		super().__init__(**kwargs)
 		self.referenced_object = referenced_object
 
-	@ExpressionPat.parent_check
+	@ExpressionPat.expr_check
 	def check(self, expression, ctx: PatternContext) -> bool:
 		return self.referenced_object.check(expression.x, ctx)
 
@@ -189,7 +189,7 @@ class MemrefPat(ExpressionPat):
 		self.referenced_object = referenced_object
 		self.field = field
 
-	@ExpressionPat.parent_check
+	@ExpressionPat.expr_check
 	def check(self, expression, ctx: PatternContext) -> bool:
 		return (self.field is None or self.field == expression.m) and \
 			self.referenced_object.check(expression.x, ctx)
@@ -202,7 +202,7 @@ class PtrPat(ExpressionPat):
 		super().__init__(**kwargs)
 		self.pointed_object = pointed_object
 
-	@ExpressionPat.parent_check
+	@ExpressionPat.expr_check
 	def check(self, expression, ctx:PatternContext) -> bool:
 		return self.pointed_object.check(expression.x, ctx)
 
@@ -216,7 +216,7 @@ class MemptrPat(ExpressionPat):
 		self.pointed_object = pointed_object
 		self.field = field
 
-	@ExpressionPat.parent_check
+	@ExpressionPat.expr_check
 	def check(self, expression, ctx: PatternContext) -> bool:
 		return (self.field is None or self.field == expression.m) and \
 			self.pointed_object.check(expression.x, ctx)
@@ -231,7 +231,7 @@ class IdxPat(ExpressionPat):
 		if isinstance(indx, int): indx = NumPat(indx)
 		self.indx = indx
 
-	@ExpressionPat.parent_check
+	@ExpressionPat.expr_check
 	def check(self, expression, ctx: PatternContext) -> bool:
 		return self.pointed_object.check(expression.x, ctx) and \
 			self.indx.check(expression.y, ctx)
@@ -247,7 +247,7 @@ class TernaryPat(ExpressionPat):
 		self.positive_expression = positive_expression
 		self.negative_expression = negative_expression
 		
-	@ExpressionPat.parent_check
+	@ExpressionPat.expr_check
 	def check(self, expression, ctx: PatternContext) -> bool:
 		return self.condition.check(expression.x, ctx) and \
 			self.positive_expression.check(expression.y, ctx) and \
@@ -261,7 +261,7 @@ class VarPat(ExpressionPat):
 	def __init__(self, **kwargs):
 		super().__init__(**kwargs)
 
-	@ExpressionPat.parent_check
+	@ExpressionPat.expr_check
 	def check(self, expression, ctx: PatternContext) -> bool:
 		return True
 
@@ -272,7 +272,7 @@ class AbstractUnaryOpPat(ExpressionPat):
 		super().__init__(**kwargs)
 		self.operand = operand
 
-	@ExpressionPat.parent_check
+	@ExpressionPat.expr_check
 	def check(self, expression, ctx: PatternContext) -> bool:
 		return self.operand.check(expression.x, ctx)
 
@@ -289,7 +289,7 @@ class AbstractBinaryOpPat(ExpressionPat):
 		self.second_operand = second_operand
 		self.symmetric = symmetric
 
-	@ExpressionPat.parent_check
+	@ExpressionPat.expr_check
 	def check(self, expression, ctx: PatternContext) -> bool:
 		first_op_second = self.first_operand.check(expression.x, ctx) and self.second_operand.check(expression.y, ctx)
 		if self.symmetric:
@@ -312,7 +312,7 @@ class AsgPat(ExpressionPat):
 		self.lhs = lhs
 		self.rhs = rhs
 
-	@ExpressionPat.parent_check
+	@ExpressionPat.expr_check
 	def check(self, item, ctx: PatternContext) -> bool:
 		if not self.lhs.check(item.x, ctx):
 			return False
