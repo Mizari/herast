@@ -94,8 +94,9 @@ class VarBindPat(BasePat):
 		if expr.op != idaapi.cot_var:
 			return False
 
-		if ctx.has_var(self.name):
-			return ctx.get_var(self.name).v.idx == expr.v.idx
+		var = ctx.get_var(self.name)
+		if var is not None:
+			return var.idx == expr.v.idx
 		else:
 			ctx.save_var(self.name, expr)
 			return True
