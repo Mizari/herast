@@ -1,4 +1,5 @@
 import idaapi
+import idc
 
 import herast.tree.utils as utils
 from herast.tree.pattern_context import PatternContext
@@ -14,10 +15,17 @@ class Matcher:
 	def match(self, *functions):
 		"""Match schemes for function body.
 
-		:param functions: matched functions. Can be decompiled cfuncs or just function addresses"""
+		:param functions: matched functions. Can be decompiled cfuncs, function addresses or function names"""
 		for func in functions:
 			if isinstance(func, idaapi.cfunc_t):
 				self.match_cfunc(func)
+
+			elif isinstance(func, str):
+				addr = idc.get_name_ea_simple(func)
+				cfunc = utils.get_cfunc(addr)
+				if cfunc is None:
+					continue
+				self.match_cfunc(cfunc)
 
 			elif isinstance(func, int):
 				cfunc = utils.get_cfunc(func)
@@ -39,7 +47,7 @@ class Matcher:
 				self.match_ast_tree(tree_processor, subitem)
 				break
 
-	def match_cfunc(self, cfunc):
+	def match_cfunc(self, cfunc:idaapi.cfunc_t):
 		"""Match schemes in decompiled function."""
 		tree_processor = TreeProcessor(cfunc)
 		ast_tree = cfunc.body

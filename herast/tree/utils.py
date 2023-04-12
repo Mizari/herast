@@ -18,7 +18,7 @@ def get_func_start(addr:int) -> int:
 def is_func_start(addr:int) -> bool:
 	return addr == get_func_start(addr)
 
-def get_cfunc(func_ea:int) -> idaapi.cfunc_t:
+def get_cfunc(func_ea:int) -> idaapi.cfunc_t|None:
 	try:
 		cfunc = idaapi.decompile(func_ea)
 	except idaapi.DecompilationFailure:
