@@ -130,7 +130,7 @@ class ObjPat(ExpressionPat):
 				if not idaapi.is_mapped(obj_info):
 					print("[!] WARNING: object with address", hex(obj_info), "is not mapped. Will still try to match it")
 					continue 
-				name = idaapi.get_name(self.addrs)
+				name = idaapi.get_name(obj_info)
 				if name != '':
 					self.names.add(name)
 
