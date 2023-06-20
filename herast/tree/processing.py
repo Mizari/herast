@@ -15,7 +15,7 @@ op2func.update({
 	idaapi.cit_switch:   lambda x: [i for i in x.cswitch.cases] + [x.cswitch.expr],
 	idaapi.cit_while:    lambda x: [x.cwhile.body, x.cwhile.expr],
 	idaapi.cit_do:       lambda x: [x.cdo.body, x.cdo.expr],
-	idaapi.cit_for:      lambda x: [x.cfor.body, x.cfor.init, x.cfor.expr, x.cfor.init],
+	idaapi.cit_for:      lambda x: [x.cfor.body, x.cfor.init, x.cfor.expr, x.cfor.step],
 	idaapi.cot_call:     lambda x: [i for i in x.a] + [x.x],
 })
 
