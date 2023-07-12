@@ -24,7 +24,7 @@ def match(*schemes_and_objects):
 	schemes = [s for s in schemes_and_objects if isinstance(s, Scheme)]
 	objects = [o for o in schemes_and_objects if not isinstance(o, Scheme)]
 	matcher = Matcher(*schemes)
-	matcher.match(objects)
+	matcher.match(*objects)
 
 def match_everywhere(*schemes):
 	matcher = Matcher(*schemes)
