@@ -82,7 +82,7 @@ class IfPat(InstructionPat):
 
 			return BlockPat(pat)
 
-		self.condition   = wrap_pattern(condition)
+		self.condition   = condition
 		self.then_branch = wrap_pattern(then_branch)
 		self.else_branch = wrap_pattern(else_branch)
 
