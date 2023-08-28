@@ -1,7 +1,7 @@
 # call_explore
 TODO
 
-# collapse_exception_branch
+# cplusplus/collapse_exception_branch
 Replaces
 <p align='center'>
 <img src='https://github.com/mostobriv/herast/blob/main/pictures/collapse_exception_before.png'>
@@ -25,7 +25,7 @@ into
 <img src='https://github.com/mostobriv/herast/blob/main/pictures/propagate_error_after.png'>
 </p>  
 
-# sharedptr
+# cplusplus/sharedptr
 Replaces
 <p align='center'>
 <img src='https://github.com/mostobriv/herast/blob/main/pictures/sharedptr_before1.png'>
