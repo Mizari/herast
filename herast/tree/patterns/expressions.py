@@ -236,7 +236,7 @@ class IdxPat(ExpressionPat):
 			self.indx.check(expression.y, ctx)
 
 
-class TernaryPat(ExpressionPat):
+class TernPat(ExpressionPat):
 	"""Pattern for C's ternary operator."""
 	op = idaapi.cot_tern
 
