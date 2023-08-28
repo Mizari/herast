@@ -18,8 +18,25 @@ from herast.passive_manager import *
 from herast.tree.utils import *
 from herast.tree.matcher import Matcher
 from herast.tree.scheme import Scheme
+from herast.tree.processing import TreeProcessor
 from herast.settings import runtime_settings
 
+
+def search_pattern(pat:BasePat, *funcs):
+	for func_ea in funcs:
+		cfunc = get_cfunc(func_ea)
+		if cfunc is None:
+			continue
+
+		tree_processor = TreeProcessor(cfunc)
+		item_ctx = PatternContext(tree_processor)
+		for subitem in tree_processor.iterate_subitems(cfunc.body):
+			if pat.check(subitem, item_ctx):
+				yield subitem
+
+def search_everywhere(pat:BasePat):
+	funcs = [fea for fea in idautils.Functions()]
+	yield from search_pattern(pat, *funcs)
 
 def match(*schemes_and_objects):
 	schemes = [s for s in schemes_and_objects if isinstance(s, Scheme)]
