@@ -77,11 +77,12 @@ def herapi_help():
 	funcs = {}
 	modules = {}
 	classes = {}
+	skips = ("sys", "idaapi", "typing", "settings_manager", "idc", "os", "idautils")
 	for k, v in vars(mod).items():
 		if k.startswith("__"): continue
 		if k.endswith("Pat"):
 			continue
-		if k in ("sys", "idaapi", "typing", "settings_manager"):
+		if k in skips:
 			continue
 		if isfunction(v):
 			funcs[k] = v
