@@ -8,6 +8,7 @@ from herast.tree.patterns.abstracts import *
 from herast.tree.patterns.expressions import *
 from herast.tree.patterns.instructions import *
 from herast.tree.patterns.helpers import *
+from herast.tree.patterns.block_searches import *
 
 # passive manager imports should go after settings manager imports
 # because they might expand behaviour with updating passing manager
