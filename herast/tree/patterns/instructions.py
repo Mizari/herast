@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import idaapi
 from .abstracts import AnyPat
 from herast.tree.patterns.base_pattern import BasePat
@@ -222,4 +224,43 @@ class BreakPat(InstructionPat):
 
 	@InstructionPat.instr_check
 	def check(self, item, ctx: PatternContext) -> bool:
+		return True
+
+
+class SwitchPat(InstructionPat):
+	"""Pattern for break instruction."""
+	op = idaapi.cit_switch
+
+	def __init__(self, expr:BasePat|None=None, *cases, **kwargs):
+		super().__init__(**kwargs)
+		self.expr = expr
+		self.cases : list[BasePat] = []
+		self.valued_cases : dict[int,BasePat] = {}
+		for case in cases:
+			if isinstance(case, BasePat):
+				self.cases.append(case)
+			elif isinstance(case, tuple) and len(case) == 2 and isinstance(case[0], int) and isinstance(case[1], BasePat):
+				if case[0] in self.valued_cases:
+					raise ValueError("Duplicate numbered case in switch")
+				self.valued_cases[case[0]] = case[1]
+			else:
+				raise ValueError("Invalid case in switch")
+
+	@InstructionPat.instr_check
+	def check(self, item, ctx: PatternContext) -> bool:
+		if self.expr is not None and not self.expr.check(item.cswitch.expr, ctx):
+			return False
+
+		for case in item.cswitch.cases:
+			value = case.value()
+			if value in self.valued_cases:
+				if not self.valued_cases[value].check(case, ctx):
+					return False
+
+			for check_case in self.cases:
+				if check_case.check(case, ctx):
+					break
+			else:
+				return False
+
 		return True
