@@ -333,6 +333,33 @@ class FnumPat(ExpressionPat):
 		return True
 
 
+class StrPat(ExpressionPat):
+	"""Class for assignment expression."""
+	op = idaapi.cot_str
+
+	def __init__(self, value=None, **kwargs):
+		super().__init__(**kwargs)
+		self.value = value
+
+	@ExpressionPat.expr_check
+	def check(self, item, ctx: PatternContext) -> bool:
+		if self.value is not None and self.value != item.string:
+			return False
+		return True
+
+
+class TypePat(ExpressionPat):
+	"""Class for assignment expression."""
+	op = idaapi.cot_type
+
+	def __init__(self, **kwargs):
+		super().__init__(**kwargs)
+
+	@ExpressionPat.expr_check
+	def check(self, item, ctx: PatternContext) -> bool:
+		return True
+
+
 def __generate_expression_patterns():
 	module = sys.modules[__name__]
 	from herast.tree.consts import binary_expressions_ops, unary_expressions_ops, op2str
