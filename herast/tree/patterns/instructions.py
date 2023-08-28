@@ -199,3 +199,27 @@ class GotoPat(InstructionPat):
 	@InstructionPat.instr_check
 	def check(self, item, ctx: PatternContext) -> bool:
 		return True
+
+
+class ContPat(InstructionPat):
+	"""Pattern for continue instruction."""
+	op = idaapi.cit_goto
+
+	def __init__(self, **kwargs):
+		super().__init__(**kwargs)
+
+	@InstructionPat.instr_check
+	def check(self, item, ctx: PatternContext) -> bool:
+		return True
+
+
+class BreakPat(InstructionPat):
+	"""Pattern for break instruction."""
+	op = idaapi.cit_goto
+
+	def __init__(self, **kwargs):
+		super().__init__(**kwargs)
+
+	@InstructionPat.instr_check
+	def check(self, item, ctx: PatternContext) -> bool:
+		return True
