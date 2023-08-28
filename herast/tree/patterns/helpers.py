@@ -36,13 +36,15 @@ class StringPat(BasePat):
 
 	@BasePat.base_check
 	def check(self, item, ctx: PatternContext) -> bool:
-		if item.op != idaapi.cot_obj:
+		if item.op == idaapi.cot_obj:
+			item.obj_ea
+			name = item.print1(None)
+			name = idaapi.tag_remove(name)
+			name = idaapi.str2user(name)
+		elif item.op == idaapi.cot_str:
+			name = item.string
+		else:
 			return False
-
-		item.obj_ea
-		name = item.print1(None)
-		name = idaapi.tag_remove(name)
-		name = idaapi.str2user(name)
 
 		if self.str_value is None:
 			return len(name) >= self.minlen
