@@ -318,6 +318,21 @@ class AsgPat(ExpressionPat):
 		return self.rhs.check(item.y, ctx)
 
 
+class FnumPat(ExpressionPat):
+	"""Class for assignment expression."""
+	op = idaapi.cot_fnum
+
+	def __init__(self, value=None, **kwargs):
+		super().__init__(**kwargs)
+		self.value = value
+
+	@ExpressionPat.expr_check
+	def check(self, item, ctx: PatternContext) -> bool:
+		if self.value is not None and self.value != item.fpc.fnum:
+			return False
+		return True
+
+
 def __generate_expression_patterns():
 	module = sys.modules[__name__]
 	from herast.tree.consts import binary_expressions_ops, unary_expressions_ops, op2str
