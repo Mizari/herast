@@ -203,7 +203,7 @@ class GotoPat(InstructionPat):
 
 class ContPat(InstructionPat):
 	"""Pattern for continue instruction."""
-	op = idaapi.cit_goto
+	op = idaapi.cit_continue
 
 	def __init__(self, **kwargs):
 		super().__init__(**kwargs)
@@ -215,7 +215,7 @@ class ContPat(InstructionPat):
 
 class BreakPat(InstructionPat):
 	"""Pattern for break instruction."""
-	op = idaapi.cit_goto
+	op = idaapi.cit_break
 
 	def __init__(self, **kwargs):
 		super().__init__(**kwargs)
