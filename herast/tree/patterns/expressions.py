@@ -19,12 +19,12 @@ class ExpressionPat(BasePat):
 	@staticmethod
 	def expr_check(func):
 		base_check = BasePat.base_check(func)
-		def __perform_parent_check(self:ExpressionPat, item, *args, **kwargs):
+		def __perform_expr_check(self:ExpressionPat, item, *args, **kwargs):
 			if self.skip_casts and item.op == idaapi.cot_cast:
 				item = item.x
 
 			return base_check(self, item, *args, **kwargs)
-		return __perform_parent_check
+		return __perform_expr_check
 
 
 class CallPat(ExpressionPat):

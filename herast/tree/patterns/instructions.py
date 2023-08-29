@@ -22,7 +22,7 @@ class InstructionPat(BasePat):
 	@staticmethod
 	def instr_check(func):
 		base_check = BasePat.base_check(func)
-		def __perform_expr_check(self:InstructionPat, item, *args, **kwargs):
+		def __perform_instr_check(self:InstructionPat, item, *args, **kwargs):
 			# item.label_num == -1, if it has no label, otherwise item.label_num >= 0
 			if self.label_num == self.SKIP_LABEL_CHECK:
 				is_label_ok = True
@@ -37,7 +37,7 @@ class InstructionPat(BasePat):
 				return False
 			return base_check(self, item, *args, **kwargs)
 
-		return __perform_expr_check
+		return __perform_instr_check
 
 
 class BlockPat(InstructionPat):
