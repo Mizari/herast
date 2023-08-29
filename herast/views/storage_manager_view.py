@@ -4,6 +4,7 @@ import idaapi
 import os
 
 import herast.passive_manager as passive_manager
+import herast.settings.settings_manager as settings_manager
 
 
 def _color_with_opacity(tone, opacity=160):
@@ -221,6 +222,8 @@ class StorageManagerModel(QtCore.QAbstractItemModel):
 
 		if not passive_manager.add_storage_folder(storage_folder):
 			return
+
+		settings_manager.add_storage_folder(storage_folder)
 
 		self.add_model_folder(storage_folder)
 		self.refresh_all()
