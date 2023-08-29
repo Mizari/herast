@@ -36,10 +36,7 @@ def is_nullsub_function(func_ea):
 
 
 class NullsubRemovalScheme(Scheme):
-	def __init__(self):
-		nullsub_funcs = [f for f in idautils.Functions() if is_nullsub_function(f)]
-		# some useful logic might be in names
-		nullsub_funcs = [f for f in nullsub_funcs if idaapi.get_name(f).startswith("sub_")]
+	def __init__(self, *nullsub_funcs):
 		pattern = ObjPat(*nullsub_funcs)
 		pattern = CallInsnPat(pattern)
 		super().__init__(pattern)
@@ -49,4 +46,8 @@ class NullsubRemovalScheme(Scheme):
 		return False
 
 
-register_storage_scheme("nullsub remover", NullsubRemovalScheme())
+nullsub_funcs = [f for f in idautils.Functions() if is_nullsub_function(f)]
+# some useful logic might be in names
+nullsub_funcs = [f for f in nullsub_funcs if idaapi.get_name(f).startswith("sub_")]
+if len(nullsub_funcs) != 0:
+	register_storage_scheme("nullsub remover", NullsubRemovalScheme(*nullsub_funcs))
