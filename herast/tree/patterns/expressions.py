@@ -9,13 +9,17 @@ class ExpressionPat(BasePat):
 	"""Base class for expression items patterns."""
 	op = None
 
-	def __init__(self, check_op=None, **kwargs):
+	def __init__(self, check_op=None, skip_casts=True, **kwargs):
 		super().__init__(check_op=self.op, **kwargs)
+		self.skip_casts = skip_casts
 
 	@staticmethod
 	def expr_check(func):
 		base_check = BasePat.base_check(func)
 		def __perform_parent_check(self, item, *args, **kwargs):
+			if self.skip_casts and item.op == idaapi.cot_cast:
+				item = item.x
+
 			return base_check(self, item, *args, **kwargs)
 		return __perform_parent_check
 
