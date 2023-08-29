@@ -15,7 +15,7 @@ def __find_python_files_in_folder(folder: str):
 	for file_path in glob.iglob(folder + '/**/**.py', recursive=True):
 		yield file_path
 
-def __initialize():
+def initialize():
 	storage_files = set(settings_manager.get_storages_files())
 	for folder in settings_manager.get_storages_folders():
 		storage_files.update(__find_python_files_in_folder(folder))
