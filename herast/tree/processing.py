@@ -147,7 +147,7 @@ class TreeProcessor:
 		rv = utils.remove_instruction_from_ast(item, parent.cinsn)
 		if not rv:
 			item.label_num = saved_lbl
-			print("[*] Failed to remove item from tree")
+			print(f"[*] Failed to remove item {item.opname} from tree at {hex(item.ea)}")
 			return False
 
 		next_item = tmc.get_next_item()
