@@ -7,15 +7,36 @@ from herast.tree.pattern_context import PatternContext
 
 
 class InstructionPat(BasePat):
+	SKIP_LABEL_CHECK = -3
+	HAS_SOME_LABEL = -2
+	HAS_NO_LABEL = -1
 	"""Base pattern for instructions patterns."""
-	def __init__(self, check_op=None, **kwargs):
+	def __init__(self, check_op=None, label_num=-3, **kwargs):
+		"""
+		:param label_num: is instr labeled? -3 means anything, -1 means is not labeled, -2 means is labeled, >=0 means label num
+		"""
 		super().__init__(check_op=self.op, **kwargs)
+		assert label_num >= -3
+		self.label_num = label_num
 
 	@staticmethod
 	def instr_check(func):
 		base_check = BasePat.base_check(func)
-		def __perform_expr_check(self, item, *args, **kwargs):
+		def __perform_expr_check(self:InstructionPat, item, *args, **kwargs):
+			# item.label_num == -1, if it has no label, otherwise item.label_num >= 0
+			if self.label_num == self.SKIP_LABEL_CHECK:
+				is_label_ok = True
+			elif self.label_num == self.HAS_SOME_LABEL:
+				is_label_ok = item.label_num != -1
+			elif self.label_num == self.HAS_NO_LABEL:
+				is_label_ok = item.label_num == -1
+			else:
+				is_label_ok = self.label_num == item.label_num
+
+			if not is_label_ok:
+				return False
 			return base_check(self, item, *args, **kwargs)
+
 		return __perform_expr_check
 
 
