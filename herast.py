@@ -38,41 +38,6 @@ import herast.settings.settings_manager as settings_manager
 from herast.tree.actions import action_manager, hx_callback_manager
 
 
-def unload_callback():
-	try:
-		return idaapi.remove_hexrays_callback(herast_callback)
-	except:
-		pass
-
-class UnloadCallbackAction(idaapi.action_handler_t):
-	def __init__(self):
-		super(UnloadCallbackAction, self).__init__()
-		self.name           = "UnloadCallbackAction"
-		self.description    = "Unload herast HexRays-callback before loading script (development purpose only)"
-		self.hotkey         = "Ctrl-Shift-E"
-	
-	def activate(self, ctx):
-		print("Unloaded herast callback with status(%x)" % (unload_callback()))
-
-	def update(self, ctx):
-		return idaapi.AST_ENABLE_ALWAYS
-
-# class ReloadScripts(idaapi.action_handler_t):
-#     def __init__(self):
-#         super(ReloadScripts, self).__init__()
-#         self.name           = "ReloadScriptsAction"
-#         self.description    = "Hot-reload of herast-scripts"
-#         self.hotkey         = "Shift-R"
-	
-#     def activate(self, ctx):
-#         global ldr
-#         ldr.reload()
-#         print("Scripts of herast has been reloaded!")
-
-#     def update(self, ctx):
-#         return idaapi.AST_ENABLE_ALWAYS
-
-
 class HerastPlugin(idaapi.plugin_t):
 	flags = 0
 	wanted_name = "herast"
@@ -121,9 +86,6 @@ class HerastPlugin(idaapi.plugin_t):
 		settings_manager.reload_settings()
 
 		__register_action(smanager_view.ShowScriptManager())
-		# dummy way to register action to unload hexrays-callback, thus it won't be triggered multiple times at once
-		__register_action(UnloadCallbackAction())
-		# __register_action(ReloadScripts())
 
 		idaapi.remove_hexrays_callback(self.herast_callback)
 		idaapi.install_hexrays_callback(self.herast_callback)
