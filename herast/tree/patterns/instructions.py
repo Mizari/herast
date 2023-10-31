@@ -85,7 +85,7 @@ class IfPat(InstructionPat):
 	"""Pattern for if instruction."""
 	op = idaapi.cit_if
 
-	def __init__(self, condition=None, then_branch=None, else_branch=None, should_wrap_in_block=True, **kwargs):
+	def __init__(self, condition=None, then_branch=None, else_branch=None, should_wrap_in_block=True, no_else=False, **kwargs):
 		"""
 		:param condition: if condition
 		:param then_branch: if then block
@@ -112,10 +112,14 @@ class IfPat(InstructionPat):
 		self.condition   = condition or AnyPat()
 		self.then_branch = wrap_pattern(then_branch)
 		self.else_branch = wrap_pattern(else_branch)
+		self.no_else = no_else
 
 	@InstructionPat.instr_check
 	def check(self, instruction, ctx: PatternContext) -> bool:
 		cif = instruction.cif
+
+		if self.no_else and cif.ielse is not None:
+			return False
 
 		rv = self.condition.check(cif.expr, ctx)
 		if not rv: return False
