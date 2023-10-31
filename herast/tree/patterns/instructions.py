@@ -103,6 +103,10 @@ class IfPat(InstructionPat):
 			if pat.op == idaapi.cit_block:
 				return pat
 
+			# do not wrap expressions and abstracts
+			if not isinstance(pat, InstructionPat):
+				return pat
+
 			return BlockPat(pat)
 
 		self.condition   = condition or AnyPat()
