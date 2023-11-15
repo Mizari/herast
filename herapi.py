@@ -29,7 +29,7 @@ def search_pattern(pat:BasePat, *funcs):
 			continue
 
 		tree_processor = TreeProcessor(cfunc)
-		item_ctx = PatternContext(tree_processor)
+		item_ctx = ASTContext(cfunc.entry_ea)
 		for subitem in tree_processor.iterate_subitems(cfunc.body):
 			if pat.check(subitem, item_ctx):
 				yield subitem

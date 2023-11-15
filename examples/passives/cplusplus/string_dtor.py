@@ -81,7 +81,7 @@ class StringDtorScheme(Scheme):
 				)
 		super().__init__(pattern)
 
-	def on_matched_item(self, item, ctx: PatternContext):
+	def on_matched_item(self, item, ctx: ASTContext):
 		str_as_str = ctx.get_var("str_as_str")
 		str_as_var = ctx.get_var("str_as_var")
 		var = None

@@ -1,7 +1,7 @@
 import idaapi
 
 from herast.tree.patterns.base_pattern import BasePat
-from herast.tree.pattern_context import PatternContext
+from herast.tree.pattern_context import ASTContext
 from herast.tree.patterns.expressions import AsgPat, CallPat
 from herast.tree.patterns.instructions import ExprInsPat
 
@@ -13,7 +13,7 @@ class IntPat(BasePat):
 		self.value = value
 
 	@BasePat.base_check
-	def check(self, item, ctx: PatternContext) -> bool:
+	def check(self, item, ctx: ASTContext) -> bool:
 		if item.op not in (idaapi.cot_num, idaapi.cot_obj):
 			return False
 
@@ -35,7 +35,7 @@ class StringPat(BasePat):
 		self.minlen = minlen
 
 	@BasePat.base_check
-	def check(self, item, ctx: PatternContext) -> bool:
+	def check(self, item, ctx: ASTContext) -> bool:
 		if item.op == idaapi.cot_obj:
 			item.obj_ea
 			name = item.print1(None)
@@ -60,7 +60,7 @@ class StructFieldAccessPat(BasePat):
 		self.member_offset = member_offset
 
 	@BasePat.base_check
-	def check(self, item, ctx: PatternContext) -> bool:
+	def check(self, item, ctx: ASTContext) -> bool:
 		if item.op != idaapi.cot_memptr and item.op != idaapi.cot_memref:
 			return False
 

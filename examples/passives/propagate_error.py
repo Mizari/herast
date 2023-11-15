@@ -20,7 +20,7 @@ class ReplacingScheme(Scheme):
 		)
 		super().__init__(pattern)
 
-	def on_matched_item(self, item, ctx: PatternContext):
+	def on_matched_item(self, item, ctx: ASTContext):
 		error_var = ctx.get_var("error_var")
 		if error_var is None:
 			return False

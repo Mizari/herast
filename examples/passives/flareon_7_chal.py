@@ -22,7 +22,7 @@ pattern = SeqPat(
 		)
 
 class Flareon7ChalScheme(Scheme):
-	def on_matched_item(self, item, ctx: PatternContext):
+	def on_matched_item(self, item, ctx: ASTContext):
 		print('%#x' % item.ea)
 		try:
 

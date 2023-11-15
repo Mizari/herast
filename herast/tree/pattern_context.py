@@ -1,29 +1,30 @@
 from __future__ import annotations
 import idaapi
-from herast.tree.processing import TreeProcessor
+
 
 class InstrModification:
 	def __init__(self, item, new_item):
 		self.item = item
 		self.new_item = new_item
 
-class PatternContext:
+
+class ASTContext:
 	"""AST context, contains additional logic for information,
 	not presented in AST. Also has some code for modifying AST in the
 	process of AST matching.
 	"""
-	def __init__(self, tree_proc: TreeProcessor):
-		self.tree_proc = tree_proc
+	def __init__(self, cfunc:idaapi.cfunc_t):
+		self.cfunc = cfunc
 		self.expressions : dict[str, idaapi.cexpr_t] = dict()
 		self.variables : dict = dict()
 		self.instrs_to_modify : list = []
 
-	def get_func_ea(self):
-		"""Get address of matched function."""
-		return self.tree_proc.cfunc.entry_ea
+	@property
+	def func_addr(self):
+		return self.cfunc.entry_ea
 
 	def get_func_name(self):
-		return idaapi.get_name(self.get_func_ea())
+		return idaapi.get_name(self.func_addr)
 
 	def get_var(self, name: str):
 		return self.variables.get(name, None)

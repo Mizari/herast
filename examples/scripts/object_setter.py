@@ -9,7 +9,7 @@ class ObjectSetterScheme(Scheme):
 		pattern = AsgPat(ObjPat(), call_pattern)
 		super().__init__(pattern)
 
-	def on_matched_item(self, item, ctx: PatternContext) -> bool:
+	def on_matched_item(self, item, ctx: ASTContext) -> bool:
 		asg_y = strip_casts(item.y)
 		arg0 = asg_y.a[0].n._value
 		arg1 = asg_y.a[1].n._value

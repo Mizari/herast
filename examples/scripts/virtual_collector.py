@@ -7,8 +7,8 @@ class VirtualCollector(Scheme):
 		super().__init__(pattern)
 		self.collection = []
 
-	def on_matched_item(self, item, ctx: PatternContext) -> bool:
-		func_ea = ctx.get_func_ea()
+	def on_matched_item(self, item, ctx: ASTContext) -> bool:
+		func_ea = ctx.func_addr
 		struct_type = item.x.x.type.get_pointed_object()
 		offset = item.x.m
 		value = item.y

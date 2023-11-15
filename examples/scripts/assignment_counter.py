@@ -10,7 +10,7 @@ class AssignmentCounterScheme(Scheme):
 		pattern = AsgPat(AnyPat(), CallPat(obj_pat))
 		super().__init__(pattern)
 
-	def on_matched_item(self, item, ctx: PatternContext) -> bool:
+	def on_matched_item(self, item, ctx: ASTContext) -> bool:
 		func_ea = strip_casts(item.y).x.obj_ea
 		self.add_assignment(func_ea)
 		return False

@@ -26,7 +26,7 @@ trampoline_pattern = ObjPat(*trampoline_funcs, skip_casts=False)
 class TrampolineFixScheme(Scheme):
 	def __init__(self):
 		super().__init__(trampoline_pattern)
-	def on_matched_item(self, item, ctx: PatternContext) -> bool:
+	def on_matched_item(self, item, ctx: ASTContext) -> bool:
 		def get_trampoline_address(func_ea):
 			dis_name = idc.GetDisasm(func_ea)[3:].replace(" ", "")
 			if dis_name.startswith("ds:"): dis_name = dis_name[3:]

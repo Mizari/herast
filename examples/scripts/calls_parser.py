@@ -19,7 +19,7 @@ class CallsParser(Scheme):
 		pattern = CallPat(obj_pat, ObjPat(), RefPat(ObjPat()), skip_missing=True)
 		super().__init__(pattern)
 
-	def on_matched_item(self, item, ctx: PatternContext) -> bool:
+	def on_matched_item(self, item, ctx: ASTContext) -> bool:
 		arg0 = item.a[0]
 		arg1 = item.a[1]
 		new_name = idc.get_strlit_contents(arg0.obj_ea)

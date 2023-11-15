@@ -3,7 +3,7 @@ from __future__ import annotations
 import idaapi
 from .abstracts import AnyPat
 from herast.tree.patterns.base_pattern import BasePat
-from herast.tree.pattern_context import PatternContext
+from herast.tree.pattern_context import ASTContext
 
 
 class InstructionPat(BasePat):
@@ -49,7 +49,7 @@ class BlockPat(InstructionPat):
 		self.sequence = patterns
 
 	@InstructionPat.instr_check
-	def check(self, instruction, ctx: PatternContext) -> bool:
+	def check(self, instruction, ctx: ASTContext) -> bool:
 		block = instruction.cblock
 		if len(block) != len(self.sequence):
 			return False
@@ -73,7 +73,7 @@ class ExprInsPat(InstructionPat):
 		self.expr = expr or AnyPat()
 
 	@InstructionPat.instr_check
-	def check(self, instruction, ctx: PatternContext) -> bool:
+	def check(self, instruction, ctx: ASTContext) -> bool:
 		return self.expr.check(instruction.cexpr, ctx)
 
 	@property
@@ -115,7 +115,7 @@ class IfPat(InstructionPat):
 		self.no_else = no_else
 
 	@InstructionPat.instr_check
-	def check(self, instruction, ctx: PatternContext) -> bool:
+	def check(self, instruction, ctx: ASTContext) -> bool:
 		cif = instruction.cif
 
 		if self.no_else and cif.ielse is not None:
@@ -146,7 +146,7 @@ class ForPat(InstructionPat):
 		self.body = body or AnyPat()
 
 	@InstructionPat.instr_check
-	def check(self, instruction, ctx: PatternContext) -> bool:
+	def check(self, instruction, ctx: ASTContext) -> bool:
 		cfor = instruction.cfor
 
 		return self.init.check(cfor.init, ctx) and \
@@ -168,7 +168,7 @@ class RetPat(InstructionPat):
 		self.expr = expr or AnyPat()
 
 	@InstructionPat.instr_check
-	def check(self, instruction, ctx: PatternContext) -> bool:
+	def check(self, instruction, ctx: ASTContext) -> bool:
 		creturn = instruction.creturn
 
 		return self.expr.check(creturn.expr, ctx)
@@ -188,7 +188,7 @@ class WhilePat(InstructionPat):
 		self.body = body or AnyPat()
 
 	@InstructionPat.instr_check
-	def check(self, instruction, ctx: PatternContext) -> bool:
+	def check(self, instruction, ctx: ASTContext) -> bool:
 		cwhile = instruction.cwhile
 
 		return self.expr.check(cwhile.expr, ctx) and \
@@ -209,7 +209,7 @@ class DoPat(InstructionPat):
 		self.body = body or AnyPat()
 
 	@InstructionPat.instr_check
-	def check(self, instruction, ctx: PatternContext) -> bool:
+	def check(self, instruction, ctx: ASTContext) -> bool:
 		cdo = instruction.cdo
 
 		return self.body.check(cdo.body, ctx) and \
@@ -228,7 +228,7 @@ class GotoPat(InstructionPat):
 		super().__init__(**kwargs)
 
 	@InstructionPat.instr_check
-	def check(self, item, ctx: PatternContext) -> bool:
+	def check(self, item, ctx: ASTContext) -> bool:
 		return True
 
 
@@ -240,7 +240,7 @@ class ContPat(InstructionPat):
 		super().__init__(**kwargs)
 
 	@InstructionPat.instr_check
-	def check(self, item, ctx: PatternContext) -> bool:
+	def check(self, item, ctx: ASTContext) -> bool:
 		return True
 
 
@@ -252,7 +252,7 @@ class BreakPat(InstructionPat):
 		super().__init__(**kwargs)
 
 	@InstructionPat.instr_check
-	def check(self, item, ctx: PatternContext) -> bool:
+	def check(self, item, ctx: ASTContext) -> bool:
 		return True
 
 
@@ -276,7 +276,7 @@ class SwitchPat(InstructionPat):
 				raise ValueError("Invalid case in switch")
 
 	@InstructionPat.instr_check
-	def check(self, item, ctx: PatternContext) -> bool:
+	def check(self, item, ctx: ASTContext) -> bool:
 		if self.expr is not None and not self.expr.check(item.cswitch.expr, ctx):
 			return False
 

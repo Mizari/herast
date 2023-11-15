@@ -4,7 +4,7 @@ import idaapi
 import idc
 
 import herast.tree.utils as utils
-from herast.tree.pattern_context import PatternContext
+from herast.tree.pattern_context import ASTContext
 from herast.tree.processing import TreeProcessor
 from herast.tree.scheme import Scheme
 from herast.settings import runtime_settings
@@ -40,24 +40,25 @@ class Matcher:
 
 	def match_cfunc(self, cfunc:idaapi.cfunc_t):
 		"""Match schemes in decompiled function."""
-		tree_processor = TreeProcessor(cfunc)
 		ast_tree = cfunc.body
+		ast_ctx = ASTContext(cfunc)
 
 		schemes = [s for s in self.schemes.values() if not s.is_readonly]
-		self.match_ast_tree(tree_processor, ast_tree, schemes)
+		self.match_ast_tree(ast_tree, ast_ctx, schemes)
 
 		schemes = [s for s in self.schemes.values() if s.is_readonly]
-		self.match_ast_tree(tree_processor, ast_tree, schemes)
+		self.match_ast_tree(ast_tree, ast_ctx, schemes)
 
-	def match_ast_tree(self, tree_processor: TreeProcessor, ast_tree, schemes:list[Scheme]):
+	def match_ast_tree(self, ast_tree:idaapi.citem_t, ast_ctx: ASTContext, schemes:list[Scheme]):
+		tree_proc = TreeProcessor(ast_ctx.cfunc)
 		while True:
-			contexts = [PatternContext(tree_processor) for _ in schemes]
+			contexts = [ASTContext(ast_ctx) for _ in schemes]
 			for i, scheme in enumerate(schemes):
 				scheme.on_tree_iteration_start(contexts[i])
 
 			is_tree_modified = False
-			for subitem in tree_processor.iterate_subitems(ast_tree):
-				is_tree_modified = self.check_schemes(tree_processor, subitem)
+			for subitem in tree_proc.iterate_subitems(ast_tree):
+				is_tree_modified = self.check_schemes(subitem, ast_ctx)
 				if is_tree_modified:
 					break
 
@@ -68,14 +69,14 @@ class Matcher:
 				scheme.on_tree_iteration_end(contexts[i])
 			break
 
-	def check_schemes(self, tree_processor: TreeProcessor, item: idaapi.citem_t) -> bool:
+	def check_schemes(self, item:idaapi.citem_t, ast_ctx: ASTContext) -> bool:
 		"""Match item in schemes.
 
 		:param tree_processor:
 		:param item: AST item
 		:return: is item modified/removed?
 		"""
-		item_ctx = PatternContext(tree_processor)
+		item_ctx = ASTContext(ast_ctx.cfunc)
 
 		for scheme in self.schemes.values():
 			if self.check_scheme(scheme, item, item_ctx):
@@ -86,7 +87,7 @@ class Matcher:
 
 		return False
 
-	def check_scheme(self, scheme: Scheme, item: idaapi.citem_t, item_ctx: PatternContext) -> bool:
+	def check_scheme(self, scheme: Scheme, item: idaapi.citem_t, item_ctx: ASTContext) -> bool:
 		if not runtime_settings.CATCH_DURING_MATCHING:
 			return self._check_scheme(scheme, item, item_ctx)
 
@@ -96,7 +97,7 @@ class Matcher:
 			print('[!] Got an exception during scheme checking: %s' % e)
 			return False
 
-	def _check_scheme(self, scheme: Scheme, item: idaapi.citem_t, item_ctx: PatternContext) -> bool:
+	def _check_scheme(self, scheme: Scheme, item: idaapi.citem_t, item_ctx: ASTContext) -> bool:
 		item_ctx.cleanup()
 
 		if not any(p.check(item, item_ctx) for p in scheme.patterns):
@@ -108,8 +109,8 @@ class Matcher:
 
 		return is_tree_modified
 
-	def finalize_item_context(self, ctx: PatternContext) -> bool:
-		tree_proc = ctx.tree_proc
+	def finalize_item_context(self, ctx: ASTContext) -> bool:
+		tree_proc = TreeProcessor(ctx.cfunc)
 		is_tree_modified = False
 		for modified_instr in ctx.modified_instrs():
 			item = modified_instr.item

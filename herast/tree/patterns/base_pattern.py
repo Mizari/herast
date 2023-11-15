@@ -1,7 +1,7 @@
 import idaapi
 import typing
 import traceback
-from herast.tree.pattern_context import PatternContext
+from herast.tree.pattern_context import ASTContext
 
 class BasePat:
 	"""Base class for all patterns."""
@@ -25,7 +25,7 @@ class BasePat:
 	def _raise(self, msg):
 		raise "%s: %s" % (self.__class__.__name__, msg)
 
-	def check(self, item, ctx: PatternContext, *args, **kwargs) -> bool:
+	def check(self, item, ctx: ASTContext, *args, **kwargs) -> bool:
 		"""Base matching operation.
 	
 		:param item: AST item

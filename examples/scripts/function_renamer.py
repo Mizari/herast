@@ -13,8 +13,8 @@ class FunctionRenamer(Scheme):
 		self.renamings = {}
 		self.conflicts = {}
 
-	def on_matched_item(self, item, ctx: PatternContext) -> bool:
-		func_ea = ctx.get_func_ea()
+	def on_matched_item(self, item, ctx: ASTContext) -> bool:
+		func_ea = ctx.func_addr
 		debug_print = ctx.get_expr("debug_print")
 		s = debug_print.a[1]
 		name = s.print1(None)
