@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import idaapi
 import idc
 
@@ -91,7 +93,7 @@ class Matcher:
 
 		return False
 
-	def check_scheme(self, scheme: Scheme, item: idaapi.citem_t, item_ctx: PatternContext):
+	def check_scheme(self, scheme: Scheme, item: idaapi.citem_t, item_ctx: PatternContext) -> bool:
 		if runtime_settings.CATCH_DURING_MATCHING:
 			try:
 				item_ctx.cleanup()
@@ -131,7 +133,7 @@ class Matcher:
 			if is_tree_modified:
 				return True
 
-	def finalize_item_context(self, ctx: PatternContext):
+	def finalize_item_context(self, ctx: PatternContext) -> bool:
 		tree_proc = ctx.tree_proc
 		is_tree_modified = False
 		for modified_instr in ctx.modified_instrs():
@@ -146,7 +148,7 @@ class Matcher:
 
 		return is_tree_modified
 
-	def get_scheme(self, scheme_name: str):
+	def get_scheme(self, scheme_name: str) -> Scheme|None:
 		return self.schemes.get(scheme_name)
 
 	def add_scheme(self, name:str, scheme:Scheme):
