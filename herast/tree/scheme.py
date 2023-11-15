@@ -4,12 +4,13 @@ from herast.tree.patterns.base_pattern import BasePat
 
 class Scheme:
 	"""Class with logic on what to do with successfully found patterns in AST"""
-	def __init__(self, *patterns: BasePat):
+	def __init__(self, *patterns: BasePat, is_readonly=False):
 		"""Scheme initialization
 
 		:param patterns: AST patterns
 		"""
 		self.patterns = patterns
+		self.is_readonly = is_readonly
 
 	def on_matched_item(self, item, ctx: PatternContext) -> bool:
 		"""Callback for successful match of scheme's patterns on item.

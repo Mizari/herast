@@ -46,17 +46,22 @@ class Matcher:
 		tree_processor = TreeProcessor(cfunc)
 		for subitem in tree_processor.iterate_subinstrs(cfunc.body):
 			if subitem.ea == instr_addr:
-				self.match_ast_tree(tree_processor, subitem)
+				schemes = [s for s in self.schemes.values()]
+				self.match_ast_tree(tree_processor, subitem, schemes)
 				break
 
 	def match_cfunc(self, cfunc:idaapi.cfunc_t):
 		"""Match schemes in decompiled function."""
 		tree_processor = TreeProcessor(cfunc)
 		ast_tree = cfunc.body
-		self.match_ast_tree(tree_processor, ast_tree)
 
-	def match_ast_tree(self, tree_processor: TreeProcessor, ast_tree):
-		schemes = [s for s in self.schemes.values()]
+		schemes = [s for s in self.schemes.values() if not s.is_readonly]
+		self.match_ast_tree(tree_processor, ast_tree, schemes)
+
+		schemes = [s for s in self.schemes.values() if s.is_readonly]
+		self.match_ast_tree(tree_processor, ast_tree, schemes)
+
+	def match_ast_tree(self, tree_processor: TreeProcessor, ast_tree, schemes:list[Scheme]):
 		while True:
 			contexts = [PatternContext(tree_processor) for _ in schemes]
 			for i, scheme in enumerate(schemes):
