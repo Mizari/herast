@@ -1,9 +1,12 @@
+import idaapi
 
-from herast.tree.patterns.base_pattern import BasePat
+from herast.tree.patterns.instructions import InstructionPat
 from herast.tree.pattern_context import PatternContext
 
 
-class SeqPat(BasePat):
+class SeqPat(InstructionPat):
+	op = idaapi.cit_block
+
 	"""Pattern for matching sequence of instructions inside Block Pattern aka curly braces."""
 	def __init__(self, *pats, skip_missing=True, **kwargs):
 		"""
@@ -24,13 +27,9 @@ class SeqPat(BasePat):
 		self.seq = tuple(pats)
 		self.length = len(pats)
 
-	@BasePat.base_check
+	@InstructionPat.instr_check
 	def check(self, instruction, ctx: PatternContext) -> bool:
-		parent = ctx.get_parent_block(instruction)
-		if parent is None:
-			return False
-
-		container = parent.cinsn.cblock
+		container = instruction.cblock
 		start_from = container.index(instruction)
 		if start_from + self.length > len(container):
 			return False

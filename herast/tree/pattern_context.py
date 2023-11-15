@@ -59,9 +59,3 @@ class PatternContext:
 	def modified_instrs(self):
 		for itm in self.instrs_to_modify:
 			yield itm
-
-	def get_parent_block(self, item):
-		"""Get parent block of instruction. Item should be instruction
-		inside cot_block item (curly braces).
-		"""
-		return self.tree_proc.get_parent_block(item)
