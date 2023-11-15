@@ -94,42 +94,26 @@ class Matcher:
 		return False
 
 	def check_scheme(self, scheme: Scheme, item: idaapi.citem_t, item_ctx: PatternContext) -> bool:
-		if runtime_settings.CATCH_DURING_MATCHING:
-			try:
-				item_ctx.cleanup()
-			except Exception as e:
-				print('[!] Got an exception during context cleanup: %s' % e)
-				return False
-		else:
-			item_ctx.cleanup()
+		if not runtime_settings.CATCH_DURING_MATCHING:
+			return self._check_scheme(scheme, item, item_ctx)
 
-		if runtime_settings.CATCH_DURING_MATCHING:
-			try:
-				if not any(p.check(item, item_ctx) for p in scheme.patterns):
-					return False
-			except Exception as e:
-				print('[!] Got an exception during pattern matching: %s' % e)
-				return False
-		else:
-			if not any(p.check(item, item_ctx) for p in scheme.patterns):
-				return False
+		try:
+			return self._check_scheme(scheme, item, item_ctx)
+		except Exception as e:
+			print('[!] Got an exception during scheme checking: %s' % e)
+			return False
 
-		if runtime_settings.CATCH_DURING_MATCHING:
-			try:
-				is_tree_modified = scheme.on_matched_item(item, item_ctx)
-				if not isinstance(is_tree_modified, bool):
-					raise Exception("Handler return invalid return type, should be bool")
+	def _check_scheme(self, scheme: Scheme, item: idaapi.citem_t, item_ctx: PatternContext) -> bool:
+		item_ctx.cleanup()
 
-				return is_tree_modified
-			except Exception as e:
-				print('[!] Got an exception during pattern handling: %s' % e)
-				return False
-		else:
-			is_tree_modified = scheme.on_matched_item(item, item_ctx)
-			if not isinstance(is_tree_modified, bool):
-				raise Exception("Handler return invalid return type, should be bool")
+		if not any(p.check(item, item_ctx) for p in scheme.patterns):
+			return False
 
-			return is_tree_modified
+		is_tree_modified = scheme.on_matched_item(item, item_ctx)
+		if not isinstance(is_tree_modified, bool):
+			raise TypeError("Handler returned invalid return type, should be bool")
+
+		return is_tree_modified
 
 	def finalize_item_context(self, ctx: PatternContext) -> bool:
 		tree_proc = ctx.tree_proc
