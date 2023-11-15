@@ -103,13 +103,13 @@ class Matcher:
 
 		if runtime_settings.CATCH_DURING_MATCHING:
 			try:
-				if not scheme.on_new_item(item, item_ctx):
+				if not any(p.check(item, item_ctx) for p in scheme.patterns):
 					return False
 			except Exception as e:
 				print('[!] Got an exception during pattern matching: %s' % e)
 				return False
 		else:
-			if not scheme.on_new_item(item, item_ctx):
+			if not any(p.check(item, item_ctx) for p in scheme.patterns):
 				return False
 
 		if runtime_settings.CATCH_DURING_MATCHING:
