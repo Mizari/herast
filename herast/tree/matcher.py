@@ -120,8 +120,7 @@ class Matcher:
 				if not isinstance(is_tree_modified, bool):
 					raise Exception("Handler return invalid return type, should be bool")
 
-				if is_tree_modified:
-					return True
+				return is_tree_modified
 			except Exception as e:
 				print('[!] Got an exception during pattern handling: %s' % e)
 				return False
@@ -130,8 +129,7 @@ class Matcher:
 			if not isinstance(is_tree_modified, bool):
 				raise Exception("Handler return invalid return type, should be bool")
 
-			if is_tree_modified:
-				return True
+			return is_tree_modified
 
 	def finalize_item_context(self, ctx: PatternContext) -> bool:
 		tree_proc = ctx.tree_proc
