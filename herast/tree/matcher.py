@@ -38,18 +38,6 @@ class Matcher:
 			else:
 				raise TypeError("Invalid function type")
 
-	def match_instruction(self, instr_addr):
-		func_addr = utils.get_func_start(instr_addr)
-		cfunc = utils.get_cfunc(func_addr)
-		if cfunc is None: return
-
-		tree_processor = TreeProcessor(cfunc)
-		for subitem in tree_processor.iterate_subinstrs(cfunc.body):
-			if subitem.ea == instr_addr:
-				schemes = [s for s in self.schemes.values()]
-				self.match_ast_tree(tree_processor, subitem, schemes)
-				break
-
 	def match_cfunc(self, cfunc:idaapi.cfunc_t):
 		"""Match schemes in decompiled function."""
 		tree_processor = TreeProcessor(cfunc)
