@@ -4,7 +4,7 @@ import idaapi
 import idc
 
 import herast.tree.utils as utils
-from herast.tree.pattern_context import ASTContext
+from herast.tree.ast_context import ASTContext
 from herast.tree.processing import TreeProcessor
 from herast.tree.scheme import Scheme
 from herast.settings import runtime_settings

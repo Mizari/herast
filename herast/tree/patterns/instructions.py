@@ -3,7 +3,7 @@ from __future__ import annotations
 import idaapi
 from .abstracts import AnyPat
 from herast.tree.patterns.base_pattern import BasePat
-from herast.tree.pattern_context import ASTContext
+from herast.tree.ast_context import ASTContext
 
 
 class InstructionPat(BasePat):

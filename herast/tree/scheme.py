@@ -1,4 +1,4 @@
-from herast.tree.pattern_context import ASTContext
+from herast.tree.ast_context import ASTContext
 from herast.tree.patterns.base_pattern import BasePat
 
 

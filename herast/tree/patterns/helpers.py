@@ -1,7 +1,7 @@
 import idaapi
 
 from herast.tree.patterns.base_pattern import BasePat
-from herast.tree.pattern_context import ASTContext
+from herast.tree.ast_context import ASTContext
 from herast.tree.patterns.expressions import AsgPat, CallPat
 from herast.tree.patterns.instructions import ExprInsPat
 

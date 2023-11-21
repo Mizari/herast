@@ -1,7 +1,7 @@
 import idaapi
 import typing
 import traceback
-from herast.tree.pattern_context import ASTContext
+from herast.tree.ast_context import ASTContext
 
 class BasePat:
 	"""Base class for all patterns."""
