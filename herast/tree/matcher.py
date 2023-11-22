@@ -15,6 +15,15 @@ class Matcher:
 	def __init__(self, *schemes):
 		self.schemes : dict[str, Scheme] = {"scheme" + str(i): s for i, s in enumerate(schemes)}
 
+	def get_scheme(self, scheme_name: str) -> Scheme|None:
+		return self.schemes.get(scheme_name)
+
+	def add_scheme(self, name:str, scheme:Scheme):
+		self.schemes[name] = scheme
+
+	def remove_scheme(self, scheme_name: str):
+		self.schemes.pop(scheme_name, None)
+
 	def match(self, *functions):
 		"""Match schemes for function body.
 
@@ -127,12 +136,3 @@ class Matcher:
 				is_tree_modified = True
 
 		return is_tree_modified
-
-	def get_scheme(self, scheme_name: str) -> Scheme|None:
-		return self.schemes.get(scheme_name)
-
-	def add_scheme(self, name:str, scheme:Scheme):
-		self.schemes[name] = scheme
-
-	def remove_scheme(self, scheme_name: str):
-		self.schemes.pop(scheme_name, None)
