@@ -14,9 +14,9 @@ class ReplacingScheme(Scheme):
 		pattern checks that some_logic_exprs are equal via BindItem calls
 		"""
 		pattern = IfPat(
-			VarBindPat("error_var"),
-			ExprInsPat(BindItemPat("logic_expr")),
-			AsgInsnPat(VarBindPat("error_var"), BindItemPat("logic_expr"))
+			VarPat(bind_name="error_var"),
+			ExprInsPat(AnyPat(bind_name="logic_expr")),
+			AsgInsnPat(VarPat(bind_name="error_var"), AnyPat(bind_name="logic_expr"))
 		)
 		super().__init__(pattern)
 

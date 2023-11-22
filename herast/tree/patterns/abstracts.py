@@ -1,5 +1,3 @@
-import idaapi
-import typing
 
 from herast.tree.patterns.base_pattern import BasePat
 from herast.tree.match_context import MatchContext
@@ -63,53 +61,12 @@ class AndPat(BasePat):
 		return self.pats
 
 
-class BindItemPat(BasePat):
-	"""Save item in context after successful matching. If item with given
-	name already exists in context, then checks their equality"""
-	def __init__(self, name: str, pat: typing.Optional[BasePat] = None, **kwargs):
-		super().__init__(**kwargs)
-		self.pat = pat or AnyPat()
-		self.name = name
-
-	@BasePat.base_check
-	def check(self, item, ctx: MatchContext) -> bool:
-		if self.pat.check(item, ctx):
-			current_expr = ctx.get_expr(self.name)
-			if current_expr is None:
-				ctx.save_expr(self.name, item)
-				return True
-			else:
-				return item.equal_effect(current_expr)
-		return False
-
-
-class VarBindPat(BasePat):
-	"""Save variable in context after successful matching. If variable with
-	given name already exists in context, then checks their indexes"""
-	def __init__(self, name: str, **kwargs):
-		super().__init__(**kwargs)
-		self.name = name
-
-	@BasePat.base_check
-	def check(self, expr, ctx: MatchContext) -> bool:
-		if expr.op != idaapi.cot_var:
-			return False
-
-		var = ctx.get_var(self.name)
-		if var is not None:
-			return var.idx == expr.v.idx
-		else:
-			ctx.save_var(self.name, expr)
-			return True
-
-
 class DeepExprPat(BasePat):
 	"""Find pattern somewhere inside an item and save it in context if 
 	bind_name is provided."""
-	def __init__(self, pat: BasePat, bind_name=None, **kwargs):
+	def __init__(self, pat: BasePat, **kwargs):
 		super().__init__(**kwargs)
 		self.pat = pat
-		self.bind_name = bind_name
 
 	@BasePat.base_check
 	def check(self, expr, ctx: MatchContext) -> bool:

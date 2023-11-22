@@ -5,10 +5,10 @@ from herapi import *
 pattern = SeqPat(
 				# ExInsPat(AsgPat(BindExpr('gobj', ObjPat()), SkipCasts(CallPat(ObjPat(name='j__malloc_base'), ignore_arguments=True)))),
 				# ExInsPat(AnyPat()),
-				ExprInsPat(AsgPat(AnyPat(), BindItemPat('num0', AnyPat()))),
-				ExprInsPat(AsgPat(AnyPat(), BindItemPat('num1', AnyPat()))),
-				ExprInsPat(AsgPat(AnyPat(), BindItemPat('num2', AnyPat()))),
-				ExprInsPat(AsgPat(AnyPat(), BindItemPat('num3', AnyPat()))),
+				ExprInsPat(AsgPat(AnyPat(), AnyPat(bind_name="num0"))),
+				ExprInsPat(AsgPat(AnyPat(), AnyPat(bind_name="num1"))),
+				ExprInsPat(AsgPat(AnyPat(), AnyPat(bind_name="num2"))),
+				ExprInsPat(AsgPat(AnyPat(), AnyPat(bind_name="num3"))),
 				# ExInsPat(AsgPat(AnyPat(), BindExpr('num4', AnyPat()))),
 				# ExInsPat(AsgPat(AnyPat(), BindExpr('num5', AnyPat()))),
 				# ExInsPat(AsgPat(AnyPat(), BindExpr('num6', AnyPat()))),
@@ -16,7 +16,7 @@ pattern = SeqPat(
 				ForPat(
 					AnyPat(), AnyPat(), AnyPat(),
 					BlockPat(
-						ExprInsPat(BindItemPat('xor', AsgxorPat(AnyPat(), AnyPat())))
+						ExprInsPat(AsgxorPat(AnyPat(), AnyPat(), bind_name="xor"))
 					)
 				)
 		)

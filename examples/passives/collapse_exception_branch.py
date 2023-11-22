@@ -53,7 +53,7 @@ class ExceptionCollapserScheme(Scheme):
 			AnyPat(),
 			ExceptionBody(
 				AsgInsnPat(AnyPat(), CallPat("__cxa_allocate_exception", ignore_arguments=True)),
-				AsgInsnPat(AnyPat(), CallPat(AnyPat(), AnyPat(), BindItemPat("exception_str", ObjPat()))),
+				AsgInsnPat(AnyPat(), CallPat(AnyPat(), AnyPat(), ObjPat(bind_name="exception_str"))),
 				CallInsnPat('__cxa_throw', ignore_arguments=True),
 			),
 			should_wrap_in_block=False,

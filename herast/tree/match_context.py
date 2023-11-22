@@ -34,8 +34,18 @@ class MatchContext(ASTContext):
 	def get_expr(self, name: str):
 		return self.expressions.get(name, None)
 
-	def save_expr(self, name: str, expression):
-		self.expressions[name] = expression
+	def save_expr(self, name: str, item) -> bool:
+		current_item = self.get_expr(name)
+		if current_item is None:
+			self.expressions[name] = item
+			return True
+
+		if current_item.op == idaapi.cot_var:
+			if item.op != idaapi.cot_var:
+				return False
+			return current_item.v.idx == item.v.idx
+
+		return item.equal_effect(current_item)
 
 	def has_expr(self, name: str):
 		return self.expressions.get(name, None) is not None

@@ -9,13 +9,16 @@ class BasePat:
 	"""Base class for all patterns."""
 	op = None
 
-	def __init__(self, debug=False, debug_msg=None, debug_trace_depth=0, check_op:int|None = None):
+	def __init__(self, bind_name=None, debug=False, debug_msg=None, debug_trace_depth=0, check_op:int|None = None):
 		"""
+
+		:param bind_name: should successfully matched item be remembered
 		:param debug: should provide debug information during matching
 		:param debug_msg: additional message to print on debug
 		:param debug_trace_depth: additional trace information on debug
 		:param check_op: what item type to check. skips this check if None
 		"""
+		self.bind_name = bind_name
 		self.check_op = check_op
 		self.debug = debug
 		self.debug_msg = debug_msg
@@ -39,14 +42,17 @@ class BasePat:
 		"""Decorator for child classes instead of inheritance, since
 		before and after calls are needed.
 		"""
-		def __perform_base_check(self:BasePat, item, *args, **kwargs):
+		def __perform_base_check(self:BasePat, item, ctx:MatchContext):
 			if item is None:
 				return False
 
 			if self.check_op is not None and item.op != self.check_op:
 				return False
 
-			rv = func(self, item, *args, **kwargs)
+			rv = func(self, item, ctx)
+
+			if rv and self.bind_name is not None:
+				rv = ctx.save_expr(self.bind_name, item)
 
 			if self.debug:
 				if self.debug_msg:

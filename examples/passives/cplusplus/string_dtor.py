@@ -38,17 +38,17 @@ class StringDtorScheme(Scheme):
 					),
 					BlockPat(
 						AsgInsnPat(
-							VarBindPat("free_var"),
+							VarPat(bind_name="free_var"),
 							OrPat(
 								PtrPat(
 									MemrefPat(
-										VarBindPat("str_as_str")
+										VarPat(bind_name="str_as_str")
 									)
 								),
 								PtrPat(
-									VarBindPat("str_as_str")
+									VarPat(bind_name="str_as_str")
 								),
-								VarBindPat("reg_str"),
+								VarPat(bind_name="reg_str"),
 								skip_casts=True
 							)
 						),
@@ -73,8 +73,8 @@ class StringDtorScheme(Scheme):
 						CallInsnPat(
 							AnyPat(),
 							OrPat(
-								VarBindPat("free_var"),
-								VarBindPat("str_as_str")
+								VarPat(bind_name="free_var"),
+								VarPat(bind_name="str_as_str")
 							),
 						)
 					)
