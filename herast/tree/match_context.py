@@ -18,16 +18,16 @@ class InstrModification:
 class MatchContext(ASTContext):
 	def __init__(self, cfunc:idaapi.cfunc_t, pattern:BasePat):
 		super().__init__(cfunc)
-		self.expressions : dict[str, idaapi.cexpr_t] = dict()
+		self.binded_items : dict[str, idaapi.cexpr_t] = dict()
 		self.instrs_to_modify : list = []
 
-	def get_expr(self, name: str):
-		return self.expressions.get(name, None)
+	def get_item(self, name: str):
+		return self.binded_items.get(name, None)
 
-	def save_expr(self, name: str, item) -> bool:
-		current_item = self.get_expr(name)
+	def bind_item(self, name: str, item) -> bool:
+		current_item = self.get_item(name)
 		if current_item is None:
-			self.expressions[name] = item
+			self.binded_items[name] = item
 			return True
 
 		if current_item.op == idaapi.cot_var:
@@ -37,8 +37,8 @@ class MatchContext(ASTContext):
 
 		return item.equal_effect(current_item)
 
-	def has_expr(self, name: str):
-		return self.expressions.get(name, None) is not None
+	def has_item(self, name: str):
+		return self.binded_items.get(name, None) is not None
 
 	def modify_instr(self, item, new_item):
 		"""Modify instruction. Changes AST, so restarting matching follows.

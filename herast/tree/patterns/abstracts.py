@@ -75,7 +75,7 @@ class DeepExprPat(BasePat):
 			if not self.pat.check(item, ctx):
 				continue
 			if self.bind_name is not None:
-				ctx.save_expr(self.bind_name, item)
+				ctx.bind_item(self.bind_name, item)
 			return True
 		return False
 

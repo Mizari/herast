@@ -25,7 +25,7 @@ class ReplacingScheme(Scheme):
 		if error_var is None:
 			return False
 
-		logic_expr = ctx.get_expr("logic_expr")
+		logic_expr = ctx.get_item("logic_expr")
 		if logic_expr is None:
 			return False
 

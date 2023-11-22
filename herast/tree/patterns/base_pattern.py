@@ -52,7 +52,7 @@ class BasePat:
 			rv = func(self, item, ctx)
 
 			if rv and self.bind_name is not None:
-				rv = ctx.save_expr(self.bind_name, item)
+				rv = ctx.bind_item(self.bind_name, item)
 
 			if self.debug:
 				if self.debug_msg:

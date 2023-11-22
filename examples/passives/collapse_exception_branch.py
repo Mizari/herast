@@ -68,7 +68,7 @@ class ExceptionCollapserScheme(Scheme):
 		"""
 
 		if_condition = item.cif.expr
-		exception_str = ctx.get_expr("exception_str")
+		exception_str = ctx.get_item("exception_str")
 		if exception_str is None:
 			new_item = make_call_helper_instr("__throw_if", if_condition)
 		else:
