@@ -2,7 +2,7 @@ import sys
 import idaapi
 
 from herast.tree.patterns.base_pattern import BasePat
-from herast.tree.ast_context import ASTContext
+from herast.tree.match_context import MatchContext
 
 
 class ExpressionPat(BasePat):
@@ -51,7 +51,7 @@ class CallPat(ExpressionPat):
 		self.skip_missing = skip_missing
 
 	@ExpressionPat.expr_check
-	def check(self, expression, ctx: ASTContext) -> bool:
+	def check(self, expression, ctx: MatchContext) -> bool:
 		if self.calling_function is not None and not self.calling_function.check(expression.x, ctx):
 			return False
 
@@ -82,7 +82,7 @@ class HelperPat(ExpressionPat):
 		self.helper_name = helper_name
 
 	@ExpressionPat.expr_check
-	def check(self, expression, ctx: ASTContext) -> bool:
+	def check(self, expression, ctx: MatchContext) -> bool:
 		return self.helper_name == expression.helper if self.helper_name is not None else True
 
 	@property
@@ -99,7 +99,7 @@ class NumPat(ExpressionPat):
 		self.num = num
 
 	@ExpressionPat.expr_check
-	def check(self, expr, ctx: ASTContext) -> bool:
+	def check(self, expr, ctx: MatchContext) -> bool:
 		if self.num is None:
 			return True
 
@@ -115,7 +115,7 @@ class CastPat(ExpressionPat):
 		self.pat = pat
 
 	@ExpressionPat.expr_check
-	def check(self, item, ctx: ASTContext, *args, **kwargs) -> bool:
+	def check(self, item, ctx: MatchContext, *args, **kwargs) -> bool:
 		return self.pat.check(item.x, ctx)
 
 
@@ -154,7 +154,7 @@ class ObjPat(ExpressionPat):
 				raise TypeError("Object info should be int|str")
 
 	@ExpressionPat.expr_check
-	def check(self, expression, ctx: ASTContext) -> bool:
+	def check(self, expression, ctx: MatchContext) -> bool:
 		# if no object was given aka any object, that passes expr_check
 		if len(self.addrs) == 0 and len(self.names) == 0:
 			return True
@@ -182,7 +182,7 @@ class RefPat(ExpressionPat):
 		self.referenced_object = referenced_object
 
 	@ExpressionPat.expr_check
-	def check(self, expression, ctx: ASTContext) -> bool:
+	def check(self, expression, ctx: MatchContext) -> bool:
 		return self.referenced_object.check(expression.x, ctx)
 
 
@@ -196,7 +196,7 @@ class MemrefPat(ExpressionPat):
 		self.field = field
 
 	@ExpressionPat.expr_check
-	def check(self, expression, ctx: ASTContext) -> bool:
+	def check(self, expression, ctx: MatchContext) -> bool:
 		return (self.field is None or self.field == expression.m) and \
 			self.referenced_object.check(expression.x, ctx)
 
@@ -209,7 +209,7 @@ class PtrPat(ExpressionPat):
 		self.pointed_object = pointed_object
 
 	@ExpressionPat.expr_check
-	def check(self, expression, ctx:ASTContext) -> bool:
+	def check(self, expression, ctx:MatchContext) -> bool:
 		return self.pointed_object.check(expression.x, ctx)
 
 
@@ -223,7 +223,7 @@ class MemptrPat(ExpressionPat):
 		self.field = field
 
 	@ExpressionPat.expr_check
-	def check(self, expression, ctx: ASTContext) -> bool:
+	def check(self, expression, ctx: MatchContext) -> bool:
 		return (self.field is None or self.field == expression.m) and \
 			self.pointed_object.check(expression.x, ctx)
 
@@ -238,7 +238,7 @@ class IdxPat(ExpressionPat):
 		self.indx = indx
 
 	@ExpressionPat.expr_check
-	def check(self, expression, ctx: ASTContext) -> bool:
+	def check(self, expression, ctx: MatchContext) -> bool:
 		return self.pointed_object.check(expression.x, ctx) and \
 			self.indx.check(expression.y, ctx)
 
@@ -254,7 +254,7 @@ class TernPat(ExpressionPat):
 		self.negative_expression = negative_expression
 		
 	@ExpressionPat.expr_check
-	def check(self, expression, ctx: ASTContext) -> bool:
+	def check(self, expression, ctx: MatchContext) -> bool:
 		return self.condition.check(expression.x, ctx) and \
 			self.positive_expression.check(expression.y, ctx) and \
 			self.negative_expression.check(expression.z, ctx)
@@ -268,7 +268,7 @@ class VarPat(ExpressionPat):
 		super().__init__(**kwargs)
 
 	@ExpressionPat.expr_check
-	def check(self, expression, ctx: ASTContext) -> bool:
+	def check(self, expression, ctx: MatchContext) -> bool:
 		return True
 
 
@@ -279,7 +279,7 @@ class AbstractUnaryOpPat(ExpressionPat):
 		self.operand = operand
 
 	@ExpressionPat.expr_check
-	def check(self, expression, ctx: ASTContext) -> bool:
+	def check(self, expression, ctx: MatchContext) -> bool:
 		return self.operand.check(expression.x, ctx)
 
 	@property
@@ -296,7 +296,7 @@ class AbstractBinaryOpPat(ExpressionPat):
 		self.symmetric = symmetric
 
 	@ExpressionPat.expr_check
-	def check(self, expression, ctx: ASTContext) -> bool:
+	def check(self, expression, ctx: MatchContext) -> bool:
 		first_op_second = self.first_operand.check(expression.x, ctx) and self.second_operand.check(expression.y, ctx)
 		if self.symmetric:
 			second_op_first = self.first_operand.check(expression.y, ctx) and self.second_operand.check(expression.x, ctx)
@@ -319,7 +319,7 @@ class AsgPat(ExpressionPat):
 		self.rhs = rhs
 
 	@ExpressionPat.expr_check
-	def check(self, item, ctx: ASTContext) -> bool:
+	def check(self, item, ctx: MatchContext) -> bool:
 		if not self.lhs.check(item.x, ctx):
 			return False
 		return self.rhs.check(item.y, ctx)
@@ -334,7 +334,7 @@ class FnumPat(ExpressionPat):
 		self.value = value
 
 	@ExpressionPat.expr_check
-	def check(self, item, ctx: ASTContext) -> bool:
+	def check(self, item, ctx: MatchContext) -> bool:
 		if self.value is not None and self.value != item.fpc.fnum:
 			return False
 		return True
@@ -349,7 +349,7 @@ class StrPat(ExpressionPat):
 		self.value = value
 
 	@ExpressionPat.expr_check
-	def check(self, item, ctx: ASTContext) -> bool:
+	def check(self, item, ctx: MatchContext) -> bool:
 		if self.value is not None and self.value != item.string:
 			return False
 		return True
@@ -363,7 +363,7 @@ class TypePat(ExpressionPat):
 		super().__init__(**kwargs)
 
 	@ExpressionPat.expr_check
-	def check(self, item, ctx: ASTContext) -> bool:
+	def check(self, item, ctx: MatchContext) -> bool:
 		return True
 
 

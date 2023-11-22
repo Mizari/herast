@@ -41,7 +41,7 @@ class NullsubRemovalScheme(Scheme):
 		pattern = CallInsnPat(pattern)
 		super().__init__(pattern)
 
-	def on_matched_item(self, item, ctx: ASTContext) -> bool:
+	def on_matched_item(self, item, ctx: MatchContext) -> bool:
 		ctx.modify_instr(item, None)
 		return False
 

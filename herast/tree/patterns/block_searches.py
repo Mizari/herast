@@ -1,7 +1,7 @@
 import idaapi
 
 from herast.tree.patterns.instructions import InstructionPat
-from herast.tree.ast_context import ASTContext
+from herast.tree.match_context import MatchContext
 
 
 class SeqPat(InstructionPat):
@@ -28,7 +28,7 @@ class SeqPat(InstructionPat):
 		self.length = len(pats)
 
 	@InstructionPat.instr_check
-	def check(self, instruction, ctx: ASTContext) -> bool:
+	def check(self, instruction, ctx: MatchContext) -> bool:
 		container = instruction.cblock
 		start_from = container.index(instruction)
 		if start_from + self.length > len(container):

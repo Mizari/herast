@@ -10,7 +10,7 @@ class HelperReplacer(Scheme):
 		self.should_remove = should_remove
 		super().__init__(pattern)
 
-	def on_matched_item(self, item, ctx: ASTContext):
+	def on_matched_item(self, item, ctx: MatchContext):
 		if self.should_remove:
 			new_item = None
 		else:
@@ -113,7 +113,7 @@ register_storage_scheme("shptr_inc", HelperReplacer(increment_pattern, "__shared
 
 
 class ItemRemovalScheme(Scheme):
-	def on_matched_item(self, item, ctx: ASTContext) -> bool:
+	def on_matched_item(self, item, ctx: MatchContext) -> bool:
 		ctx.modify_instr(item, None)
 		return False
 

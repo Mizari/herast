@@ -1,4 +1,4 @@
-from herast.tree.ast_context import ASTContext
+from herast.tree.match_context import MatchContext
 from herast.tree.patterns.base_pattern import BasePat
 
 
@@ -12,7 +12,7 @@ class Scheme:
 		self.patterns = patterns
 		self.is_readonly = is_readonly
 
-	def on_matched_item(self, item, ctx: ASTContext) -> bool:
+	def on_matched_item(self, item, ctx: MatchContext) -> bool:
 		"""Callback for successful match of scheme's patterns on item.
 		Generally contains logic with AST modification or some information collection
 
@@ -22,16 +22,12 @@ class Scheme:
 		"""
 		return False
 
-	def on_tree_iteration_start(self, ctx: ASTContext):
+	def on_tree_iteration_start(self):
 		"""Callback for the start of AST iteration. Generally contains state initialization and state clear.
-
-		:param ctx: AST context
 		"""
 		return
 
-	def on_tree_iteration_end(self, ctx: ASTContext):
+	def on_tree_iteration_end(self):
 		"""Callback for the end of AST iteration. Generally contains code for collected information processing
-
-		:param ctx: AST context
 		"""
 		return

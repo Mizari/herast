@@ -19,6 +19,8 @@ from herast.tree.utils import *
 from herast.tree.matcher import Matcher
 from herast.tree.scheme import Scheme
 from herast.tree.processing import TreeProcessor
+from herast.tree.match_context import MatchContext
+from herast.tree.ast_context import ASTContext
 from herast.settings import runtime_settings
 
 
@@ -29,7 +31,7 @@ def search_pattern(pat:BasePat, *funcs):
 			continue
 
 		tree_processor = TreeProcessor(cfunc)
-		item_ctx = ASTContext(cfunc.entry_ea)
+		item_ctx = MatchContext(cfunc)
 		for subitem in tree_processor.iterate_subitems(cfunc.body):
 			if pat.check(subitem, item_ctx):
 				yield subitem

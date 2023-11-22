@@ -1,13 +1,15 @@
+from __future__ import annotations
+
 import idaapi
-import typing
 import traceback
-from herast.tree.ast_context import ASTContext
+from herast.tree.match_context import MatchContext
+
 
 class BasePat:
 	"""Base class for all patterns."""
 	op = None
 
-	def __init__(self, debug=False, debug_msg=None, debug_trace_depth=0, check_op: typing.Optional[int] = None):
+	def __init__(self, debug=False, debug_msg=None, debug_trace_depth=0, check_op:int|None = None):
 		"""
 		:param debug: should provide debug information during matching
 		:param debug_msg: additional message to print on debug
@@ -18,16 +20,10 @@ class BasePat:
 		self.debug = debug
 		self.debug_msg = debug_msg
 		self.debug_trace_depth = debug_trace_depth
-	
-	def _assert(self, cond, msg=""):
-		assert cond, "%s: %s" % (self.__class__.__name__, msg)
-	
-	def _raise(self, msg):
-		raise "%s: %s" % (self.__class__.__name__, msg)
 
-	def check(self, item, ctx: ASTContext, *args, **kwargs) -> bool:
+	def check(self, item:idaapi.citem_t, ctx: MatchContext) -> bool:
 		"""Base matching operation.
-	
+
 		:param item: AST item
 		:param ctx: matching context
 		"""

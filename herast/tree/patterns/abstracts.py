@@ -2,7 +2,7 @@ import idaapi
 import typing
 
 from herast.tree.patterns.base_pattern import BasePat
-from herast.tree.ast_context import ASTContext
+from herast.tree.match_context import MatchContext
 from herast.tree.processing import TreeProcessor
 
 
@@ -15,7 +15,7 @@ class AnyPat(BasePat):
 		super().__init__(**kwargs)
 		self.may_be_none = may_be_none
 
-	def check(self, item, ctx: ASTContext) -> bool:
+	def check(self, item, ctx: MatchContext) -> bool:
 		return item is not None or self.may_be_none
 
 	@property
@@ -31,7 +31,7 @@ class OrPat(BasePat):
 		self.pats = tuple(pats)
 
 	@BasePat.base_check
-	def check(self, item, ctx: ASTContext) -> bool:
+	def check(self, item, ctx: MatchContext) -> bool:
 		for p in self.pats:
 			if p.check(item, ctx):
 				return True
@@ -51,7 +51,7 @@ class AndPat(BasePat):
 		self.pats = tuple(pats)
 
 	@BasePat.base_check
-	def check(self, item, ctx: ASTContext) -> bool:
+	def check(self, item, ctx: MatchContext) -> bool:
 		for p in self.pats:
 			if not p.check(item, ctx):
 				return False
@@ -72,7 +72,7 @@ class BindItemPat(BasePat):
 		self.name = name
 
 	@BasePat.base_check
-	def check(self, item, ctx: ASTContext) -> bool:
+	def check(self, item, ctx: MatchContext) -> bool:
 		if self.pat.check(item, ctx):
 			current_expr = ctx.get_expr(self.name)
 			if current_expr is None:
@@ -91,7 +91,7 @@ class VarBindPat(BasePat):
 		self.name = name
 
 	@BasePat.base_check
-	def check(self, expr, ctx: ASTContext) -> bool:
+	def check(self, expr, ctx: MatchContext) -> bool:
 		if expr.op != idaapi.cot_var:
 			return False
 
@@ -112,7 +112,7 @@ class DeepExprPat(BasePat):
 		self.bind_name = bind_name
 
 	@BasePat.base_check
-	def check(self, expr, ctx: ASTContext) -> bool:
+	def check(self, expr, ctx: MatchContext) -> bool:
 		tree_proc = TreeProcessor(ctx.cfunc)
 		for item in tree_proc.iterate_subitems(expr):
 			if not self.pat.check(item, ctx):
@@ -130,7 +130,7 @@ class RemovePat(BasePat):
 		self.pat = pat
 
 	@BasePat.base_check
-	def check(self, item, ctx: ASTContext) -> bool:
+	def check(self, item, ctx: MatchContext) -> bool:
 		if not self.pat.check(item, ctx):
 			return False
 

@@ -61,7 +61,7 @@ class ExceptionCollapserScheme(Scheme):
 
 		super().__init__(pattern)
 
-	def on_matched_item(self, item, ctx: ASTContext) -> bool:
+	def on_matched_item(self, item, ctx: MatchContext) -> bool:
 		"""
 			on match will try to construct from found item and binded expressions
 			__throw_if(if_expr, "exception string")

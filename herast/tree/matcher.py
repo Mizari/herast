@@ -5,6 +5,7 @@ import idc
 
 import herast.tree.utils as utils
 from herast.tree.ast_context import ASTContext
+from herast.tree.match_context import MatchContext
 from herast.tree.processing import TreeProcessor
 from herast.tree.scheme import Scheme
 from herast.settings import runtime_settings
@@ -54,7 +55,7 @@ class Matcher:
 		while True:
 			contexts = [ASTContext(ast_ctx) for _ in schemes]
 			for i, scheme in enumerate(schemes):
-				scheme.on_tree_iteration_start(contexts[i])
+				scheme.on_tree_iteration_start()
 
 			is_tree_modified = False
 			for subitem in tree_proc.iterate_subitems(ast_tree):
@@ -66,7 +67,7 @@ class Matcher:
 				continue
 
 			for i, scheme in enumerate(schemes):
-				scheme.on_tree_iteration_end(contexts[i])
+				scheme.on_tree_iteration_end()
 			break
 
 	def check_schemes(self, item:idaapi.citem_t, ast_ctx: ASTContext) -> bool:
@@ -76,40 +77,43 @@ class Matcher:
 		:param item: AST item
 		:return: is item modified/removed?
 		"""
-		item_ctx = ASTContext(ast_ctx.cfunc)
-
 		for scheme in self.schemes.values():
-			if self.check_scheme(scheme, item, item_ctx):
-				return True
-
-			if self.finalize_item_context(item_ctx):
+			if self.check_scheme(scheme, item, ast_ctx):
 				return True
 
 		return False
 
-	def check_scheme(self, scheme: Scheme, item: idaapi.citem_t, item_ctx: ASTContext) -> bool:
+	def check_scheme(self, scheme: Scheme, item: idaapi.citem_t, ast_ctx: ASTContext) -> bool:
 		if not runtime_settings.CATCH_DURING_MATCHING:
-			return self._check_scheme(scheme, item, item_ctx)
+			return self._check_scheme(scheme, item, ast_ctx)
 
 		try:
-			return self._check_scheme(scheme, item, item_ctx)
+			return self._check_scheme(scheme, item, ast_ctx)
 		except Exception as e:
 			print('[!] Got an exception during scheme checking: %s' % e)
 			return False
 
-	def _check_scheme(self, scheme: Scheme, item: idaapi.citem_t, item_ctx: ASTContext) -> bool:
-		item_ctx.cleanup()
+	def _check_scheme(self, scheme: Scheme, item: idaapi.citem_t, ast_ctx: ASTContext) -> bool:
+		for pat in scheme.patterns:
+			mctx = MatchContext(ast_ctx.cfunc, pat)
+			# check that pattern matches AST item
+			if not pat.check(item, mctx):
+				continue
 
-		if not any(p.check(item, item_ctx) for p in scheme.patterns):
-			return False
+			# handle user's scheme callback
+			is_tree_modified = scheme.on_matched_item(item, mctx)
+			if not isinstance(is_tree_modified, bool):
+				raise TypeError("Handler returned invalid return type, should be bool")
+			if not is_tree_modified:
+				continue
 
-		is_tree_modified = scheme.on_matched_item(item, item_ctx)
-		if not isinstance(is_tree_modified, bool):
-			raise TypeError("Handler returned invalid return type, should be bool")
+			# try to modify AST
+			if self.finalize_item_context(mctx):
+				return True
 
-		return is_tree_modified
+		return False
 
-	def finalize_item_context(self, ctx: ASTContext) -> bool:
+	def finalize_item_context(self, ctx:MatchContext) -> bool:
 		tree_proc = TreeProcessor(ctx.cfunc)
 		is_tree_modified = False
 		for modified_instr in ctx.modified_instrs():
