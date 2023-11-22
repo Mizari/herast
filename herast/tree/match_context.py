@@ -19,17 +19,7 @@ class MatchContext(ASTContext):
 	def __init__(self, cfunc:idaapi.cfunc_t, pattern:BasePat):
 		super().__init__(cfunc)
 		self.expressions : dict[str, idaapi.cexpr_t] = dict()
-		self.variables : dict = dict()
 		self.instrs_to_modify : list = []
-
-	def get_var(self, name: str):
-		return self.variables.get(name, None)
-
-	def save_var(self, name: str, lvar_expr):
-		self.variables[name] = lvar_expr
-
-	def has_var(self, name: str):
-		return self.variables.get(name, None) is not None
 
 	def get_expr(self, name: str):
 		return self.expressions.get(name, None)
