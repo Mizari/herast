@@ -18,6 +18,7 @@ class InstrModification:
 class MatchContext(ASTContext):
 	def __init__(self, cfunc:idaapi.cfunc_t, pattern:BasePat):
 		super().__init__(cfunc)
+		self.pattern = pattern
 		self.binded_items : dict[str, idaapi.cexpr_t] = dict()
 		self.instrs_to_modify : list = []
 
