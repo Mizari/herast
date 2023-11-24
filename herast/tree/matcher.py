@@ -68,7 +68,12 @@ class Matcher:
 
 			is_tree_modified = False
 			for subitem in tree_proc.iterate_subitems(ast_tree):
-				is_tree_modified = self.check_schemes(subitem, ast_ctx)
+				ast_patch = self.check_schemes(subitem, ast_ctx)
+				if ast_patch is None:
+					continue
+
+				# try to modify AST
+				is_tree_modified = tree_proc.apply_patch(ast_patch)
 				if is_tree_modified:
 					break
 
@@ -79,7 +84,7 @@ class Matcher:
 				scheme.on_tree_iteration_end()
 			break
 
-	def check_schemes(self, item:idaapi.citem_t, ast_ctx: ASTContext) -> bool:
+	def check_schemes(self, item:idaapi.citem_t, ast_ctx: ASTContext) -> ASTPatch|None:
 		"""Match item in schemes.
 
 		:param tree_processor:
@@ -87,12 +92,13 @@ class Matcher:
 		:return: is item modified/removed?
 		"""
 		for scheme in self.schemes.values():
-			if self.check_scheme(scheme, item, ast_ctx):
-				return True
+			ast_patch = self.check_scheme(scheme, item, ast_ctx)
+			if ast_patch is not None:
+				return ast_patch
 
-		return False
+		return None
 
-	def check_scheme(self, scheme: Scheme, item: idaapi.citem_t, ast_ctx: ASTContext) -> bool:
+	def check_scheme(self, scheme: Scheme, item: idaapi.citem_t, ast_ctx: ASTContext) -> ASTPatch|None:
 		if not runtime_settings.CATCH_DURING_MATCHING:
 			return self._check_scheme(scheme, item, ast_ctx)
 
@@ -100,10 +106,9 @@ class Matcher:
 			return self._check_scheme(scheme, item, ast_ctx)
 		except Exception as e:
 			print('[!] Got an exception during scheme checking: %s' % e)
-			return False
+			return None
 
-	def _check_scheme(self, scheme: Scheme, item: idaapi.citem_t, ast_ctx: ASTContext) -> bool:
-		tree_proc = TreeProcessor(ast_ctx.cfunc)
+	def _check_scheme(self, scheme: Scheme, item: idaapi.citem_t, ast_ctx: ASTContext) -> ASTPatch|None:
 		for pat in scheme.patterns:
 			mctx = MatchContext(ast_ctx.cfunc, pat)
 			# check that pattern matches AST item
@@ -115,11 +120,10 @@ class Matcher:
 			if ast_patch is None:
 				continue
 
+			# schemes handlers are written by users, need to validate return value
 			if not isinstance(ast_patch, ASTPatch):
-				raise TypeError("Handler returned invalid return type, should be bool")
+				raise TypeError("Handler returned invalid return type, should be ASTPatch or None")
 
-			# try to modify AST
-			if tree_proc.apply_patch(ast_patch):
-				return True
+			return ast_patch
 
-		return False
+		return None
