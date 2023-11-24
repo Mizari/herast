@@ -43,7 +43,7 @@ class NullsubRemovalScheme(Scheme):
 		super().__init__(pattern)
 
 	def on_matched_item(self, item, ctx: MatchContext) -> ASTPatch|None:
-		return ASTPatch(item, None)
+		return ASTPatch.remove_item(item)
 
 
 nullsub_funcs = [f for f in idautils.Functions() if is_nullsub_function(f)]

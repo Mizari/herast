@@ -14,10 +14,10 @@ class HelperReplacer(Scheme):
 
 	def on_matched_item(self, item, ctx: MatchContext) -> ASTPatch|None:
 		if self.should_remove:
-			new_item = None
-		else:
-			new_item = make_call_helper_instr(self.helper_name)
-		return ASTPatch(item, new_item)
+			return ASTPatch.remove_item(item)
+
+		new_item = make_call_helper_instr(self.helper_name)
+		return ASTPatch.replace_item(item, new_item)
 
 """
 	A rather complex pattern representing releasing of C++'s sharedptr
@@ -115,7 +115,7 @@ register_storage_scheme("shptr_inc", HelperReplacer(increment_pattern, "__shared
 
 class ItemRemovalScheme(Scheme):
 	def on_matched_item(self, item, ctx: MatchContext) -> ASTPatch|None:
-		return ASTPatch(item, None)
+		return ASTPatch.remove_item(item)
 
 """
 	std_release_pattern is for removing this code:

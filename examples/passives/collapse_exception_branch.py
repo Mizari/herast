@@ -74,6 +74,6 @@ class ExceptionCollapserScheme(Scheme):
 			new_item = make_call_helper_instr("__throw_if", if_condition)
 		else:
 			new_item = make_call_helper_instr("__throw_if", if_condition, exception_str)
-		return ASTPatch(item, new_item)
+		return ASTPatch.replace_item(item, new_item)
 
 register_storage_scheme("exception_collapser", ExceptionCollapserScheme())

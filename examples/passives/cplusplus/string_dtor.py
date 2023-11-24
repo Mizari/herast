@@ -95,7 +95,7 @@ class StringDtorScheme(Scheme):
 			var = str_as_str
 
 		new_item = make_call_helper_instr("string_dtor", var)
-		return ASTPatch(item, new_item)
+		return ASTPatch.replace_item(item, new_item)
 
 
 register_storage_scheme("string_dtor", StringDtorScheme())
