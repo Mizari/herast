@@ -70,7 +70,7 @@ class DeepExprPat(BasePat):
 
 	@BasePat.base_check
 	def check(self, expr, ctx: MatchContext) -> bool:
-		tree_proc = TreeProcessor(ctx.cfunc)
+		tree_proc = TreeProcessor()
 		for item in tree_proc.iterate_subitems(expr):
 			if not self.pat.check(item, ctx):
 				continue
