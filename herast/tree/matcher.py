@@ -7,7 +7,7 @@ import herast.tree.utils as utils
 from herast.tree.ast_context import ASTContext
 from herast.tree.ast_patch import ASTPatch
 from herast.tree.match_context import MatchContext
-from herast.tree.processing import TreeProcessor
+from herast.tree.processing import TreeIterator
 from herast.tree.scheme import Scheme
 from herast.settings import runtime_settings
 
@@ -61,7 +61,7 @@ class Matcher:
 		self.match_ast_tree(ast_tree, ast_ctx, schemes)
 
 	def match_ast_tree(self, ast_tree:idaapi.citem_t, ast_ctx: ASTContext, schemes:list[Scheme]):
-		tree_proc = TreeProcessor()
+		tree_proc = TreeIterator()
 		for scheme in schemes:
 			scheme.on_tree_iteration_start()
 

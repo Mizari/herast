@@ -1,7 +1,7 @@
 
 from herast.tree.patterns.base_pattern import BasePat
 from herast.tree.match_context import MatchContext
-from herast.tree.processing import TreeProcessor
+from herast.tree.processing import TreeIterator
 
 
 class AnyPat(BasePat):
@@ -70,7 +70,7 @@ class DeepExprPat(BasePat):
 
 	@BasePat.base_check
 	def check(self, expr, ctx: MatchContext) -> bool:
-		tree_proc = TreeProcessor()
+		tree_proc = TreeIterator()
 		for item in tree_proc.iterate_subitems(expr):
 			if not self.pat.check(item, ctx):
 				continue

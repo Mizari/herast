@@ -64,7 +64,7 @@ def collect_labels(haystack):
 	return labels
 
 
-class TreeProcessor:
+class TreeIterator:
 	def __init__(self):
 		pass
 
