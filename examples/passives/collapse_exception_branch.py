@@ -73,7 +73,7 @@ class ExceptionCollapserScheme(Scheme):
 			new_item = make_call_helper_instr("__throw_if", if_condition)
 		else:
 			new_item = make_call_helper_instr("__throw_if", if_condition, exception_str)
-		ctx.modify_instr(item, new_item)
+		ctx.add_patch(item, new_item)
 
 		return False
 

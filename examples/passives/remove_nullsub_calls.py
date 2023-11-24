@@ -42,7 +42,7 @@ class NullsubRemovalScheme(Scheme):
 		super().__init__(pattern)
 
 	def on_matched_item(self, item, ctx: MatchContext) -> bool:
-		ctx.modify_instr(item, None)
+		ctx.add_patch(item, None)
 		return False
 
 

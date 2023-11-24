@@ -30,7 +30,7 @@ class ReplacingScheme(Scheme):
 			return False
 
 		new_item = make_call_helper_instr("__propagate_error", error_var, logic_expr)
-		ctx.modify_instr(item, new_item)
+		ctx.add_patch(item, new_item)
 		return False
 
 register_storage_scheme("propagate_error", ReplacingScheme())

@@ -3,6 +3,7 @@ import idaapi
 
 import herast.tree.utils as utils
 from herast.tree.consts import binary_expressions_ops, unary_expressions_ops
+from herast.tree.ast_patch import ASTPatch
 
 
 # handler, that maps item_op to children_items_getter
@@ -135,6 +136,12 @@ class TreeProcessor:
 			return False
 
 		return True
+
+	def apply_patch(self, ast_patch:ASTPatch) -> bool:
+		if ast_patch.new_item is None:
+			return self.remove_item(ast_patch.item)
+		else:
+			return self.replace_item(ast_patch.item, ast_patch.new_item)
 
 	def remove_item(self, item, is_forced=False):
 		tmc = TreeModificationContext(self, item)

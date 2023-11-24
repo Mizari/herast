@@ -15,7 +15,7 @@ class HelperReplacer(Scheme):
 			new_item = None
 		else:
 			new_item = make_call_helper_instr(self.helper_name)
-		ctx.modify_instr(item, new_item)
+		ctx.add_patch(item, new_item)
 		return False
 
 """
@@ -114,7 +114,7 @@ register_storage_scheme("shptr_inc", HelperReplacer(increment_pattern, "__shared
 
 class ItemRemovalScheme(Scheme):
 	def on_matched_item(self, item, ctx: MatchContext) -> bool:
-		ctx.modify_instr(item, None)
+		ctx.add_patch(item, None)
 		return False
 
 """

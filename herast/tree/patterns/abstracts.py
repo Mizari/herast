@@ -91,5 +91,5 @@ class RemovePat(BasePat):
 		if not self.pat.check(item, ctx):
 			return False
 
-		ctx.modify_instr(item, None)
+		ctx.add_patch(item, None)
 		return True

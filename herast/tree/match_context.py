@@ -7,12 +7,7 @@ if typing.TYPE_CHECKING:
 	from herast.tree.patterns.base_pattern import BasePat
 
 from herast.tree.ast_context import ASTContext
-
-
-class InstrModification:
-	def __init__(self, item, new_item):
-		self.item = item
-		self.new_item = new_item
+from herast.tree.ast_patch import ASTPatch
 
 
 class MatchContext(ASTContext):
@@ -20,7 +15,7 @@ class MatchContext(ASTContext):
 		super().__init__(cfunc)
 		self.pattern = pattern
 		self.binded_items : dict[str, idaapi.cexpr_t] = dict()
-		self.instrs_to_modify : list = []
+		self.ast_patches : list = []
 
 	def get_item(self, name: str):
 		return self.binded_items.get(name, None)
@@ -41,14 +36,14 @@ class MatchContext(ASTContext):
 	def has_item(self, name: str):
 		return self.binded_items.get(name, None) is not None
 
-	def modify_instr(self, item, new_item):
+	def add_patch(self, item, new_item):
 		"""Modify instruction. Changes AST, so restarting matching follows.
 		
 		:param item: AST item
 		:param new_item: new AST item, if None, then its just removed
 		"""
-		self.instrs_to_modify.append(InstrModification(item, new_item))
+		self.ast_patches.append(ASTPatch(item, new_item))
 
 	def modified_instrs(self):
-		for itm in self.instrs_to_modify:
+		for itm in self.ast_patches:
 			yield itm

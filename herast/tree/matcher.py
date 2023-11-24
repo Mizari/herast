@@ -124,14 +124,8 @@ class Matcher:
 	def finalize_item_context(self, ctx:MatchContext) -> bool:
 		tree_proc = TreeProcessor(ctx.cfunc)
 		is_tree_modified = False
-		for modified_instr in ctx.modified_instrs():
-			item = modified_instr.item
-			new_item = modified_instr.new_item
-
-			if new_item is None:
-				if tree_proc.remove_item(item):
-					is_tree_modified = True
-			elif tree_proc.replace_item(item, new_item):
+		for ast_patch in ctx.ast_patches:
+			if tree_proc.apply_patch(ast_patch):
 				is_tree_modified = True
 
 		return is_tree_modified
