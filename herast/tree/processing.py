@@ -112,7 +112,7 @@ class TreeProcessor:
 
 		return labels
 
-	def is_removal_possible(self, tmc):
+	def is_removal_possible(self, tmc) -> bool:
 		item = tmc.item
 		gotos = tmc.get_gotos()
 		if len(gotos) > 0:
@@ -143,7 +143,7 @@ class TreeProcessor:
 		else:
 			return self.replace_item(ast_patch.item, ast_patch.new_item)
 
-	def remove_item(self, item, is_forced=False):
+	def remove_item(self, item, is_forced=False) -> bool:
 		tmc = TreeModificationContext(self, item)
 		if not is_forced and not self.is_removal_possible(tmc):
 			return False
@@ -161,8 +161,8 @@ class TreeProcessor:
 		if next_item is not None:
 			next_item.label_num = saved_lbl
 		return True
-	
-	def is_replacing_possible(self, tmc):
+
+	def is_replacing_possible(self, tmc:TreeModificationContext) -> bool:
 		item = tmc.item
 		gotos = tmc.get_gotos()
 		if len(gotos) > 0:
