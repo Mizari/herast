@@ -49,9 +49,10 @@ def iterate_all_subinstrs(instr):
 		children = [c for c in children if not c.is_expr()]
 		unprocessed_items += children
 
+
 class TreeModificationContext:
 	def __init__(self, tree_proc, item):
-		self.tree_proc = tree_proc
+		self.tree_proc : TreeProcessor = tree_proc
 		self.item = item
 		self.labels = None
 		self.gotos = None
@@ -79,6 +80,7 @@ class TreeModificationContext:
 		if self.parent is None:
 			self.parent = self.tree_proc.get_parent_block(self.item)
 		return self.parent
+
 
 class TreeProcessor:
 	def __init__(self, cfunc):
@@ -112,7 +114,7 @@ class TreeProcessor:
 
 		return labels
 
-	def is_removal_possible(self, tmc) -> bool:
+	def is_removal_possible(self, tmc:TreeModificationContext) -> bool:
 		item = tmc.item
 		gotos = tmc.get_gotos()
 		if len(gotos) > 0:
