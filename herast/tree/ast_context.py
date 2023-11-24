@@ -16,3 +16,9 @@ class ASTContext:
 
 	def get_func_name(self):
 		return idaapi.get_name(self.func_addr)
+
+	def get_parent_block(self, item):
+		parent = self.cfunc.body.find_parent_of(item)
+		if parent is None or parent.op != idaapi.cit_block:
+			return None
+		return parent

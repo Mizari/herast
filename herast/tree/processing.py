@@ -1,9 +1,7 @@
 from __future__ import print_function
 import idaapi
 
-import herast.tree.utils as utils
 from herast.tree.consts import binary_expressions_ops, unary_expressions_ops
-from herast.tree.ast_patch import ASTPatch
 
 
 # handler, that maps item_op to children_items_getter
@@ -67,103 +65,11 @@ def collect_labels(haystack):
 
 
 class TreeProcessor:
-	def __init__(self, cfunc):
-		self.cfunc = cfunc
+	def __init__(self):
+		pass
 
 	def iterate_subitems(self, root_item):
 		yield from iterate_all_subitems(root_item)
 
 	def iterate_subinstrs(self, root_item):
 		yield from iterate_all_subinstrs(root_item)
-
-	def get_parent_block(self, item):
-		parent = self.cfunc.body.find_parent_of(item)
-		if parent is None or parent.op != idaapi.cit_block:
-			return None
-		return parent
-
-	def is_removal_possible(self, item) -> bool:
-		gotos = collect_gotos(item)
-		if len(gotos) > 0:
-			print("[!] failed removing item with gotos in it")
-			return False
-
-		parent = self.get_parent_block(item)
-		if parent is None:
-			print("[*] Failed to remove item from tree, because no parent is found", item.opname)
-			return False
-
-		labels = collect_labels(item)
-		if len(labels) == 1 and labels[0] == item:
-			next_item = utils.get_following_instr(parent, item)
-			if next_item is None:
-				print("[!] failed2removing item with labels in it", next_item)
-				return False
-
-		elif len(labels) > 0:
-			print("[!] failed removing item with labels in it")
-			return False
-
-		return True
-
-	def apply_patch(self, ast_patch:ASTPatch) -> bool:
-		if ast_patch.new_item is None:
-			return self.remove_item(ast_patch.item)
-		else:
-			return self.replace_item(ast_patch.item, ast_patch.new_item)
-
-	def remove_item(self, item, is_forced=False) -> bool:
-		if not is_forced and not self.is_removal_possible(item):
-			return False
-
-		parent = self.get_parent_block(item)
-		saved_lbl = item.label_num
-		item.label_num = -1
-		rv = utils.remove_instruction_from_ast(item, parent.cinsn) # type: ignore
-		if not rv:
-			item.label_num = saved_lbl
-			print(f"[*] Failed to remove item {item.opname} from tree at {hex(item.ea)}")
-			return False
-
-		next_item = utils.get_following_instr(parent, item)
-		if next_item is not None:
-			next_item.label_num = saved_lbl
-		return True
-
-	def is_replacing_possible(self, item) -> bool:
-		gotos = collect_gotos(item)
-		if len(gotos) > 0:
-			print("[!] failed replacing item with gotos in it")
-			return False
-
-		labels = collect_labels(item)
-		if len(labels) > 1:
-			print("[!] failed replacing item with labels in it", labels, item)
-			return False
-
-		if len(labels) == 1 and labels[0] != item:
-			print("[!] failed replacing item with labels in it")
-			return False
-
-		return True
-
-	def replace_item(self, item, new_item, is_forced=False) -> bool:
-		if item.is_expr and new_item.is_expr:
-			item.replace_by(new_item)
-			return True
-
-		if not is_forced and not self.is_replacing_possible(item):
-			return False
-
-		if new_item.ea == idaapi.BADADDR and item.ea != idaapi.BADADDR:
-			new_item.ea = item.ea
-
-		if new_item.label_num == -1 and item.label_num != -1:
-			new_item.label_num = item.label_num
-
-		try:
-			idaapi.qswap(item, new_item)
-			return True
-		except Exception as e:
-			print("[!] Got an exception during ctree instr replacing", e)
-			return False

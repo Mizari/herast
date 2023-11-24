@@ -61,7 +61,7 @@ class Matcher:
 		self.match_ast_tree(ast_tree, ast_ctx, schemes)
 
 	def match_ast_tree(self, ast_tree:idaapi.citem_t, ast_ctx: ASTContext, schemes:list[Scheme]):
-		tree_proc = TreeProcessor(ast_ctx.cfunc)
+		tree_proc = TreeProcessor()
 		while True:
 			for scheme in schemes:
 				scheme.on_tree_iteration_start()
@@ -73,7 +73,7 @@ class Matcher:
 					continue
 
 				# try to modify AST
-				is_tree_modified = tree_proc.apply_patch(ast_patch)
+				is_tree_modified = ast_patch.apply_patch(ast_ctx)
 				if is_tree_modified:
 					break
 
