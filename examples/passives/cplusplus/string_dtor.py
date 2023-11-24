@@ -1,3 +1,4 @@
+from __future__ import annotations
 from herapi import *
 
 
@@ -81,21 +82,20 @@ class StringDtorScheme(Scheme):
 				)
 		super().__init__(pattern)
 
-	def on_matched_item(self, item, ctx: MatchContext):
-		str_as_str = ctx.get_var("str_as_str")
-		str_as_var = ctx.get_var("str_as_var")
+	def on_matched_item(self, item, ctx: MatchContext) -> ASTPatch|None:
+		str_as_str = ctx.get_item("str_as_str")
+		str_as_var = ctx.get_item("str_as_var")
 		var = None
 		if str_as_str is None:
 			if str_as_var is None:
-				return False
+				return None
 			else:
 				var = str_as_var
 		else:
 			var = str_as_str
 
 		new_item = make_call_helper_instr("string_dtor", var)
-		ctx.add_patch(item, new_item)
-		return False
+		return ASTPatch(item, new_item)
 
 
 register_storage_scheme("string_dtor", StringDtorScheme())

@@ -1,3 +1,4 @@
+from __future__ import annotations
 import idaapi
 from herapi import *
 
@@ -61,7 +62,7 @@ class ExceptionCollapserScheme(Scheme):
 
 		super().__init__(pattern)
 
-	def on_matched_item(self, item, ctx: MatchContext) -> bool:
+	def on_matched_item(self, item, ctx: MatchContext) -> ASTPatch|None:
 		"""
 			on match will try to construct from found item and binded expressions
 			__throw_if(if_expr, "exception string")
@@ -73,8 +74,6 @@ class ExceptionCollapserScheme(Scheme):
 			new_item = make_call_helper_instr("__throw_if", if_condition)
 		else:
 			new_item = make_call_helper_instr("__throw_if", if_condition, exception_str)
-		ctx.add_patch(item, new_item)
-
-		return False
+		return ASTPatch(item, new_item)
 
 register_storage_scheme("exception_collapser", ExceptionCollapserScheme())

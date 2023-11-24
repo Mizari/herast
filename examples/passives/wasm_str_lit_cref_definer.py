@@ -1,13 +1,15 @@
+from __future__ import annotations
+
 import idaapi
 from herapi import *
 
 
 class DrefingScheme(Scheme):
-	def on_matched_item(self, item, ctx: MatchContext):
+	def on_matched_item(self, item, ctx: MatchContext) -> ASTPatch|None:
 		obj = ctx.get_item('xref_me')
 		if obj.obj_ea >= 0 and obj.obj_ea <= 0x100000:
 			idaapi.add_dref(obj.ea, obj.obj_ea, idaapi.dr_O)
-		return False
+		return None
 
 
 pattern = ExprInsPat(DeepExprPat(ObjPat(), bind_name="xref_me"))

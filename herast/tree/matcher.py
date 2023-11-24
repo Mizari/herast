@@ -5,6 +5,7 @@ import idc
 
 import herast.tree.utils as utils
 from herast.tree.ast_context import ASTContext
+from herast.tree.ast_patch import ASTPatch
 from herast.tree.match_context import MatchContext
 from herast.tree.processing import TreeProcessor
 from herast.tree.scheme import Scheme
@@ -102,6 +103,7 @@ class Matcher:
 			return False
 
 	def _check_scheme(self, scheme: Scheme, item: idaapi.citem_t, ast_ctx: ASTContext) -> bool:
+		tree_proc = TreeProcessor(ast_ctx.cfunc)
 		for pat in scheme.patterns:
 			mctx = MatchContext(ast_ctx.cfunc, pat)
 			# check that pattern matches AST item
@@ -109,23 +111,15 @@ class Matcher:
 				continue
 
 			# handle user's scheme callback
-			is_tree_modified = scheme.on_matched_item(item, mctx)
-			if not isinstance(is_tree_modified, bool):
-				raise TypeError("Handler returned invalid return type, should be bool")
-			if not is_tree_modified:
+			ast_patch = scheme.on_matched_item(item, mctx)
+			if ast_patch is None:
 				continue
 
+			if not isinstance(ast_patch, ASTPatch):
+				raise TypeError("Handler returned invalid return type, should be bool")
+
 			# try to modify AST
-			if self.finalize_item_context(mctx):
+			if tree_proc.apply_patch(ast_patch):
 				return True
 
 		return False
-
-	def finalize_item_context(self, ctx:MatchContext) -> bool:
-		tree_proc = TreeProcessor(ctx.cfunc)
-		is_tree_modified = False
-		for ast_patch in ctx.ast_patches:
-			if tree_proc.apply_patch(ast_patch):
-				is_tree_modified = True
-
-		return is_tree_modified

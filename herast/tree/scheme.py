@@ -1,5 +1,8 @@
+from __future__ import annotations
+
 from herast.tree.match_context import MatchContext
 from herast.tree.patterns.base_pattern import BasePat
+from herast.tree.ast_patch import ASTPatch
 
 
 class Scheme:
@@ -12,15 +15,15 @@ class Scheme:
 		self.patterns = patterns
 		self.is_readonly = is_readonly
 
-	def on_matched_item(self, item, ctx: MatchContext) -> bool:
+	def on_matched_item(self, item, ctx: MatchContext) -> ASTPatch|None:
 		"""Callback for successful match of scheme's patterns on item.
 		Generally contains logic with AST modification or some information collection
 
 		:param item: AST item
 		:param ctx: matching context
-		:return: bool is AST modified?
+		:return: how to patch AST
 		"""
-		return False
+		return None
 
 	def on_tree_iteration_start(self):
 		"""Callback for the start of AST iteration. Generally contains state initialization and state clear.

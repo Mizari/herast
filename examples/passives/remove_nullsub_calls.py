@@ -1,3 +1,4 @@
+from __future__ import annotations
 import idautils
 import idc
 import re
@@ -41,9 +42,8 @@ class NullsubRemovalScheme(Scheme):
 		pattern = CallInsnPat(pattern)
 		super().__init__(pattern)
 
-	def on_matched_item(self, item, ctx: MatchContext) -> bool:
-		ctx.add_patch(item, None)
-		return False
+	def on_matched_item(self, item, ctx: MatchContext) -> ASTPatch|None:
+		return ASTPatch(item, None)
 
 
 nullsub_funcs = [f for f in idautils.Functions() if is_nullsub_function(f)]

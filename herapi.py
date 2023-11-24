@@ -21,6 +21,7 @@ from herast.tree.scheme import Scheme
 from herast.tree.processing import TreeProcessor
 from herast.tree.match_context import MatchContext
 from herast.tree.ast_context import ASTContext
+from herast.tree.ast_patch import ASTPatch
 from herast.settings import runtime_settings
 
 

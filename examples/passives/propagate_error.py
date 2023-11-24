@@ -1,3 +1,4 @@
+from __future__ import annotations
 from herapi import *
 
 
@@ -21,7 +22,7 @@ class ReplacingScheme(Scheme):
 		super().__init__(pattern)
 
 	def on_matched_item(self, item, ctx: MatchContext):
-		error_var = ctx.get_var("error_var")
+		error_var = ctx.get_item("error_var")
 		if error_var is None:
 			return False
 
@@ -30,7 +31,6 @@ class ReplacingScheme(Scheme):
 			return False
 
 		new_item = make_call_helper_instr("__propagate_error", error_var, logic_expr)
-		ctx.add_patch(item, new_item)
-		return False
+		return ASTPatch(item, new_item)
 
 register_storage_scheme("propagate_error", ReplacingScheme())

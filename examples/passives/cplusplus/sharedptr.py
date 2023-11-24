@@ -1,4 +1,6 @@
+from __future__ import annotations
 from herapi import *
+
 
 class HelperReplacer(Scheme):
 	"""
@@ -10,13 +12,12 @@ class HelperReplacer(Scheme):
 		self.should_remove = should_remove
 		super().__init__(pattern)
 
-	def on_matched_item(self, item, ctx: MatchContext):
+	def on_matched_item(self, item, ctx: MatchContext) -> ASTPatch|None:
 		if self.should_remove:
 			new_item = None
 		else:
 			new_item = make_call_helper_instr(self.helper_name)
-		ctx.add_patch(item, new_item)
-		return False
+		return ASTPatch(item, new_item)
 
 """
 	A rather complex pattern representing releasing of C++'s sharedptr
@@ -113,9 +114,8 @@ register_storage_scheme("shptr_inc", HelperReplacer(increment_pattern, "__shared
 
 
 class ItemRemovalScheme(Scheme):
-	def on_matched_item(self, item, ctx: MatchContext) -> bool:
-		ctx.add_patch(item, None)
-		return False
+	def on_matched_item(self, item, ctx: MatchContext) -> ASTPatch|None:
+		return ASTPatch(item, None)
 
 """
 	std_release_pattern is for removing this code:

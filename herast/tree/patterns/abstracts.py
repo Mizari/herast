@@ -78,18 +78,3 @@ class DeepExprPat(BasePat):
 				ctx.bind_item(self.bind_name, item)
 			return True
 		return False
-
-
-class RemovePat(BasePat):
-	"""Pattern, that will queue item removal after successful matching."""
-	def __init__(self, pat: BasePat, **kwargs):
-		super().__init__(**kwargs)
-		self.pat = pat
-
-	@BasePat.base_check
-	def check(self, item, ctx: MatchContext) -> bool:
-		if not self.pat.check(item, ctx):
-			return False
-
-		ctx.add_patch(item, None)
-		return True
