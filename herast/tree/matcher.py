@@ -62,10 +62,10 @@ class Matcher:
 
 	def match_ast_tree(self, ast_tree:idaapi.citem_t, ast_ctx: ASTContext, schemes:list[Scheme]):
 		tree_proc = TreeProcessor()
-		while True:
-			for scheme in schemes:
-				scheme.on_tree_iteration_start()
+		for scheme in schemes:
+			scheme.on_tree_iteration_start()
 
+		while True:
 			is_tree_modified = False
 			for subitem in tree_proc.iterate_subitems(ast_tree):
 				ast_patch = self.check_schemes(subitem, ast_ctx, schemes)
@@ -78,11 +78,14 @@ class Matcher:
 					break
 
 			if is_tree_modified:
+				for scheme in schemes:
+					scheme.on_tree_iteration_start()
 				continue
 
-			for scheme in schemes:
-				scheme.on_tree_iteration_end()
 			break
+
+		for scheme in schemes:
+			scheme.on_tree_iteration_end()
 
 	def check_schemes(self, item:idaapi.citem_t, ast_ctx: ASTContext, schemes:list[Scheme]) -> ASTPatch|None:
 		"""Match item in schemes.
