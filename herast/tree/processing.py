@@ -49,37 +49,21 @@ def iterate_all_subinstrs(instr):
 		children = [c for c in children if not c.is_expr()]
 		unprocessed_items += children
 
+def collect_gotos(haystack):
+	gotos = []
+	for potential_goto in iterate_all_subinstrs(haystack):
+		if potential_goto.op == idaapi.cit_goto:
+			gotos.append(potential_goto)
 
-class TreeModificationContext:
-	def __init__(self, tree_proc, item):
-		self.tree_proc : TreeProcessor = tree_proc
-		self.item = item
-		self.labels = None
-		self.gotos = None
-		self.next_item = None
-		self.parent = None
-	
-	def get_gotos(self):
-		if self.gotos is None:
-			self.gotos = self.tree_proc.collect_gotos(self.item)
-		return self.gotos
+	return gotos
 
-	def get_labels(self):
-		if self.labels is None:
-			self.labels = self.tree_proc.collect_labels(self.item)
-		return self.labels
+def collect_labels(haystack):
+	labels = []
+	for potential_label in iterate_all_subinstrs(haystack):
+		if potential_label.label_num != -1:
+			labels.append(potential_label)
 
-	def get_next_item(self):
-		if self.next_item is None:
-			parent = self.get_parent()
-			if parent is not None:
-				self.next_item = utils.get_following_instr(parent, self.item)
-		return self.next_item
-
-	def get_parent(self):
-		if self.parent is None:
-			self.parent = self.tree_proc.get_parent_block(self.item)
-		return self.parent
+	return labels
 
 
 class TreeProcessor:
@@ -98,37 +82,20 @@ class TreeProcessor:
 			return None
 		return parent
 
-	def collect_gotos(self, haystack):
-		gotos = []
-		for potential_goto in iterate_all_subinstrs(haystack):
-			if potential_goto.op == idaapi.cit_goto:
-				gotos.append(potential_goto)
-
-		return gotos
-
-	def collect_labels(self, haystack):
-		labels = []
-		for potential_label in iterate_all_subinstrs(haystack):
-			if potential_label.label_num != -1:
-				labels.append(potential_label)
-
-		return labels
-
-	def is_removal_possible(self, tmc:TreeModificationContext) -> bool:
-		item = tmc.item
-		gotos = tmc.get_gotos()
+	def is_removal_possible(self, item) -> bool:
+		gotos = collect_gotos(item)
 		if len(gotos) > 0:
 			print("[!] failed removing item with gotos in it")
 			return False
 
-		parent = tmc.get_parent()
+		parent = self.get_parent_block(item)
 		if parent is None:
 			print("[*] Failed to remove item from tree, because no parent is found", item.opname)
 			return False
 
-		labels = tmc.get_labels()
+		labels = collect_labels(item)
 		if len(labels) == 1 and labels[0] == item:
-			next_item = tmc.get_next_item()
+			next_item = utils.get_following_instr(parent, item)
 			if next_item is None:
 				print("[!] failed2removing item with labels in it", next_item)
 				return False
@@ -146,32 +113,30 @@ class TreeProcessor:
 			return self.replace_item(ast_patch.item, ast_patch.new_item)
 
 	def remove_item(self, item, is_forced=False) -> bool:
-		tmc = TreeModificationContext(self, item)
-		if not is_forced and not self.is_removal_possible(tmc):
+		if not is_forced and not self.is_removal_possible(item):
 			return False
 
-		parent = tmc.get_parent()
+		parent = self.get_parent_block(item)
 		saved_lbl = item.label_num
 		item.label_num = -1
-		rv = utils.remove_instruction_from_ast(item, parent.cinsn)
+		rv = utils.remove_instruction_from_ast(item, parent.cinsn) # type: ignore
 		if not rv:
 			item.label_num = saved_lbl
 			print(f"[*] Failed to remove item {item.opname} from tree at {hex(item.ea)}")
 			return False
 
-		next_item = tmc.get_next_item()
+		next_item = utils.get_following_instr(parent, item)
 		if next_item is not None:
 			next_item.label_num = saved_lbl
 		return True
 
-	def is_replacing_possible(self, tmc:TreeModificationContext) -> bool:
-		item = tmc.item
-		gotos = tmc.get_gotos()
+	def is_replacing_possible(self, item) -> bool:
+		gotos = collect_gotos(item)
 		if len(gotos) > 0:
 			print("[!] failed replacing item with gotos in it")
 			return False
 
-		labels = tmc.get_labels()
+		labels = collect_labels(item)
 		if len(labels) > 1:
 			print("[!] failed replacing item with labels in it", labels, item)
 			return False
@@ -187,8 +152,7 @@ class TreeProcessor:
 			item.replace_by(new_item)
 			return True
 
-		tmc = TreeModificationContext(self, item)
-		if not is_forced and not self.is_replacing_possible(tmc):
+		if not is_forced and not self.is_replacing_possible(item):
 			return False
 
 		if new_item.ea == idaapi.BADADDR and item.ea != idaapi.BADADDR:
