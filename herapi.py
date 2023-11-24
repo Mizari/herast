@@ -32,7 +32,7 @@ def search_pattern(pat:BasePat, *funcs):
 			continue
 
 		tree_processor = TreeProcessor(cfunc)
-		item_ctx = MatchContext(cfunc)
+		item_ctx = MatchContext(cfunc, pat)
 		for subitem in tree_processor.iterate_subitems(cfunc.body):
 			if pat.check(subitem, item_ctx):
 				yield subitem
