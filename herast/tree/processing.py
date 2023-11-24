@@ -181,8 +181,11 @@ class TreeProcessor:
 		return True
 
 	def replace_item(self, item, new_item, is_forced=False) -> bool:
-		tmc = TreeModificationContext(self, item)
+		if item.is_expr and new_item.is_expr:
+			item.replace_by(new_item)
+			return True
 
+		tmc = TreeModificationContext(self, item)
 		if not is_forced and not self.is_replacing_possible(tmc):
 			return False
 
