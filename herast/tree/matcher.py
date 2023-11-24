@@ -68,7 +68,7 @@ class Matcher:
 
 			is_tree_modified = False
 			for subitem in tree_proc.iterate_subitems(ast_tree):
-				ast_patch = self.check_schemes(subitem, ast_ctx)
+				ast_patch = self.check_schemes(subitem, ast_ctx, schemes)
 				if ast_patch is None:
 					continue
 
@@ -84,14 +84,14 @@ class Matcher:
 				scheme.on_tree_iteration_end()
 			break
 
-	def check_schemes(self, item:idaapi.citem_t, ast_ctx: ASTContext) -> ASTPatch|None:
+	def check_schemes(self, item:idaapi.citem_t, ast_ctx: ASTContext, schemes:list[Scheme]) -> ASTPatch|None:
 		"""Match item in schemes.
 
 		:param tree_processor:
 		:param item: AST item
 		:return: is item modified/removed?
 		"""
-		for scheme in self.schemes.values():
+		for scheme in schemes:
 			ast_patch = self.check_scheme(scheme, item, ast_ctx)
 			if ast_patch is not None:
 				return ast_patch
