@@ -70,8 +70,8 @@ class DeepExprPat(BasePat):
 
 	@BasePat.base_check
 	def check(self, expr, ctx: MatchContext) -> bool:
-		tree_proc = TreeIterator()
-		for item in tree_proc.iterate_subitems(expr):
+		tree_proc = TreeIterator(expr)
+		for item in tree_proc.iterate_subitems():
 			if not self.pat.check(item, ctx):
 				continue
 			if self.bind_name is not None:

@@ -65,8 +65,8 @@ def collect_labels(haystack):
 
 
 class TreeIterator:
-	def __init__(self):
-		pass
+	def __init__(self, ast):
+		self.ast = ast
 
-	def iterate_subitems(self, root_item):
-		yield from iterate_all_subitems(root_item)
+	def iterate_subitems(self):
+		yield from iterate_all_subitems(self.ast)
