@@ -70,6 +70,3 @@ class TreeIterator:
 
 	def iterate_subitems(self, root_item):
 		yield from iterate_all_subitems(root_item)
-
-	def iterate_subinstrs(self, root_item):
-		yield from iterate_all_subinstrs(root_item)
