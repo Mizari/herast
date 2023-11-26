@@ -67,6 +67,17 @@ def collect_labels(haystack):
 class TreeIterator:
 	def __init__(self, ast):
 		self.ast = ast
+		self.cor = iterate_all_subitems(self.ast)
+
+	def get_next(self):
+		try:
+			return self.cor.__next__()
+		except StopIteration:
+			return None
+
+	def restart_iteration(self):
+		self.cor = iterate_all_subitems(self.ast)
 
 	def iterate_subitems(self):
-		yield from iterate_all_subitems(self.ast)
+		while (sub := self.get_next()) is not None:
+			yield sub
