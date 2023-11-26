@@ -1,4 +1,5 @@
 from __future__ import print_function
+from enum import Enum
 import idaapi
 
 from herast.tree.consts import binary_expressions_ops, unary_expressions_ops
@@ -64,6 +65,10 @@ def collect_labels(haystack):
 	return labels
 
 
+class IterationBreak(Enum):
+	ROOT = 1
+
+
 class TreeIterator:
 	def __init__(self, ast):
 		self.ast = ast
@@ -75,8 +80,11 @@ class TreeIterator:
 		except StopIteration:
 			return None
 
-	def restart_iteration(self):
-		self.cor = iterate_all_subitems(self.ast)
+	def break_iteration(self, itbreak:IterationBreak):
+		if itbreak is IterationBreak.ROOT:
+			self.cor = iterate_all_subitems(self.ast)
+		else:
+			raise ValueError("Not implemented")
 
 	def iterate_subitems(self):
 		while (sub := self.get_next()) is not None:
