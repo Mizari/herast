@@ -74,7 +74,5 @@ class DeepExprPat(BasePat):
 		for item in tree_proc.iterate_subitems():
 			if not self.pat.check(item, ctx):
 				continue
-			if self.bind_name is not None:
-				ctx.bind_item(self.bind_name, item)
 			return True
 		return False
