@@ -14,7 +14,8 @@ class ASTContext:
 	def func_addr(self):
 		return self.cfunc.entry_ea
 
-	def get_func_name(self):
+	@property
+	def func_name(self):
 		return idaapi.get_name(self.func_addr)
 
 	def get_parent_block(self, item):
