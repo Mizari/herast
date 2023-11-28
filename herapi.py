@@ -18,10 +18,10 @@ from herast.passive_manager import *
 from herast.tree.utils import *
 from herast.tree.matcher import Matcher
 from herast.tree.scheme import Scheme
-from herast.tree.processing import TreeIterator
+from herast.tree.ast_iterator import ASTIterator
 from herast.tree.match_context import MatchContext
 from herast.tree.ast_context import ASTContext
-from herast.tree.ast_patch import ASTPatch, remove_instr, replace_instr
+from herast.tree.ast_patch import ASTPatch, remove_instr, replace_instr, replace_expr
 from herast.settings import runtime_settings
 
 
@@ -31,7 +31,7 @@ def search_pattern(pat:BasePat, *funcs):
 		if cfunc is None:
 			continue
 
-		tree_processor = TreeIterator(cfunc.body)
+		tree_processor = ASTIterator(cfunc.body)
 		item_ctx = MatchContext(cfunc, pat)
 		for subitem in tree_processor.iterate_subitems():
 			if pat.check(subitem, item_ctx):

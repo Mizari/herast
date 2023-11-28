@@ -7,7 +7,8 @@ import herast.tree.utils as utils
 from herast.tree.ast_context import ASTContext
 from herast.tree.ast_patch import ASTPatch
 from herast.tree.match_context import MatchContext
-from herast.tree.processing import TreeIterator, IterationBreak
+from herast.tree.ast_iteration import IterationBreak
+from herast.tree.ast_iterator import ASTIterator
 from herast.tree.scheme import Scheme
 from herast.settings import runtime_settings
 
@@ -64,12 +65,12 @@ class Matcher:
 		for scheme in schemes:
 			scheme.on_tree_iteration_start()
 
-		tree_proc = TreeIterator(ast_tree)
+		tree_proc = ASTIterator(ast_tree)
 		while (subitem := tree_proc.get_next()) is not None:
 			if (ast_patch := self.check_schemes(subitem, ast_ctx, schemes)) is None:
 				continue
 
-			if (itbreak := ast_patch.apply_patch(ast_ctx)) is None:
+			if (itbreak := tree_proc.apply_patch(ast_patch, ast_ctx)) is None:
 				continue
 			elif itbreak is IterationBreak.ROOT:
 				for scheme in schemes:

@@ -1,4 +1,4 @@
-from __future__ import print_function
+from __future__ import annotations
 from enum import Enum
 import idaapi
 
@@ -67,25 +67,3 @@ def collect_labels(haystack):
 
 class IterationBreak(Enum):
 	ROOT = 1
-
-
-class TreeIterator:
-	def __init__(self, ast):
-		self.ast = ast
-		self.cor = iterate_all_subitems(self.ast)
-
-	def get_next(self):
-		try:
-			return self.cor.__next__()
-		except StopIteration:
-			return None
-
-	def break_iteration(self, itbreak:IterationBreak):
-		if itbreak is IterationBreak.ROOT:
-			self.cor = iterate_all_subitems(self.ast)
-		else:
-			raise ValueError("Not implemented")
-
-	def iterate_subitems(self):
-		while (sub := self.get_next()) is not None:
-			yield sub

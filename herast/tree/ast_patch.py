@@ -2,7 +2,7 @@ from __future__ import annotations
 from enum import Enum
 import idaapi
 import herast.tree.utils as utils
-from herast.tree.processing import collect_gotos, collect_labels, IterationBreak
+from herast.tree.ast_iteration import collect_gotos, collect_labels, IterationBreak
 from herast.tree.ast_context import ASTContext
 
 
@@ -120,7 +120,7 @@ class ASTPatch:
 	def scheme_modified(cls):
 		return cls(cls.PatchType.SCHEME_MODIFIED)
 
-	def apply_patch(self, ast_ctx:ASTContext) -> IterationBreak|None:
+	def do_patch(self, ast_ctx:ASTContext) -> IterationBreak|None:
 		if self.ptype == self.PatchType.REMOVE_INSTR:
 			return remove_instr(self.item, ast_ctx)
 		elif self.ptype == self.PatchType.REPLACE_INSTR:
