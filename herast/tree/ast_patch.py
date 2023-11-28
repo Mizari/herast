@@ -30,9 +30,9 @@ def is_removal_possible(item:idaapi.cinsn_t, ctx:ASTContext) -> bool:
 
 	return True
 
-def remove_instr(item:idaapi.cinsn_t, ctx:ASTContext) -> IterationBreak|None:
+def remove_instr(item:idaapi.cinsn_t, ctx:ASTContext) -> IterationBreak:
 	if not is_removal_possible(item, ctx):
-		return None
+		return IterationBreak.NONE
 
 	parent = ctx.get_parent_block(item)
 	saved_lbl = item.label_num
@@ -41,7 +41,7 @@ def remove_instr(item:idaapi.cinsn_t, ctx:ASTContext) -> IterationBreak|None:
 	if not rv:
 		item.label_num = saved_lbl
 		print(f"[*] Failed to remove item {item.opname} from tree at {hex(item.ea)}")
-		return None
+		return IterationBreak.NONE
 
 	next_item = utils.get_following_instr(parent, item)
 	if next_item is not None:
@@ -65,13 +65,13 @@ def is_replacing_possible(item:idaapi.cinsn_t) -> bool:
 
 	return True
 
-def replace_expr(expr:idaapi.cexpr_t, new_expr:idaapi.cexpr_t, ctx:ASTContext) -> IterationBreak|None:
+def replace_expr(expr:idaapi.cexpr_t, new_expr:idaapi.cexpr_t, ctx:ASTContext) -> IterationBreak:
 	expr.replace_by(new_expr)
 	return IterationBreak.ROOT
 
-def replace_instr(item, new_item:idaapi.cinsn_t, ctx:ASTContext) -> IterationBreak|None:
+def replace_instr(item, new_item:idaapi.cinsn_t, ctx:ASTContext) -> IterationBreak:
 	if not is_replacing_possible(item):
-		return None
+		return IterationBreak.NONE
 
 	if new_item.ea == idaapi.BADADDR and item.ea != idaapi.BADADDR:
 		new_item.ea = item.ea
@@ -84,7 +84,7 @@ def replace_instr(item, new_item:idaapi.cinsn_t, ctx:ASTContext) -> IterationBre
 		return IterationBreak.ROOT
 	except Exception as e:
 		print("[!] Got an exception during ctree instr replacing", e)
-		return None
+		return IterationBreak.NONE
 
 
 class ASTPatch:
@@ -120,7 +120,7 @@ class ASTPatch:
 	def scheme_modified(cls):
 		return cls(cls.PatchType.SCHEME_MODIFIED)
 
-	def do_patch(self, ast_ctx:ASTContext) -> IterationBreak|None:
+	def do_patch(self, ast_ctx:ASTContext) -> IterationBreak:
 		if self.ptype == self.PatchType.REMOVE_INSTR:
 			return remove_instr(self.item, ast_ctx)
 		elif self.ptype == self.PatchType.REPLACE_INSTR:

@@ -66,4 +66,5 @@ def collect_labels(haystack):
 
 
 class IterationBreak(Enum):
+	NONE = 0
 	ROOT = 1

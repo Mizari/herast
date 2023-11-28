@@ -70,12 +70,9 @@ class Matcher:
 			if (ast_patch := self.check_schemes(subitem, ast_ctx, schemes)) is None:
 				continue
 
-			if (itbreak := tree_proc.apply_patch(ast_patch, ast_ctx)) is None:
-				continue
-			elif itbreak is IterationBreak.ROOT:
+			if tree_proc.apply_patch(ast_patch, ast_ctx) is IterationBreak.ROOT:
 				for scheme in schemes:
 					scheme.on_tree_iteration_start()
-			tree_proc.break_iteration(itbreak)
 
 		for scheme in schemes:
 			scheme.on_tree_iteration_end()

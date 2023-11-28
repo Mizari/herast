@@ -25,5 +25,7 @@ class ASTIterator:
 		while (sub := self.get_next()) is not None:
 			yield sub
 
-	def apply_patch(self, ast_patch:ASTPatch, ast_ctx:ASTContext) -> IterationBreak|None:
-		return ast_patch.do_patch(ast_ctx)
+	def apply_patch(self, ast_patch:ASTPatch, ast_ctx:ASTContext) -> IterationBreak:
+		itbreak = ast_patch.do_patch(ast_ctx)
+		self.break_iteration(itbreak)
+		return itbreak
