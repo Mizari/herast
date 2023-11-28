@@ -101,14 +101,19 @@ class ASTPatch:
 
 	@classmethod
 	def remove_instr(cls, item:idaapi.cinsn_t):
+		assert not item.is_expr()
 		return cls(cls.PatchType.REMOVE_INSTR, item)
 
 	@classmethod
 	def replace_instr(cls, item:idaapi.cinsn_t, new_item:idaapi.cinsn_t):
+		assert not item.is_expr()
+		assert not new_item.is_expr()
 		return cls(cls.PatchType.REPLACE_INSTR, item, new_item)
 
 	@classmethod
 	def replace_expr(cls, expr:idaapi.cexpr_t, new_expr:idaapi.cexpr_t):
+		assert expr.is_expr()
+		assert new_expr.is_expr()
 		return cls(cls.PatchType.REPLACE_EXPR, expr, new_expr)
 
 	@classmethod
