@@ -31,6 +31,6 @@ class ReplacingScheme(Scheme):
 			return False
 
 		new_item = make_call_helper_instr("__propagate_error", error_var, logic_expr)
-		return ASTPatch.replace_item(item, new_item)
+		return ASTPatch.replace_instr(item, new_item)
 
 register_storage_scheme("propagate_error", ReplacingScheme())

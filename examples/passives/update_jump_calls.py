@@ -42,6 +42,6 @@ class TrampolineFixScheme(Scheme):
 		new_obj = make_obj(jump_target)
 		new_obj.ea = item.ea
 		new_obj.type = item.type
-		return ASTPatch.replace_item(item, new_obj)
+		return ASTPatch.replace_expr(item, new_obj)
 
 register_storage_scheme("trampoline fixer", TrampolineFixScheme())

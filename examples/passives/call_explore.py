@@ -6,7 +6,7 @@ test_pattern = CallInsnPat('_objc_release', ignore_arguments=True)
 
 class ItemRemovalScheme(Scheme):
 	def on_matched_item(self, item, ctx: MatchContext) -> ASTPatch|None:
-		return ASTPatch.remove_item(item)
+		return ASTPatch.remove_instr(item)
 
 
 register_storage_scheme("remove_objc_release", ItemRemovalScheme(test_pattern))
