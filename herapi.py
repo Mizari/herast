@@ -31,9 +31,8 @@ def search_pattern(pat:BasePat, *funcs):
 		if cfunc is None:
 			continue
 
-		tree_processor = ASTIterator(cfunc.body)
 		item_ctx = MatchContext(cfunc, pat)
-		for subitem in tree_processor.iterate_subitems():
+		for subitem in iterate_all_subitems(cfunc.body):
 			if pat.check(subitem, item_ctx):
 				yield subitem
 
