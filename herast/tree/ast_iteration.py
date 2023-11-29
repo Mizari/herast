@@ -6,8 +6,7 @@ from herast.tree.consts import binary_expressions_ops, unary_expressions_ops
 
 
 # handler, that maps item_op to children_items_getter
-op2func = {}
-op2func.update({
+op2func = {
 	idaapi.cit_expr:     lambda x: [x.cexpr],
 	idaapi.cit_return:   lambda x: [x.creturn.expr],
 	idaapi.cit_block:    lambda x: [i for i in x.cblock],
@@ -17,7 +16,7 @@ op2func.update({
 	idaapi.cit_do:       lambda x: [x.cdo.body, x.cdo.expr],
 	idaapi.cit_for:      lambda x: [x.cfor.body, x.cfor.init, x.cfor.expr, x.cfor.step],
 	idaapi.cot_call:     lambda x: [i for i in x.a] + [x.x],
-})
+}
 
 for i in unary_expressions_ops:
 	op2func[i] = lambda x: [x.x]
@@ -25,12 +24,13 @@ for i in unary_expressions_ops:
 for i in binary_expressions_ops:
 	op2func[i] = lambda x: [x.x, x.y]
 
+op2func[idaapi.cot_tern] = lambda x: [x.x, x.y, x.z]
+
 def get_children(item):
-	handler = op2func.get(item.op, None)
-	if handler is None:
+	if (handler := op2func.get(item.op, None)) is None:
 		return []
-	children = handler(item)
-	return list(filter(None, children))
+
+	return [c for c in handler(item) if c is not None]
 
 def iterate_all_subitems(item):
 	unprocessed_items = [item]

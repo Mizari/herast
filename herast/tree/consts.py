@@ -20,7 +20,8 @@ binary_expressions_ops = [
 
 unary_expressions_ops = [
 	idaapi.cot_fneg, idaapi.cot_neg, idaapi.cot_cast, idaapi.cot_lnot, idaapi.cot_bnot, idaapi.cot_ptr,
-	 idaapi.cot_ref, idaapi.cot_postinc, idaapi.cot_postdec, idaapi.cot_preinc, idaapi.cot_predec, idaapi.cot_sizeof
+	idaapi.cot_ref, idaapi.cot_postinc, idaapi.cot_postdec, idaapi.cot_preinc, idaapi.cot_predec, idaapi.cot_sizeof,
+	idaapi.cot_memref, idaapi.cot_memptr,
 ]
 
 str2op = {v:k for k, v in op2str.items()}
