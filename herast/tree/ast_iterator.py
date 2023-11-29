@@ -23,10 +23,12 @@ class ASTIterator:
 			return None
 
 		current_item, child_idx = self.path.pop()
-		if child_idx == -1: # -1 means no need to iterate children
+		# -1 means no need to iterate children or that there are no children
+		if child_idx == -1:
 			return current_item
 
 		children = get_children(current_item)
+		# iteration is finished for all children
 		if len(children) == child_idx + 1:
 			return current_item
 
