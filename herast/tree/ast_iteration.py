@@ -7,30 +7,30 @@ from herast.tree.consts import binary_expressions_ops, unary_expressions_ops
 
 # handler, that maps item_op to children_items_getter
 op2func = {
-	idaapi.cit_expr:     lambda x: [x.cexpr],
-	idaapi.cit_return:   lambda x: [x.creturn.expr],
-	idaapi.cit_block:    lambda x: [i for i in x.cblock],
-	idaapi.cit_if:       lambda x: [x.cif.ithen, x.cif.ielse, x.cif.expr],
-	idaapi.cit_switch:   lambda x: [i for i in x.cswitch.cases] + [x.cswitch.expr],
-	idaapi.cit_while:    lambda x: [x.cwhile.body, x.cwhile.expr],
-	idaapi.cit_do:       lambda x: [x.cdo.body, x.cdo.expr],
-	idaapi.cit_for:      lambda x: [x.cfor.body, x.cfor.init, x.cfor.expr, x.cfor.step],
-	idaapi.cot_call:     lambda x: [i for i in x.a] + [x.x],
+	idaapi.cit_expr:     lambda x: (x.cexpr,),
+	idaapi.cit_return:   lambda x: (x.creturn.expr,),
+	idaapi.cit_block:    lambda x: tuple(i for i in x.cblock),
+	idaapi.cit_if:       lambda x: (x.cif.ithen, x.cif.ielse, x.cif.expr),
+	idaapi.cit_switch:   lambda x: tuple(i for i in x.cswitch.cases) + (x.cswitch.expr,),
+	idaapi.cit_while:    lambda x: (x.cwhile.body, x.cwhile.expr),
+	idaapi.cit_do:       lambda x: (x.cdo.body, x.cdo.expr),
+	idaapi.cit_for:      lambda x: (x.cfor.body, x.cfor.init, x.cfor.expr, x.cfor.step),
+	idaapi.cot_call:     lambda x: (x.x,) + tuple(i for i in x.a),
 }
 
 for i in unary_expressions_ops:
-	op2func[i] = lambda x: [x.x]
+	op2func[i] = lambda x: (x.x,)
 
 for i in binary_expressions_ops:
-	op2func[i] = lambda x: [x.x, x.y]
+	op2func[i] = lambda x: (x.x, x.y)
 
-op2func[idaapi.cot_tern] = lambda x: [x.x, x.y, x.z]
+op2func[idaapi.cot_tern] = lambda x: (x.x, x.y, x.z)
 
 def get_children(item):
 	if (handler := op2func.get(item.op, None)) is None:
-		return []
+		return ()
 
-	return [c for c in handler(item) if c is not None]
+	return tuple(c for c in handler(item) if c is not None)
 
 def iterate_all_subitems(item):
 	unprocessed_items = [item]
