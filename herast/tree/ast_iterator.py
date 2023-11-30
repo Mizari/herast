@@ -1,4 +1,5 @@
 from __future__ import annotations
+import idaapi
 from herast.tree.ast_iteration import IterationBreak, get_children
 from herast.tree.ast_patch import ASTPatch
 from herast.tree.ast_context import ASTContext
@@ -36,7 +37,13 @@ class ASTIterator:
 			return False
 		return True
 
-	def get_next(self):
+	def get_current(self) -> idaapi.citem_t | None:
+		if len(self.path) == 0:
+			return None
+
+		return self.path[-1][0]
+
+	def pop_current(self) -> idaapi.citem_t | None:
 		if len(self.path) == 0:
 			return None
 

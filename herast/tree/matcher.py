@@ -66,7 +66,7 @@ class Matcher:
 			scheme.on_tree_iteration_start()
 
 		tree_proc = ASTIterator(ast_tree)
-		while (subitem := tree_proc.get_next()) is not None:
+		while (subitem := tree_proc.pop_current()) is not None:
 			if (ast_patch := self.check_schemes(subitem, ast_ctx, schemes)) is None:
 				continue
 
