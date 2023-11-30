@@ -14,7 +14,7 @@ def build_path(ast):
 	return path
 
 
-class ASTIterator:
+class ASTProcessor:
 	def __init__(self, root):
 		self.root = root
 		self.path = build_path(root)

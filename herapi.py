@@ -18,7 +18,7 @@ from herast.passive_manager import *
 from herast.tree.utils import *
 from herast.tree.matcher import Matcher
 from herast.tree.scheme import Scheme
-from herast.tree.ast_iterator import ASTIterator
+from herast.tree.ast_processor import ASTProcessor
 from herast.tree.match_context import MatchContext
 from herast.tree.ast_context import ASTContext
 from herast.tree.ast_patch import ASTPatch, remove_instr, replace_instr, replace_expr
