@@ -31,7 +31,7 @@ class ASTContext:
 	def get_full_path(self, item):
 		parent = self.cfunc.body.find_parent_of(item)
 		if parent is None:
-			return []
+			return [(item, -1)]
 
 		parent = parent.to_specific_type
 		parent_children = get_children(parent)
@@ -42,5 +42,7 @@ class ASTContext:
 			raise ValueError()
 
 		path = self.get_full_path(parent)
-		path.append((parent, child_idx))
+		if len(path) != 0:
+			path[-1] = (path[-1][0], child_idx)
+		path.append((item, -1))
 		return path

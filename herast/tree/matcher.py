@@ -65,11 +65,15 @@ class Matcher:
 			scheme.on_tree_iteration_start()
 
 		ast_proc = ASTProcessor(ast_tree)
-		while (subitem := ast_proc.pop_current()) is not None:
+		while (subitem := ast_proc.get_current()) is not None:
 			if (ast_patch := self.check_schemes(subitem, ast_ctx, schemes)) is None:
+				ast_proc.pop_current()
 				continue
 
-			ast_proc.apply_patch(ast_patch, ast_ctx)
+			if not ast_proc.apply_patch(ast_patch, ast_ctx):
+				ast_proc.pop_current()
+				continue
+
 			# check if patch restarted iteration
 			if ast_proc.is_iteration_started():
 				for scheme in schemes:
