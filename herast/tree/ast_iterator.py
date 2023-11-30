@@ -60,7 +60,7 @@ class ASTIterator:
 		self.path.append((current_item, child_idx+1))
 		child = children[child_idx+1]
 		self.path += build_path(child)
-		return self.get_next()
+		return self.pop_current()
 
 	def break_iteration(self, itbreak:IterationBreak):
 		if itbreak is IterationBreak.ROOT:
