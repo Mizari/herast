@@ -1,5 +1,5 @@
-from __future__ import annotations
 import idaapi
+from herast.tree.ast_iteration import get_children
 
 
 class ASTContext:
@@ -15,6 +15,10 @@ class ASTContext:
 		return self.cfunc.entry_ea
 
 	@property
+	def root(self):
+		return self.cfunc.body
+
+	@property
 	def func_name(self):
 		return idaapi.get_name(self.func_addr)
 
@@ -23,3 +27,20 @@ class ASTContext:
 		if parent is None or parent.op != idaapi.cit_block:
 			return None
 		return parent
+
+	def get_full_path(self, item):
+		parent = self.cfunc.body.find_parent_of(item)
+		if parent is None:
+			return []
+
+		parent = parent.to_specific_type
+		parent_children = get_children(parent)
+		for child_idx, c in enumerate(parent_children):
+			if c == item:
+				break
+		else:
+			raise ValueError()
+
+		path = self.get_full_path(parent)
+		path.append((parent, child_idx))
+		return path

@@ -1,6 +1,6 @@
 from __future__ import annotations
 import idaapi
-from herast.tree.ast_iteration import IterationBreak, get_children
+from herast.tree.ast_iteration import get_children
 from herast.tree.ast_patch import ASTPatch
 from herast.tree.ast_context import ASTContext
 
@@ -62,13 +62,29 @@ class ASTIterator:
 		self.path += build_path(child)
 		return self.pop_current()
 
-	def break_iteration(self, itbreak:IterationBreak):
-		if itbreak is IterationBreak.ROOT:
+	def apply_patch(self, ast_patch:ASTPatch, ast_ctx:ASTContext):
+		# restart from root, if user modified AST in scheme callback
+		if ast_patch.ptype == ast_patch.PatchType.SCHEME_MODIFIED:
 			self.path = build_path(self.root)
-		else:
-			raise ValueError("Not implemented")
+			return
 
-	def apply_patch(self, ast_patch:ASTPatch, ast_ctx:ASTContext) -> IterationBreak:
-		itbreak = ast_patch.do_patch(ast_ctx)
-		self.break_iteration(itbreak)
-		return itbreak
+		# if iteration ended, then cant decide about reiteration
+		# just do the pathch
+		if len(self.path) == 0:
+			print("[!] WARNING: patching AST, that is already finished iteration")
+			is_patch_applied = ast_patch.do_patch(ast_ctx)
+
+		# check that patch is applied to correct AST with the same root
+		elif self.path[0][0] != ast_ctx.root:
+			print("[!] WARNING: patching AST, that has different root")
+			is_patch_applied = ast_patch.do_patch(ast_ctx)
+
+		# current iteration item is either under patch item or on different path
+		elif len(full_path := ast_ctx.get_full_path(ast_patch.item)) < len(self.path):
+			is_patch_applied = ast_patch.do_patch(ast_ctx)
+
+		else:
+			is_patch_applied = ast_patch.do_patch(ast_ctx)
+
+		if is_patch_applied:
+			self.path = build_path(self.root)

@@ -2,7 +2,7 @@ from __future__ import annotations
 from enum import Enum
 import idaapi
 import herast.tree.utils as utils
-from herast.tree.ast_iteration import collect_gotos, collect_labels, IterationBreak
+from herast.tree.ast_iteration import collect_gotos, collect_labels
 from herast.tree.ast_context import ASTContext
 
 
@@ -30,9 +30,9 @@ def is_removal_possible(item:idaapi.cinsn_t, ctx:ASTContext) -> bool:
 
 	return True
 
-def remove_instr(item:idaapi.cinsn_t, ctx:ASTContext) -> IterationBreak:
+def remove_instr(item:idaapi.cinsn_t, ctx:ASTContext) -> bool:
 	if not is_removal_possible(item, ctx):
-		return IterationBreak.NONE
+		return False
 
 	parent = ctx.get_parent_block(item)
 	saved_lbl = item.label_num
@@ -41,12 +41,12 @@ def remove_instr(item:idaapi.cinsn_t, ctx:ASTContext) -> IterationBreak:
 	if not rv:
 		item.label_num = saved_lbl
 		print(f"[*] Failed to remove item {item.opname} from tree at {hex(item.ea)}")
-		return IterationBreak.NONE
+		return False
 
 	next_item = utils.get_following_instr(parent, item)
 	if next_item is not None:
 		next_item.label_num = saved_lbl
-	return IterationBreak.ROOT
+	return True
 
 def is_replacing_possible(item:idaapi.cinsn_t) -> bool:
 	gotos = collect_gotos(item)
@@ -65,13 +65,13 @@ def is_replacing_possible(item:idaapi.cinsn_t) -> bool:
 
 	return True
 
-def replace_expr(expr:idaapi.cexpr_t, new_expr:idaapi.cexpr_t, ctx:ASTContext) -> IterationBreak:
+def replace_expr(expr:idaapi.cexpr_t, new_expr:idaapi.cexpr_t, ctx:ASTContext) -> bool:
 	expr.replace_by(new_expr)
-	return IterationBreak.ROOT
+	return True
 
-def replace_instr(item, new_item:idaapi.cinsn_t, ctx:ASTContext) -> IterationBreak:
+def replace_instr(item, new_item:idaapi.cinsn_t, ctx:ASTContext) -> bool:
 	if not is_replacing_possible(item):
-		return IterationBreak.NONE
+		return False
 
 	if new_item.ea == idaapi.BADADDR and item.ea != idaapi.BADADDR:
 		new_item.ea = item.ea
@@ -81,10 +81,10 @@ def replace_instr(item, new_item:idaapi.cinsn_t, ctx:ASTContext) -> IterationBre
 
 	try:
 		idaapi.qswap(item, new_item)
-		return IterationBreak.ROOT
+		return True
 	except Exception as e:
 		print("[!] Got an exception during ctree instr replacing", e)
-		return IterationBreak.NONE
+		return False
 
 
 class ASTPatch:
@@ -120,7 +120,7 @@ class ASTPatch:
 	def scheme_modified(cls):
 		return cls(cls.PatchType.SCHEME_MODIFIED)
 
-	def do_patch(self, ast_ctx:ASTContext) -> IterationBreak:
+	def do_patch(self, ast_ctx:ASTContext) -> bool:
 		if self.ptype == self.PatchType.REMOVE_INSTR:
 			return remove_instr(self.item, ast_ctx)
 		elif self.ptype == self.PatchType.REPLACE_INSTR:
@@ -128,6 +128,6 @@ class ASTPatch:
 		elif self.ptype == self.PatchType.REPLACE_EXPR:
 			return replace_expr(self.item, self.new_item, ast_ctx)
 		elif self.ptype == self.PatchType.SCHEME_MODIFIED:
-			return IterationBreak.ROOT
+			return False
 		else:
 			raise TypeError("This patch type is not implemented")

@@ -1,5 +1,3 @@
-from __future__ import annotations
-from enum import Enum
 import idaapi
 
 from herast.tree.consts import binary_expressions_ops, unary_expressions_ops
@@ -63,8 +61,3 @@ def collect_labels(haystack):
 			labels.append(potential_label)
 
 	return labels
-
-
-class IterationBreak(Enum):
-	NONE = 0
-	ROOT = 1
