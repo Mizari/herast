@@ -66,6 +66,7 @@ def is_replacing_possible(item:idaapi.cinsn_t) -> bool:
 	return True
 
 def replace_expr(expr:idaapi.cexpr_t, new_expr:idaapi.cexpr_t, ctx:ASTContext) -> bool:
+	new_expr = idaapi.cexpr_t(new_expr)
 	expr.replace_by(new_expr)
 	return True
 
@@ -80,6 +81,7 @@ def replace_instr(item, new_item:idaapi.cinsn_t, ctx:ASTContext) -> bool:
 		new_item.label_num = item.label_num
 
 	try:
+		new_item = idaapi.cinsn_t(new_item)
 		idaapi.qswap(item, new_item)
 		return True
 	except Exception as e:
