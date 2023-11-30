@@ -70,7 +70,9 @@ class Matcher:
 			if (ast_patch := self.check_schemes(subitem, ast_ctx, schemes)) is None:
 				continue
 
-			if tree_proc.apply_patch(ast_patch, ast_ctx) is IterationBreak.ROOT:
+			tree_proc.apply_patch(ast_patch, ast_ctx)
+			# check if patch restarted iteration
+			if tree_proc.is_iteration_started():
 				for scheme in schemes:
 					scheme.on_tree_iteration_start()
 

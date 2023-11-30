@@ -18,6 +18,24 @@ class ASTIterator:
 		self.root = root
 		self.path = build_path(root)
 
+	def is_iteration_ended(self) -> bool:
+		return len(self.path) == 0
+
+	def is_iteration_started(self) -> bool:
+		if len(self.path) == 0:
+			return False
+
+		# check that AST path is all left-sided
+		# except for the last node, that is supposed to be a leaf
+		if any(child_idx != 0 for (_, child_idx) in self.path[:-1]):
+			return False
+
+		# check that the last node is a leaf
+		last_item, child_idx = self.path[-1]
+		if len(get_children(last_item)) != 0 or child_idx > 0:
+			return False
+		return True
+
 	def get_next(self):
 		if len(self.path) == 0:
 			return None
