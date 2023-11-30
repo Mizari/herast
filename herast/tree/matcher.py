@@ -7,7 +7,6 @@ import herast.tree.utils as utils
 from herast.tree.ast_context import ASTContext
 from herast.tree.ast_patch import ASTPatch
 from herast.tree.match_context import MatchContext
-from herast.tree.ast_iteration import IterationBreak
 from herast.tree.ast_iterator import ASTIterator
 from herast.tree.scheme import Scheme
 from herast.settings import runtime_settings
