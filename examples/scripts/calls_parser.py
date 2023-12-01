@@ -1,3 +1,4 @@
+from __future__ import annotations
 import idaapi, idc
 from herapi import *
 
@@ -17,19 +18,19 @@ class CallsParser(Scheme):
 
 		obj_pat = ObjPat(*function_address)
 		pattern = CallPat(obj_pat, ObjPat(), RefPat(ObjPat()), skip_missing=True)
-		super().__init__(pattern)
+		super().__init__(pattern, scheme_type=Scheme.SchemeType.READONLY)
 
-	def on_matched_item(self, item, ctx: ASTContext) -> bool:
+	def on_matched_item(self, item, ctx:MatchContext) -> ASTPatch|None:
 		arg0 = item.a[0]
 		arg1 = item.a[1]
 		new_name = idc.get_strlit_contents(arg0.obj_ea)
-		if new_name is None: return False
+		if new_name is None: return None
 		new_name = new_name.decode()
 		new_name = get_unique_name(new_name)
 		rename_address = arg1.x.obj_ea
 		print("renaming", hex(rename_address), "to", new_name)
 		idaapi.set_name(rename_address, new_name)
-		return False
+		return None
 
 def find_calls(*functions):
 	scheme = CallsParser(*functions)

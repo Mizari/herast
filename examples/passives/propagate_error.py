@@ -21,14 +21,14 @@ class ReplacingScheme(Scheme):
 		)
 		super().__init__(pattern)
 
-	def on_matched_item(self, item, ctx: MatchContext):
+	def on_matched_item(self, item, ctx: MatchContext) -> ASTPatch|None:
 		error_var = ctx.get_item("error_var")
 		if error_var is None:
-			return False
+			return None
 
 		logic_expr = ctx.get_item("logic_expr")
 		if logic_expr is None:
-			return False
+			return None
 
 		new_item = make_call_helper_instr("__propagate_error", error_var, logic_expr)
 		return ASTPatch.replace_instr(item, new_item)

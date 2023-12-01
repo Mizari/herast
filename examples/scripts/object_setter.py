@@ -1,3 +1,4 @@
+from __future__ import annotations
 import idaapi, idc
 from herapi import *
 
@@ -7,9 +8,9 @@ class ObjectSetterScheme(Scheme):
 		self.objects = {}
 		call_pattern = CallPat(function_address, NumPat(), NumPat(), AnyPat())
 		pattern = AsgPat(ObjPat(), call_pattern)
-		super().__init__(pattern)
+		super().__init__(pattern, scheme_type=Scheme.SchemeType.READONLY)
 
-	def on_matched_item(self, item, ctx: ASTContext) -> bool:
+	def on_matched_item(self, item, ctx:MatchContext) -> ASTPatch|None:
 		asg_y = strip_casts(item.y)
 		arg0 = asg_y.a[0].n._value
 		arg1 = asg_y.a[1].n._value
@@ -17,7 +18,7 @@ class ObjectSetterScheme(Scheme):
 		object_address = item.x.obj_ea
 		object_type    = None
 		self.add_object(object_address, object_name, object_type)
-		return False
+		return None
 
 	def add_object(self, object_ea, object_name, object_type):
 		if self.objects.get(object_ea) is None:

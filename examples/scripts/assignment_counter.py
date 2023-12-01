@@ -1,3 +1,4 @@
+from __future__ import annotations
 import idautils, idaapi
 from herapi import *
 from collections import defaultdict
@@ -10,10 +11,10 @@ class AssignmentCounterScheme(Scheme):
 		pattern = AsgPat(AnyPat(), CallPat(obj_pat))
 		super().__init__(pattern)
 
-	def on_matched_item(self, item, ctx: ASTContext) -> bool:
+	def on_matched_item(self, item, ctx:MatchContext) -> ASTPatch|None:
 		func_ea = strip_casts(item.y).x.obj_ea
 		self.add_assignment(func_ea)
-		return False
+		return None
 
 	def add_assignment(self, func_ea):
 		self.count[func_ea] += 1

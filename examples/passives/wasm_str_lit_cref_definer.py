@@ -5,6 +5,9 @@ from herapi import *
 
 
 class DrefingScheme(Scheme):
+	def __init__(self, pattern):
+		super().__init__(pattern, scheme_type=Scheme.SchemeType.READONLY)
+
 	def on_matched_item(self, item, ctx: MatchContext) -> ASTPatch|None:
 		obj = ctx.get_item('xref_me')
 		if obj.obj_ea >= 0 and obj.obj_ea <= 0x100000:

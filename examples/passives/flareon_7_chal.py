@@ -1,6 +1,7 @@
 from __future__ import annotations
 import struct
 from herapi import *
+from herast.tree.patterns.base_pattern import BasePat
 
 
 pattern = SeqPat(
@@ -22,8 +23,12 @@ pattern = SeqPat(
 				)
 		)
 
+
 class Flareon7ChalScheme(Scheme):
-	def on_matched_item(self, item, ctx: MatchContext):
+	def __init__(self, pattern:BasePat):
+		super().__init__(pattern, scheme_type=Scheme.SchemeType.READONLY)
+
+	def on_matched_item(self, item, ctx: MatchContext) -> ASTPatch|None:
 		print('%#x' % item.ea)
 		try:
 
@@ -45,7 +50,7 @@ class Flareon7ChalScheme(Scheme):
 		except:
 			pass
 
-		return False
+		return None
 
 
 register_storage_scheme("flareon7chal", Flareon7ChalScheme(pattern))

@@ -1,3 +1,4 @@
+from __future__ import annotations
 import idaapi
 from herapi import *
 
@@ -13,16 +14,16 @@ class FunctionRenamer(Scheme):
 		self.renamings = {}
 		self.conflicts = {}
 
-	def on_matched_item(self, item, ctx: ASTContext) -> bool:
+	def on_matched_item(self, item, ctx: MatchContext) -> ASTPatch|None:
 		func_ea = ctx.func_addr
-		debug_print = ctx.get_expr("debug_print")
+		debug_print = ctx.get_item("debug_print")
 		s = debug_print.a[1]
 		name = s.print1(None)
 		name = idaapi.tag_remove(name)
 		name = idaapi.str2user(name)
 		name = name[2:-2]
 		self.add_renaming(func_ea, name)
-		return False
+		return None
 
 	def add_renaming(self, func_addr, new_name):
 		current_name = idaapi.get_func_name(func_addr) 
