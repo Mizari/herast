@@ -136,7 +136,7 @@ class ASTProcessor:
 			return ast_patch.do_patch(ast_ctx)
 
 		item_path = self.get_item_path(ast_patch.item)
-		if item_path[0][0] != ast_ctx.root:
+		if len(item_path) == 0:
 			print("[!] WARNING: patching AST with items, that dont match")
 			rv = ast_patch.do_patch(ast_ctx)
 			self.path = build_path(self.root)
