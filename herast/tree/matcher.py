@@ -54,10 +54,14 @@ class Matcher:
 		ast_tree = cfunc.body
 		ast_ctx = ASTContext(cfunc)
 
-		schemes = [s for s in self.schemes.values() if not s.is_readonly]
+		schemes = [s for s in self.schemes.values() if s.stype is s.SchemeType.GENERIC]
 		self.match_ast_tree(ast_tree, ast_ctx, schemes)
 
-		schemes = [s for s in self.schemes.values() if s.is_readonly]
+		singulars = [s for s in self.schemes.values() if s.stype is s.SchemeType.SINGULAR]
+		for s in singulars:
+			self.match_ast_tree(ast_tree, ast_ctx, [s])
+
+		schemes = [s for s in self.schemes.values() if s.stype is s.SchemeType.READONLY]
 		self.match_ast_tree(ast_tree, ast_ctx, schemes)
 
 	def match_ast_tree(self, ast_tree:idaapi.citem_t, ast_ctx: ASTContext, schemes:list[Scheme]):
