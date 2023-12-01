@@ -75,7 +75,7 @@ class ASTProcessor:
 		self.path.append((current_item, child_idx+1))
 		child = children[child_idx+1]
 		self.path += build_path(child)
-		return self.pop_current()
+		return self.get_current()
 
 	def get_relative_position(self, item_path, ast_ctx:ASTContext) -> RelativePosition:
 		item = item_path[-1][0]
@@ -119,22 +119,48 @@ class ASTProcessor:
 		item_path = ast_ctx.get_full_path(ast_patch.item)
 		if item_path[0][0] != ast_ctx.root:
 			print("[!] WARNING: patching AST with items, that dont match")
+			rv = ast_patch.do_patch(ast_ctx)
 			self.path = build_path(self.root)
-			return ast_patch.do_patch(ast_ctx)
+			return rv
 
 		if not ast_patch.do_patch(ast_ctx):
 			return False
+		# TODO check if context is changed, then reiterate from scratch
 
 		relpos = self.get_relative_position(item_path, ast_ctx)
+		# if item is yet to be iterated, then nothing needs to change
 		if relpos is RelativePosition.AHEAD:
-			pass
-		elif relpos is RelativePosition.CURRENT:
-			self.path = build_path(self.root)
-		elif relpos is RelativePosition.PARENT:
-			self.path = build_path(self.root)
-		elif relpos is RelativePosition.BEHIND:
-			self.path = build_path(self.root)
-		else:
-			raise NotImplementedError()
+			return True
+
+		# otherwise current/parent/behind is modified/removed
+		# that means that it is already iterated over
+		# thus reiteration (aka rebuilding self.path) is needed
+
+		# if instruction is removed
+		if ast_patch.new_item is None:
+			# popping deleted instruction
+			item_path.pop()
+
+			# higher than deleted instruction comes its parent block
+			parent_block, child_idx = item_path[-1]
+
+			children = get_children(parent_block)[child_idx]
+
+			# if removed instr is not last, then traverse next
+			if len(children) != child_idx:
+				child = children[child_idx]
+				item_path += build_path(child)
+
+			# if removed instr is last, then next goes iteration over its
+			# parent block, just update it in path
+			else:
+				item_path[-1] = (parent_block, -1)
+
+			self.path = item_path
+
+		# if item is replaced with new item
+		elif ast_patch.new_item is not None:
+			item_path.pop()
+			self.path = item_path + build_path(ast_patch.new_item)
 
 		return True
