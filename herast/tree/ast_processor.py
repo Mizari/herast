@@ -34,6 +34,25 @@ class ASTProcessor:
 		self.root = root
 		self.path = build_path(root)
 
+	def get_item_path(self, item):
+		parent = self.root.find_parent_of(item)
+		if parent is None:
+			return [(item, -1)]
+
+		parent = parent.to_specific_type
+		parent_children = get_children(parent)
+		for child_idx, c in enumerate(parent_children):
+			if c == item:
+				break
+		else:
+			raise ValueError()
+
+		path = self.get_item_path(parent)
+		if len(path) != 0:
+			path[-1] = (path[-1][0], child_idx)
+		path.append((item, -1))
+		return path
+
 	def is_iteration_ended(self) -> bool:
 		return len(self.path) == 0
 
@@ -116,7 +135,7 @@ class ASTProcessor:
 			print("[!] WARNING: patching AST, that already finished iteration")
 			return ast_patch.do_patch(ast_ctx)
 
-		item_path = ast_ctx.get_full_path(ast_patch.item)
+		item_path = self.get_item_path(ast_patch.item)
 		if item_path[0][0] != ast_ctx.root:
 			print("[!] WARNING: patching AST with items, that dont match")
 			rv = ast_patch.do_patch(ast_ctx)
