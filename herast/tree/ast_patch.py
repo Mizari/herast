@@ -31,12 +31,12 @@ def remove_instr(item:idaapi.cinsn_t, ctx:ASTContext) -> bool:
 			pass
 
 	if len(removed_labels) > 0:
-		print("[!] failed removing item with labels in it")
+		print(f"[!] failed to remove item {item.opname} with labels in it")
 		return False
 
 	rv = utils.remove_instruction_from_ast(item, parent.cinsn)
 	if not rv:
-		print(f"[*] Failed to remove item {item.opname} from tree at {hex(item.ea)}")
+		print(f"[*] failed to remove item {item.opname} from tree at {hex(item.ea)}")
 
 	if len(unused_labels) != 0:
 		ctx.is_modified = True
@@ -49,16 +49,16 @@ def replace_instr(item, new_item:idaapi.cinsn_t, ctx:ASTContext) -> bool:
 	# TODO check item.op != idaapi.cit_goto and != cit_label
 	gotos = collect_gotos(item)
 	if len(gotos) > 0:
-		print("[!] failed replacing item with gotos in it")
+		print(f"[!] failed to replace item {item.opname} with gotos in it")
 		return False
 
 	labels = collect_labels(item)
 	if len(labels) > 1:
-		print("[!] failed replacing item with labels in it", labels, item)
+		print(f"[!] failed to replace item {item.opname} with labels in it")
 		return False
 
 	if len(labels) == 1 and labels[0] != item:
-		print("[!] failed replacing item with labels in it")
+		print(f"[!] failed to replace item {item.opname} with labels in it")
 		return False
 
 	if new_item.ea == idaapi.BADADDR and item.ea != idaapi.BADADDR:
