@@ -32,7 +32,8 @@ class ASTProcessor:
 
 	def __init__(self, root):
 		self.root = root
-		self.path = build_path(root)
+		self.path = []
+		self.restart_iteration()
 
 	def get_item_path(self, item):
 		parent = self.root.find_parent_of(item)
@@ -52,6 +53,9 @@ class ASTProcessor:
 			path[-1] = (path[-1][0], child_idx)
 		path.append((item, -1))
 		return path
+
+	def restart_iteration(self):
+		self.path = build_path(self.root)
 
 	def is_iteration_ended(self) -> bool:
 		return len(self.path) == 0
@@ -121,9 +125,9 @@ class ASTProcessor:
 
 	def apply_patch(self, ast_patch:ASTPatch, ast_ctx:ASTContext) -> bool:
 		# restart from root, if user modified AST in scheme callback
-		if ast_patch.ptype == ast_patch.PatchType.SCHEME_MODIFIED:
-			self.path = build_path(self.root)
-			# assuming that user only gives us scheme patch, when it actually happened
+		# assuming that user only gives us scheme patch, when it actually happened
+		if ast_patch.ptype is ast_patch.PatchType.SCHEME_MODIFIED:
+			self.restart_iteration()
 			return True
 
 		# sanity check, None is only for scheme callbacks
@@ -139,7 +143,7 @@ class ASTProcessor:
 		if len(item_path) == 0:
 			print("[!] WARNING: patching AST with items, that dont match")
 			rv = ast_patch.do_patch(ast_ctx)
-			self.path = build_path(self.root)
+			self.restart_iteration()
 			return rv
 
 		if not ast_patch.do_patch(ast_ctx):
@@ -148,7 +152,7 @@ class ASTProcessor:
 		# if context is changed, then reiterate from scratch
 		if ast_ctx.is_modified:
 			ast_ctx.is_modified = False
-			self.path = build_path(self.root)
+			self.restart_iteration()
 			return True
 
 		relpos = self.get_relative_position(item_path, ast_ctx)
