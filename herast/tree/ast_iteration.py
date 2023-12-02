@@ -52,6 +52,9 @@ def collect_gotos(haystack):
 		if potential_goto.op == idaapi.cit_goto:
 			gotos.append(potential_goto)
 
+	if haystack.op == idaapi.cit_goto:
+		gotos.append(haystack)
+
 	return gotos
 
 def collect_labels(haystack):
@@ -59,5 +62,8 @@ def collect_labels(haystack):
 	for potential_label in iterate_all_subinstrs(haystack):
 		if potential_label.label_num != -1:
 			labels.append(potential_label)
+
+	if haystack.label_num != -1:
+		labels.append(haystack)
 
 	return labels
