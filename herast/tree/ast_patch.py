@@ -6,7 +6,7 @@ from herast.tree.ast_iteration import collect_gotos, collect_labels
 from herast.tree.ast_context import ASTContext
 
 
-def is_removal_possible(item:idaapi.cinsn_t, ctx:ASTContext) -> bool:
+def remove_instr(item:idaapi.cinsn_t, ctx:ASTContext) -> bool:
 	gotos = collect_gotos(item)
 	if len(gotos) > 0:
 		print("[!] failed removing item with gotos in it")
@@ -28,12 +28,6 @@ def is_removal_possible(item:idaapi.cinsn_t, ctx:ASTContext) -> bool:
 		print("[!] failed removing item with labels in it")
 		return False
 
-	return True
-
-def remove_instr(item:idaapi.cinsn_t, ctx:ASTContext) -> bool:
-	if not is_removal_possible(item, ctx):
-		return False
-
 	parent = ctx.get_parent_block(item)
 	saved_lbl = item.label_num
 	item.label_num = -1
@@ -48,7 +42,7 @@ def remove_instr(item:idaapi.cinsn_t, ctx:ASTContext) -> bool:
 		next_item.label_num = saved_lbl
 	return True
 
-def is_replacing_possible(item:idaapi.cinsn_t) -> bool:
+def replace_instr(item, new_item:idaapi.cinsn_t, ctx:ASTContext) -> bool:
 	gotos = collect_gotos(item)
 	if len(gotos) > 0:
 		print("[!] failed replacing item with gotos in it")
@@ -61,17 +55,6 @@ def is_replacing_possible(item:idaapi.cinsn_t) -> bool:
 
 	if len(labels) == 1 and labels[0] != item:
 		print("[!] failed replacing item with labels in it")
-		return False
-
-	return True
-
-def replace_expr(expr:idaapi.cexpr_t, new_expr:idaapi.cexpr_t, ctx:ASTContext) -> bool:
-	new_expr = idaapi.cexpr_t(new_expr)
-	expr.replace_by(new_expr)
-	return True
-
-def replace_instr(item, new_item:idaapi.cinsn_t, ctx:ASTContext) -> bool:
-	if not is_replacing_possible(item):
 		return False
 
 	if new_item.ea == idaapi.BADADDR and item.ea != idaapi.BADADDR:
@@ -87,6 +70,11 @@ def replace_instr(item, new_item:idaapi.cinsn_t, ctx:ASTContext) -> bool:
 	except Exception as e:
 		print("[!] Got an exception during ctree instr replacing", e)
 		return False
+
+def replace_expr(expr:idaapi.cexpr_t, new_expr:idaapi.cexpr_t, ctx:ASTContext) -> bool:
+	new_expr = idaapi.cexpr_t(new_expr)
+	expr.replace_by(new_expr)
+	return True
 
 
 class ASTPatch:
