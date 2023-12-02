@@ -28,10 +28,9 @@ def remove_instr(item:idaapi.cinsn_t, ctx:ASTContext) -> bool:
 		print("[!] failed removing item with labels in it")
 		return False
 
-	parent = ctx.get_parent_block(item)
 	saved_lbl = item.label_num
 	item.label_num = -1
-	rv = utils.remove_instruction_from_ast(item, parent.cinsn) # type: ignore
+	rv = utils.remove_instruction_from_ast(item, parent.cinsn)
 	if not rv:
 		item.label_num = saved_lbl
 		print(f"[*] Failed to remove item {item.opname} from tree at {hex(item.ea)}")
