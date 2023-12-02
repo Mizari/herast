@@ -144,7 +144,12 @@ class ASTProcessor:
 
 		if not ast_patch.do_patch(ast_ctx):
 			return False
-		# TODO check if context is changed, then reiterate from scratch
+
+		# if context is changed, then reiterate from scratch
+		if ast_ctx.is_modified:
+			ast_ctx.is_modified = False
+			self.path = build_path(self.root)
+			return True
 
 		relpos = self.get_relative_position(item_path, ast_ctx)
 		# if item is yet to be iterated, then nothing needs to change

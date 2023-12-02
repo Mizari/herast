@@ -24,6 +24,8 @@ class ASTContext:
 
 		# TODO label names, var names
 
+		self.is_modified = False
+
 	@property
 	def func_addr(self):
 		return self.cfunc.entry_ea
