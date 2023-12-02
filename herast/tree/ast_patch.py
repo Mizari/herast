@@ -76,6 +76,10 @@ def replace_instr(item, new_item:idaapi.cinsn_t, ctx:ASTContext) -> bool:
 
 	if new_item.label_num == -1 and item.label_num != -1:
 		new_item.label_num = item.label_num
+		try:
+			removed_labels.remove(item.label_num)
+		except ValueError:
+			pass
 
 	if new_item.label_num not in (-1, item.label_num):
 		print(f"[!] failed to replace item {item.opname} with new label")
@@ -93,7 +97,7 @@ def replace_instr(item, new_item:idaapi.cinsn_t, ctx:ASTContext) -> bool:
 
 	if rv and new_item.op == idaapi.cit_goto:
 		ctx.is_modified = True
-	if rv and new_item.label_num != item.label_num:
+	if rv and new_item.label_num != -1:
 		ctx.is_modified = True
 	if rv and len(unused_labels) != 0:
 		ctx.is_modified = True
