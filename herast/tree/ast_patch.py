@@ -24,6 +24,12 @@ def remove_instr(item:idaapi.cinsn_t, ctx:ASTContext) -> bool:
 			unused_labels.append(lnum)
 
 	removed_labels = collect_labels(item)
+	for u in unused_labels:
+		try:
+			removed_labels.remove(u)
+		except ValueError:
+			pass
+
 	if len(removed_labels) > 0:
 		print("[!] failed removing item with labels in it")
 		return False
