@@ -112,7 +112,7 @@ class Matcher:
 
 	def _check_scheme(self, scheme: Scheme, item: idaapi.citem_t, ast_ctx: ASTContext) -> ASTPatch|None:
 		for pat in scheme.patterns:
-			mctx = MatchContext(ast_ctx.cfunc, pat)
+			mctx = MatchContext(ast_ctx, pat)
 			# check that pattern matches AST item
 			if not pat.check(item, mctx):
 				continue

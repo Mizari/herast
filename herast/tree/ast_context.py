@@ -1,5 +1,7 @@
 import idaapi
 
+from herast.tree.ast_iteration import collect_gotos, collect_labels
+
 
 class ASTContext:
 	"""AST context, contains additional logic for information,
@@ -8,6 +10,19 @@ class ASTContext:
 	"""
 	def __init__(self, cfunc:idaapi.cfunc_t):
 		self.cfunc = cfunc
+
+		self.label2gotos = {}
+		self.label2instr = {}
+		gotos = collect_gotos(self.cfunc.body)
+		labels = collect_labels(self.cfunc.body)
+		for l in labels:
+			self.label2gotos[l.label_num] = []
+			self.label2instr[l.label_num] = l
+
+		for g in gotos:
+			self.label2gotos[g.label_num] = g
+
+		# TODO label names, var names
 
 	@property
 	def func_addr(self):
