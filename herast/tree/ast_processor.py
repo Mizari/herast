@@ -151,6 +151,7 @@ class ASTProcessor:
 
 		# if context is changed, then reiterate from scratch
 		if ast_ctx.is_modified:
+			ast_ctx.rebuild()
 			ast_ctx.is_modified = False
 			self.restart_iteration()
 			return True

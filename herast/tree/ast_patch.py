@@ -41,7 +41,6 @@ def remove_instr(item:idaapi.cinsn_t, ctx:ASTContext) -> bool:
 	if len(unused_labels) != 0 and rv:
 		ctx.is_modified = True
 		ctx.cfunc.remove_unused_labels()
-		ctx.rebuild()
 
 	return rv
 
