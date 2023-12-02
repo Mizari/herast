@@ -38,7 +38,7 @@ def remove_instr(item:idaapi.cinsn_t, ctx:ASTContext) -> bool:
 	if not rv:
 		print(f"[*] failed to remove item {item.opname} from tree at {hex(item.ea)}")
 
-	if len(unused_labels) != 0:
+	if len(unused_labels) != 0 and rv:
 		ctx.is_modified = True
 		ctx.cfunc.remove_unused_labels()
 		ctx.rebuild()
