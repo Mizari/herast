@@ -9,13 +9,6 @@ from herast.tree.ast_context import ASTContext
 
 def __replace_instr(item:idaapi.cinsn_t, new_item:idaapi.cinsn_t) -> bool:
 	new_item = idaapi.cinsn_t(new_item)
-
-	if new_item.ea == idaapi.BADADDR and item.ea != idaapi.BADADDR:
-		new_item.ea = item.ea
-
-	if new_item.label_num == -1 and item.label_num != -1:
-		new_item.label_num = item.label_num
-
 	try:
 		idaapi.qswap(item, new_item)
 		return True
@@ -77,6 +70,16 @@ def replace_instr(item, new_item:idaapi.cinsn_t, ctx:ASTContext) -> bool:
 			removed_labels.remove(u)
 		except ValueError:
 			pass
+
+	if new_item.ea == idaapi.BADADDR and item.ea != idaapi.BADADDR:
+		new_item.ea = item.ea
+
+	if new_item.label_num == -1 and item.label_num != -1:
+		new_item.label_num = item.label_num
+
+	if new_item.label_num not in (-1, item.label_num):
+		print(f"[!] failed to replace item {item.opname} with new label")
+		return False
 
 	if len(removed_labels) > 1:
 		print(f"[!] failed to replace item {item.opname} with labels in it")
