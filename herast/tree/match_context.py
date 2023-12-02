@@ -9,9 +9,9 @@ if typing.TYPE_CHECKING:
 from herast.tree.ast_context import ASTContext
 
 
-class MatchContext(ASTContext):
-	def __init__(self, cfunc:idaapi.cfunc_t, pattern:BasePat):
-		super().__init__(cfunc)
+class MatchContext:
+	def __init__(self, ast_ctx:ASTContext, pattern:BasePat):
+		self.ast_ctx = ast_ctx
 		self.pattern = pattern
 		self.binded_items : dict[str, idaapi.cexpr_t] = dict()
 
