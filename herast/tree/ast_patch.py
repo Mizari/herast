@@ -1,5 +1,6 @@
 from __future__ import annotations
 from enum import Enum
+from collections import defaultdict
 import idaapi
 import herast.tree.utils as utils
 from herast.tree.ast_iteration import collect_gotos, collect_labels
@@ -13,9 +14,14 @@ def remove_instr(item:idaapi.cinsn_t, ctx:ASTContext) -> bool:
 		return False
 
 	removed_gotos = collect_gotos(item)
-	if len(removed_gotos) > 0:
-		print("[!] failed removing item with gotos in it")
-		return False
+	count = defaultdict(int)
+	for g in removed_gotos:
+		count[g.label_num] += 1
+
+	unused_labels = []
+	for lnum, c in count.items():
+		if len(ctx.label2gotos[lnum]) == c:
+			unused_labels.append(lnum)
 
 	removed_labels = collect_labels(item)
 	if len(removed_labels) > 0:
@@ -25,6 +31,12 @@ def remove_instr(item:idaapi.cinsn_t, ctx:ASTContext) -> bool:
 	rv = utils.remove_instruction_from_ast(item, parent.cinsn)
 	if not rv:
 		print(f"[*] Failed to remove item {item.opname} from tree at {hex(item.ea)}")
+
+	if len(unused_labels) != 0:
+		ctx.is_modified = True
+		ctx.cfunc.remove_unused_labels()
+		ctx.rebuild()
+
 	return rv
 
 def replace_instr(item, new_item:idaapi.cinsn_t, ctx:ASTContext) -> bool:
