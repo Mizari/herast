@@ -7,30 +7,19 @@ from herast.tree.ast_context import ASTContext
 
 
 def remove_instr(item:idaapi.cinsn_t, ctx:ASTContext) -> bool:
-	removed_gotos = collect_gotos(item)
-	if item.op == idaapi.cit_goto:
-		removed_gotos.append(item)
-
-	if len(removed_gotos) > 0:
-		print("[!] failed removing item with gotos in it")
-		return False
-
 	parent = ctx.get_parent_block(item)
 	if parent is None:
 		print("[*] Failed to remove item from tree, because no parent is found", item.opname)
 		return False
 
-	removed_labels = collect_labels(item)
-	if item.label_num != -1:
-		removed_labels.append(item.label_num)
-
-	if len(removed_labels) > 0:
-		print("[!] failed removing item with labels in it")
+	removed_gotos = collect_gotos(item)
+	if len(removed_gotos) > 0:
+		print("[!] failed removing item with gotos in it")
 		return False
 
-	next_item = utils.get_following_instr(parent, item)
-	if next_item is None:
-		print("[!] failed2removing item with labels in it", next_item)
+	removed_labels = collect_labels(item)
+	if len(removed_labels) > 0:
+		print("[!] failed removing item with labels in it")
 		return False
 
 	rv = utils.remove_instruction_from_ast(item, parent.cinsn)
@@ -39,6 +28,7 @@ def remove_instr(item:idaapi.cinsn_t, ctx:ASTContext) -> bool:
 	return rv
 
 def replace_instr(item, new_item:idaapi.cinsn_t, ctx:ASTContext) -> bool:
+	# TODO check item.op != idaapi.cit_goto and != cit_label
 	gotos = collect_gotos(item)
 	if len(gotos) > 0:
 		print("[!] failed replacing item with gotos in it")
