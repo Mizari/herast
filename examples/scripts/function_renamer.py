@@ -15,7 +15,7 @@ class FunctionRenamer(Scheme):
 		self.conflicts = {}
 
 	def on_matched_item(self, item, ctx: MatchContext) -> ASTPatch|None:
-		func_ea = ctx.func_addr
+		func_ea = ctx.ast_ctx.func_addr
 		debug_print = ctx.get_item("debug_print")
 		s = debug_print.a[1]
 		name = s.print1(None)
